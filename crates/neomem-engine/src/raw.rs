@@ -1,5 +1,6 @@
-use neomem_proto::{FailureKind, RawHit, RawQuery, Response};
-use neomem_state::RawSearch;
+use neomem_core::IntakeId;
+use neomem_proto::{CorrectionReceipt, FailureKind, RawHit, RawQuery, Response};
+use neomem_state::{CorrectionOutcome, RawSearch};
 
 use crate::Engine;
 use crate::reply::failed;
@@ -17,18 +18,32 @@ impl Engine {
             Ok(found) => Response::RawHits(
                 found
                     .into_iter()
-                    .map(|logged| RawHit {
+                    .map(|record| (record.logged, record.corrected))
+                    .map(|(logged, corrected)| RawHit {
                         id: logged.id,
                         source: logged.record.source,
                         occurred: logged.record.occurred,
                         recorded_at: logged.recorded_at,
                         tags: logged.record.tags,
                         content: logged.record.content,
-                        corrected: false,
+                        corrected,
                     })
                     .collect(),
             ),
             Err(error) => failed(FailureKind::Internal, format!("raw search failed: {error}")),
+        }
+    }
+}
+
+impl Engine {
+    pub(crate) fn correct(&self, intake: IntakeId, reason: &str) -> Response {
+        let recorded_at = self.clock.now();
+        match self.state.correct(intake, reason, recorded_at) {
+            Ok(CorrectionOutcome::Recorded) => Response::Corrected(CorrectionReceipt { intake, recorded_at }),
+            Ok(CorrectionOutcome::UnknownIntake) => {
+                failed(FailureKind::NotFound, format!("there is no intake record {intake}"))
+            }
+            Err(error) => failed(FailureKind::Internal, format!("recording the correction failed: {error}")),
         }
     }
 }

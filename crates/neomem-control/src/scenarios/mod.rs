@@ -1,3 +1,4 @@
+mod correct;
 mod daemon;
 mod intake;
 mod raw;
@@ -19,6 +20,7 @@ pub const ALL: &[Scenario] = &[
     Scenario { name: "vault", run: vault::prove },
     Scenario { name: "spool", run: spool::prove },
     Scenario { name: "raw", run: raw::prove },
+    Scenario { name: "correct", run: correct::prove },
 ];
 
 pub fn find(name: &str) -> Option<Scenario> {

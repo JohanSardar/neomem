@@ -32,6 +32,7 @@ fn print_human(response: &Response) {
         Response::ShuttingDown => println!("neomemd is shutting down"),
         Response::Added(receipt) => println!("{}", receipt.id),
         Response::RawHits(hits) => print_raw_hits(hits),
+        Response::Corrected(receipt) => println!("{} is marked as logged incorrectly", receipt.intake),
         Response::ModelRoster(roster) => {
             for assignment in roster {
                 println!("{:<13} {}", assignment.role.name(), assignment.assignment);

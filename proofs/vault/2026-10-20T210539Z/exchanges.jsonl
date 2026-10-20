@@ -1,0 +1,1 @@
+{"request":{"protocol":1,"request":{"command":"status"}},"response":{"body":{"daemon_version":"0.1.0","home":"/tmp/neomemctl-znPy4f","pid":2598049,"protocol":1,"uptime_ms":7065},"reply":"status"},"elapsed_ms":0.323064}

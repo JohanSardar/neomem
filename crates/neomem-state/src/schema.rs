@@ -44,6 +44,14 @@ CREATE TABLE errors (
 ) STRICT;
 CREATE INDEX errors_by_kind ON errors (kind, at);
 ",
+    r"
+CREATE TABLE corrections (
+    intake_id TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    recorded_at INTEGER NOT NULL
+) STRICT;
+CREATE INDEX corrections_by_intake ON corrections (intake_id);
+",
 ];
 
 pub fn migrate(connection: &mut Connection) -> Result<(), StateError> {
