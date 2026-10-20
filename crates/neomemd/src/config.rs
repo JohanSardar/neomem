@@ -1,6 +1,7 @@
 use std::fs;
 
 use anyhow::Context;
+use neomem_models::ModelsConfig;
 use neomem_proto::Home;
 use serde::Deserialize;
 
@@ -15,6 +16,8 @@ port = 47391
 pub struct DaemonConfig {
     #[serde(default)]
     pub http: HttpConfig,
+    #[serde(flatten)]
+    pub models: ModelsConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]

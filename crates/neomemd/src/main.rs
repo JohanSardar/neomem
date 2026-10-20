@@ -10,6 +10,7 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use neomem_engine::{Engine, EngineParts};
+use neomem_models::{ModelHost, Secrets};
 use neomem_proto::Home;
 
 use crate::config::DaemonConfig;
@@ -35,7 +36,7 @@ fn run() -> anyhow::Result<()> {
         return Ok(());
     };
     let config = DaemonConfig::load_or_create(&home)?;
-    let engine = Arc::new(open_engine(&home)?);
+    let engine = Arc::new(open_engine(&home, &config)?);
     http::start(Arc::clone(&engine), &config.http, &home)?;
     tracing::info!("neomemd serving {}", home.root().display());
     socket::serve(&engine, &home.socket_path())?;
@@ -43,8 +44,11 @@ fn run() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn open_engine(home: &Home) -> anyhow::Result<Engine> {
+fn open_engine(home: &Home, config: &DaemonConfig) -> anyhow::Result<Engine> {
+    let secrets = Secrets::load(&home.secrets_path());
+    let models = ModelHost::new(config.models.clone(), secrets, home.models_dir());
     let parts = EngineParts {
+        models: Arc::new(models),
         home: home.root().to_path_buf(),
         state_db: home.state_db_path(),
         clock: Arc::new(SystemClock),

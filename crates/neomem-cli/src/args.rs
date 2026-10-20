@@ -13,6 +13,28 @@ pub struct Cli {
 pub enum Command {
     Status,
     Add(AddArgs),
+    Models(ModelsArgs),
+}
+
+#[derive(Debug, Args)]
+pub struct ModelsArgs {
+    #[command(subcommand)]
+    pub action: Option<ModelsAction>,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ModelsAction {
+    Test { role: RoleArgument },
+}
+
+#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+pub enum RoleArgument {
+    Embedder,
+    Judge,
+    Checker,
+    Planner,
+    Extractor,
+    Consolidator,
 }
 
 #[derive(Debug, Args)]
@@ -32,4 +54,17 @@ pub struct AddArgs {
     pub source_ref: Option<String>,
     #[arg(long)]
     pub session: Option<String>,
+}
+
+impl RoleArgument {
+    pub fn model_role(self) -> neomem_core::ModelRole {
+        match self {
+            Self::Embedder => neomem_core::ModelRole::Embedder,
+            Self::Judge => neomem_core::ModelRole::Judge,
+            Self::Checker => neomem_core::ModelRole::Checker,
+            Self::Planner => neomem_core::ModelRole::Planner,
+            Self::Extractor => neomem_core::ModelRole::Extractor,
+            Self::Consolidator => neomem_core::ModelRole::Consolidator,
+        }
+    }
 }
