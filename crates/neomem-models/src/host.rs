@@ -139,6 +139,14 @@ impl ModelRoles for ModelHost {
             .map(|role| RoleAssignment { role: *role, assignment: self.describe_role(*role) })
             .collect()
     }
+
+    fn start_login(&self, provider: &str) -> Result<String, ModelError> {
+        Err(ModelError::NotConfigured(format!("{provider}: signing in is not wired yet")))
+    }
+
+    fn finish_login(&self, provider: &str) -> Result<String, ModelError> {
+        Err(ModelError::NotConfigured(format!("{provider}: signing in is not wired yet")))
+    }
 }
 
 fn describe_role_config(role: &RoleConfig) -> String {

@@ -120,28 +120,39 @@ pub enum Effort {
     High,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+impl Effort {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Low => "low",
+            Self::Medium => "medium",
+            Self::High => "high",
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ToolSpec {
     pub name: String,
     pub description: String,
     pub parameters_schema: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ToolCall {
     pub id: String,
     pub name: String,
     pub arguments: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "role", content = "content", rename_all = "snake_case")]
 pub enum LlmMessage {
     User(String),
     Assistant { text: String, tool_calls: Vec<ToolCall> },
     ToolResult { call_id: String, content: String },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LlmRequest {
     pub system: String,
     pub messages: Vec<LlmMessage>,
@@ -150,7 +161,7 @@ pub struct LlmRequest {
     pub max_output_tokens: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct LlmReply {
     pub text: String,
     pub tool_calls: Vec<ToolCall>,
@@ -214,6 +225,8 @@ pub trait ModelRoles: Send + Sync + Debug {
     fn judge(&self, role: JudgeRole) -> Result<Arc<dyn Judge>, ModelError>;
     fn llm(&self, role: LlmRole, source: Option<&Source>) -> Result<Arc<dyn Llm>, ModelError>;
     fn describe(&self) -> Vec<RoleAssignment>;
+    fn start_login(&self, provider: &str) -> Result<String, ModelError>;
+    fn finish_login(&self, provider: &str) -> Result<String, ModelError>;
 }
 
 #[cfg(test)]

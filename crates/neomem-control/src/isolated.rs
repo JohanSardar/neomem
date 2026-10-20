@@ -26,13 +26,12 @@ pub struct IsolatedNeomem {
     fake_models: Option<Child>,
     keep_running: bool,
     temporary_dir: Option<tempfile::TempDir>,
+    environment: Vec<(String, PathBuf)>,
 }
 
 impl IsolatedNeomem {
     pub fn start(binaries: &Binaries) -> anyhow::Result<Self> {
-        let temporary = tempfile::Builder::new().prefix("neomemctl-").tempdir()?;
-        let mut isolated = Self::prepare(temporary.path(), binaries)?;
-        isolated.temporary_dir = Some(temporary);
+        let mut isolated = Self::prepared(binaries)?;
         isolated.start_daemon()?;
         Ok(isolated)
     }
@@ -43,25 +42,44 @@ impl IsolatedNeomem {
         Ok(isolated)
     }
 
+    pub fn prepared(binaries: &Binaries) -> anyhow::Result<Self> {
+        let temporary = tempfile::Builder::new().prefix("neomemctl-").tempdir()?;
+        let mut isolated = Self::prepare(temporary.path(), binaries)?;
+        isolated.temporary_dir = Some(temporary);
+        Ok(isolated)
+    }
+
     fn prepare(root: &Path, binaries: &Binaries) -> anyhow::Result<Self> {
         refuse_the_real_home(root)?;
         let home = Home::at(root);
         fs::create_dir_all(home.run_dir())?;
         let fake_models = start_fake_models(&home)?;
-        let address = fs::read_to_string(fake_models_address_path(&home))?;
-        if !home.config_path().exists() {
-            fs::write(home.config_path(), fake_models::config_toml(address.trim()))?;
-        }
-        fs::write(home.secrets_path(), "NEOMEM_FAKE_JEV_KEY=fake-key\n")?;
-        fs::set_permissions(home.secrets_path(), fs::Permissions::from_mode(0o600))?;
-        Ok(Self {
+        let isolated = Self {
             home,
             binaries: binaries.clone(),
             daemon: None,
             fake_models: Some(fake_models),
             keep_running: false,
             temporary_dir: None,
-        })
+            environment: Vec::new(),
+        };
+        if !isolated.home.config_path().exists() {
+            isolated.plan_with("fake")?;
+        }
+        fs::write(isolated.home.secrets_path(), fake_models::FAKE_SECRETS)?;
+        fs::set_permissions(isolated.home.secrets_path(), fs::Permissions::from_mode(0o600))?;
+        Ok(isolated)
+    }
+
+    pub fn plan_with(&self, planner_provider: &str) -> anyhow::Result<()> {
+        let config =
+            fake_models::config_toml(&self.fake_models_address()?, &self.binaries.fake_llm, planner_provider);
+        fs::write(self.home.config_path(), config)?;
+        Ok(())
+    }
+
+    pub fn set_env(&mut self, name: &str, value: &Path) {
+        self.environment.push((name.to_owned(), value.to_path_buf()));
     }
 
     pub fn fake_models_address(&self) -> anyhow::Result<String> {
@@ -88,6 +106,7 @@ impl IsolatedNeomem {
         let log = File::options().create(true).append(true).open(self.home.daemon_log_path())?;
         let child = Command::new(&self.binaries.neomemd)
             .env("NEOMEM_HOME", self.home.root())
+            .envs(self.environment.iter().map(|(name, value)| (name, value)))
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(log)
@@ -131,11 +150,27 @@ impl IsolatedNeomem {
     }
 
     pub fn neomem(&self, arguments: &[&str]) -> anyhow::Result<Output> {
-        Command::new(&self.binaries.neomem)
-            .args(arguments)
-            .env("NEOMEM_HOME", self.home.root())
+        self.neomem_command(arguments)
             .output()
             .with_context(|| format!("running neomem {}", arguments.join(" ")))
+    }
+
+    pub fn spawn_neomem(&self, arguments: &[&str]) -> anyhow::Result<Child> {
+        self.neomem_command(arguments)
+            .stdin(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .with_context(|| format!("starting neomem {}", arguments.join(" ")))
+    }
+
+    fn neomem_command(&self, arguments: &[&str]) -> Command {
+        let mut command = Command::new(&self.binaries.neomem);
+        command
+            .args(arguments)
+            .env("NEOMEM_HOME", self.home.root())
+            .envs(self.environment.iter().map(|(name, value)| (name, value)));
+        command
     }
 
     pub fn http_address(&self) -> anyhow::Result<String> {

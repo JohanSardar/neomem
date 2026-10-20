@@ -16,6 +16,7 @@ pub enum Command {
     Raw(RawArgs),
     Correct(CorrectArgs),
     Models(ModelsArgs),
+    Login(LoginArgs),
 }
 
 #[derive(Debug, Args)]
@@ -47,7 +48,33 @@ pub struct ModelsArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum ModelsAction {
-    Test { role: RoleArgument },
+    Test {
+        role: RoleArgument,
+        #[arg(long)]
+        source: Option<String>,
+        #[arg(long)]
+        structured: bool,
+    },
+}
+
+#[derive(Debug, Args)]
+pub struct LoginArgs {
+    pub provider: LoginProvider,
+    #[arg(long)]
+    pub no_browser: bool,
+}
+
+#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+pub enum LoginProvider {
+    Chatgpt,
+}
+
+impl LoginProvider {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Chatgpt => "chatgpt",
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
