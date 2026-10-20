@@ -84,8 +84,9 @@
   module: neomem-models (llm)
   depends_on: [daemon]
   proof: models-llm
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/models.llm/2026-10-20T215455Z
+  blocked: "needs-user: live provider checks need the user: neomem login chatgpt needs a browser sign-in, openai and anthropic need API keys (none on this machine), and codex needs Codex's own login, which neomem must not use; every kind is proven against fakes"
 - id: models.swap
   does: swapping the embedder re-embeds every memory into a second vector set in the background and switches search over in one step
   reached_via: [neomem models use]
