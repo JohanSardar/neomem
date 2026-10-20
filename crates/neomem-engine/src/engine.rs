@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-use neomem_core::{Clock, Embedder, EpochMs, ModelRoles};
+use neomem_core::{Clock, Embedder, EpochMs, ModelRoles, SearchConfig};
 use neomem_index::Index;
 use neomem_proto::{Request, Response};
 use neomem_state::StateDb;
@@ -19,6 +19,7 @@ pub struct EngineParts {
     pub index_db: PathBuf,
     pub commit_policy: CommitPolicy,
     pub nightly_at: NightlyAt,
+    pub search_config: SearchConfig,
     pub clock: Arc<dyn Clock>,
     pub models: Arc<dyn ModelRoles>,
     pub daemon_version: String,
@@ -34,6 +35,7 @@ pub struct Engine {
     pub(crate) vault: Vault,
     pub(crate) commit_policy: CommitPolicy,
     pub(crate) nightly_at: NightlyAt,
+    pub(crate) search_config: SearchConfig,
     pub(crate) ids: IdMint,
     pub(crate) models: Arc<dyn ModelRoles>,
     pub(crate) embedder: Option<Arc<dyn Embedder>>,
@@ -78,6 +80,7 @@ impl Engine {
             state: StateDb::open(&parts.state_db)?,
             commit_policy: parts.commit_policy,
             nightly_at: parts.nightly_at,
+            search_config: parts.search_config,
             clock: parts.clock,
             daemon_version: parts.daemon_version,
             started_at,
@@ -98,6 +101,7 @@ impl Engine {
             Request::Correct { intake, reason } => self.correct(intake, &reason),
             Request::Rebuild => self.rebuild(),
             Request::CheckDrift => self.drift(),
+            Request::Search(query) => self.search(&query),
             Request::SetClock { .. } => crate::reply::failed(
                 neomem_proto::FailureKind::BadRequest,
                 "this daemon's clock is not settable",
