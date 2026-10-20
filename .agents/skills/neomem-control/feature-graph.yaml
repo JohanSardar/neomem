@@ -5,15 +5,15 @@
   depends_on: []
   proof: daemon
   status: proven
-  last_proof: proofs/daemon/2026-10-20T200746Z
+  last_proof: proofs/daemon/2026-10-20T201438Z
 - id: intake
   does: copies every intake record into the intake log with an int_ ID before any processing and queues its extraction job
-  reached_via: [neomem add, mcp add]
+  reached_via: [neomem add]
   module: neomem-engine (intake)
   depends_on: [daemon]
   proof: intake
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/intake/2026-10-20T201350Z
 - id: spool
   does: writes capture signals and adds to spool/ while the daemon is down and drains them when it is back
   reached_via: [neomem add, neomem hook]
@@ -24,7 +24,7 @@
   last_proof: null
 - id: raw
   does: keyword and date search over the raw intake log, without decay
-  reached_via: [neomem raw, mcp raw]
+  reached_via: [neomem raw]
   module: neomem-state (raw)
   depends_on: [intake]
   proof: raw
@@ -120,7 +120,7 @@
   last_proof: null
 - id: search
   does: the fixed search pipeline from query embedding through vector seeds, latest swap, one hop and ranking, with no model call besides the embedding
-  reached_via: [neomem search, mcp search]
+  reached_via: [neomem search]
   module: neomem-engine (search)
   depends_on: [index, models.embed]
   proof: search
@@ -152,7 +152,7 @@
   last_proof: null
 - id: entity
   does: shows an entity with aliases, facts, linked entities and external references, shows any memory file with its sources, and resolves names to entity IDs
-  reached_via: [neomem entity, neomem show, neomem resolve, mcp entity, mcp show, mcp resolve]
+  reached_via: [neomem entity, neomem show, neomem resolve]
   module: neomem-engine (entity)
   depends_on: [index]
   proof: entity
@@ -208,7 +208,7 @@
   last_proof: null
 - id: mcp
   does: serves the same tools over MCP on stdio (relayed to the daemon) and Streamable HTTP
-  reached_via: [neomem mcp, http /mcp]
+  reached_via: [neomem mcp, http /mcp, mcp search, mcp add, mcp raw, mcp entity, mcp show, mcp history, mcp resolve, mcp tags, mcp link, mcp useful]
   module: neomemd (mcp)
   depends_on: [search, intake]
   proof: mcp
@@ -264,7 +264,7 @@
   last_proof: null
 - id: contract
   does: publishes IDs, the tag registry, link types and external references for other systems (CONTRACT.md plus JSON Schema)
-  reached_via: [neomem tags, neomem link, mcp tags, mcp link]
+  reached_via: [neomem tags, neomem link]
   module: neomem-engine (contract)
   depends_on: [entity]
   proof: contract

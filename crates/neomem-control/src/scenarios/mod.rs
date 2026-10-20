@@ -1,4 +1,5 @@
 mod daemon;
+mod intake;
 
 use crate::binaries::Binaries;
 use crate::proof::ProofRun;
@@ -9,7 +10,8 @@ pub struct Scenario {
     pub run: fn(&mut ProofRun, &Binaries) -> anyhow::Result<()>,
 }
 
-pub const ALL: &[Scenario] = &[Scenario { name: "daemon", run: daemon::prove }];
+pub const ALL: &[Scenario] =
+    &[Scenario { name: "daemon", run: daemon::prove }, Scenario { name: "intake", run: intake::prove }];
 
 pub fn find(name: &str) -> Option<Scenario> {
     ALL.iter().copied().find(|scenario| scenario.name == name)
