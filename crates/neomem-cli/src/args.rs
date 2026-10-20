@@ -15,6 +15,7 @@ pub enum Command {
     Add(AddArgs),
     Raw(RawArgs),
     Correct(CorrectArgs),
+    Rebuild,
     Models(ModelsArgs),
     Login(LoginArgs),
 }
