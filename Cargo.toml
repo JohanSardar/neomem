@@ -67,6 +67,10 @@ print_stderr = "allow"
 todo = "warn"
 unimplemented = "warn"
 
+[profile.dev.package.llama-cpp-sys-2]
+opt-level = 3
+debug = false
+
 [profile.release]
 lto = "fat"
 codegen-units = 1
