@@ -221,6 +221,8 @@ pub struct RoleAssignment {
 }
 
 pub trait ModelRoles: Send + Sync + Debug {
+    fn maintain(&self, _now: crate::EpochMs) {}
+    fn record_read(&self) {}
     fn embedder(&self) -> Result<Arc<dyn Embedder>, ModelError>;
     fn judge(&self, role: JudgeRole) -> Result<Arc<dyn Judge>, ModelError>;
     fn llm(&self, role: LlmRole, source: Option<&Source>) -> Result<Arc<dyn Llm>, ModelError>;

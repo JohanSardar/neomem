@@ -1,0 +1,268 @@
+{
+  "feature": "models.llm",
+  "scenario": "models-llm",
+  "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+  "started_at": "2026-10-20T231856Z",
+  "duration_ms": 4129,
+  "code_version": "5eacf07b7e87-dirty",
+========
+  "started_at": "2026-10-20T232322Z",
+  "duration_ms": 3497,
+  "code_version": "998498985ac7-dirty",
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "neomem login chatgpt signs in through the browser flow and keeps neomem's own token in the isolated home's secrets.env (mode 600)",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "Some(LoggedIn { provider: \"chatgpt\", account: \"neomem-test@example.com\" }); browser Ok(200); mode 600; tokens stored true; 57 ms; Sign in to chatgpt in your browser:\nhttp://127.0.0.1:42813/oauth/authorize?response_type=code&client_id=app_EMoamEEZ73f0CkXaXp7hrann&redirect_uri=http%3A%2F%2Flocalhost%3A41717%2Fauth%2Fcallback&scope=openid+profile+email+offline_access&code_challenge=T3-CjDu00SLYQnjuzn2l3T34kp8s8P2mt4zuaNwPsNs&code_challenge_method=S256&id_token_add_organizations=true&codex_cli_simplified_flow=true&state=cv83RmJOnM3mIxJ9_CdNlQ&originator=neomem"
+========
+      "detail": "Some(LoggedIn { provider: \"chatgpt\", account: \"neomem-test@example.com\" }); browser Ok(200); mode 600; tokens stored true; 55 ms; Sign in to chatgpt in your browser:\nhttp://127.0.0.1:43017/oauth/authorize?response_type=code&client_id=app_EMoamEEZ73f0CkXaXp7hrann&redirect_uri=http%3A%2F%2Flocalhost%3A36729%2Fauth%2Fcallback&scope=openid+profile+email+offline_access&code_challenge=O8_WK1TSNSPHcdFNVyloYD4B8CoD1yfHkJDVqiTCpIg&code_challenge_method=S256&id_token_add_organizations=true&codex_cli_simplified_flow=true&state=7oEIq3u5tnOGLXtrfaIXCg&originator=neomem"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "the sign-in uses PKCE: an S256 challenge, then the code exchanged with its verifier",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "claim": "neomem models test planner answers through the openai (chat completions) provider",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "openai:fake-planner answered \"OK\" in 7.7 ms, first text 7.5 ms via /v1/chat/completions"
+========
+      "detail": "openai:fake-planner answered \"OK\" in 5.3 ms, first text 5.1 ms via /v1/chat/completions"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "openai (chat completions): streamed text reaches the caller before the reply completes",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "openai:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 615.4 ms, first text 9.9 ms"
+========
+      "detail": "openai:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 624.3 ms, first text 5.5 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "openai (chat completions): a structured answer is valid JSON for the schema",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 12.2 ms, first text 12.2 ms"
+========
+      "detail": "openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 6.2 ms, first text 6.2 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "openai (chat completions): an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "2 calls; openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 21.2 ms, first text 21.2 ms"
+========
+      "detail": "2 calls; openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 14.2 ms, first text 14.2 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "neomem models test planner answers through the openai (responses) provider",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "openai:fake-planner answered \"OK\" in 9.8 ms, first text 9.6 ms via /v1/responses"
+========
+      "detail": "openai:fake-planner answered \"OK\" in 5.2 ms, first text 5.1 ms via /v1/responses"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "openai (responses): streamed text reaches the caller before the reply completes",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "openai:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 555.7 ms, first text 9.0 ms"
+========
+      "detail": "openai:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 544.8 ms, first text 2.9 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "openai (responses): a structured answer is valid JSON for the schema",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 12.2 ms, first text 12.2 ms"
+========
+      "detail": "openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 2.6 ms, first text 2.6 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "openai (responses): an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "2 calls; openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 22.1 ms, first text 22.1 ms"
+========
+      "detail": "2 calls; openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 6.2 ms, first text 6.2 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "neomem models test planner answers through the anthropic provider",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "anthropic:fake-planner answered \"OK\" in 6.3 ms, first text 6.1 ms via /v1/messages"
+========
+      "detail": "anthropic:fake-planner answered \"OK\" in 3.6 ms, first text 3.3 ms via /v1/messages"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "anthropic requests mark the system prompt for prompt caching",
+      "passed": true,
+      "detail": "Some(String(\"ephemeral\"))"
+    },
+    {
+      "claim": "anthropic: streamed text reaches the caller before the reply completes",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "anthropic:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 554.2 ms, first text 7.2 ms"
+========
+      "detail": "anthropic:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 545.5 ms, first text 4.1 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "anthropic: a structured answer is valid JSON for the schema",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "anthropic:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 4.4 ms, first text 4.4 ms"
+========
+      "detail": "anthropic:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 2.4 ms, first text 2.4 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "anthropic: an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "2 calls; anthropic:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 24.2 ms, first text 24.2 ms"
+========
+      "detail": "2 calls; anthropic:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 4.7 ms, first text 4.7 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "neomem models test planner answers through the chatgpt provider",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "chatgpt:fake-planner answered \"OK\" in 13.9 ms, first text 13.8 ms via /backend-api/codex/responses"
+========
+      "detail": "chatgpt:fake-planner answered \"OK\" in 4.6 ms, first text 4.4 ms via /backend-api/codex/responses"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "chatgpt: streamed text reaches the caller before the reply completes",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "chatgpt:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 555.0 ms, first text 9.5 ms"
+========
+      "detail": "chatgpt:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 543.6 ms, first text 2.2 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "chatgpt: a structured answer is valid JSON for the schema",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "chatgpt:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 6.2 ms, first text 6.2 ms"
+========
+      "detail": "chatgpt:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 2.2 ms, first text 2.2 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "chatgpt: an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "2 calls; chatgpt:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 15.3 ms, first text 15.3 ms"
+========
+      "detail": "2 calls; chatgpt:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 4.2 ms, first text 4.2 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "neomem models test planner answers through the codex provider",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "codex:fake-planner answered \"OK\" in 23.0 ms, first text 23.0 ms via /v1/brain"
+========
+      "detail": "codex:fake-planner answered \"OK\" in 3.7 ms, first text 3.7 ms via /v1/brain"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "codex: streamed text reaches the caller before the reply completes",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "codex:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 557.7 ms, first text 8.0 ms"
+========
+      "detail": "codex:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 543.5 ms, first text 2.2 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "codex: a structured answer is valid JSON for the schema",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "codex:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 8.2 ms, first text 8.2 ms"
+========
+      "detail": "codex:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 2.1 ms, first text 2.1 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "codex: an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "2 calls; codex:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 15.9 ms, first text 15.8 ms"
+========
+      "detail": "2 calls; codex:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 3.8 ms, first text 3.8 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "neomem models test planner answers through the command provider",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "command:fake-planner answered \"OK\" in 18.8 ms, first text 18.7 ms via /v1/brain"
+========
+      "detail": "command:fake-planner answered \"OK\" in 4.7 ms, first text 4.7 ms via /v1/brain"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "command: a structured answer is valid JSON for the schema",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "command:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 17.0 ms, first text 17.0 ms"
+========
+      "detail": "command:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 4.7 ms, first text 4.7 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "command: an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "2 calls; command:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 27.0 ms, first text 27.0 ms"
+========
+      "detail": "2 calls; command:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 9.4 ms, first text 9.4 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    },
+    {
+      "claim": "effort low reaches every provider kind in its own form",
+      "passed": true,
+      "detail": "openai (chat completions)=low, openai (responses)=low, anthropic=low, chatgpt=low, codex=low, command=low"
+    },
+    {
+      "claim": "an expiring ChatGPT token is refreshed with the refresh token neomem stored, and the rotated token is saved",
+      "passed": true,
+      "detail": "1 refreshes"
+    },
+    {
+      "claim": "signing in, refreshing and every provider call leave the Codex, pi and Hermes sign-ins untouched and never send their tokens",
+      "passed": true,
+      "detail": "7 files unchanged: true; leaked []"
+    },
+    {
+      "claim": "[models.extractor_by_source] sends bank-digest extraction to its own provider and everything else to the default",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.llm/2026-10-20T231856Z/proof.json
+      "detail": "default: openai:fake-extractor answered \"OK\" in 15.3 ms, first text 15.1 ms; bank-digest: anthropic:claude-fake answered \"OK\" in 6.6 ms, first text 6.5 ms"
+========
+      "detail": "default: openai:fake-extractor answered \"OK\" in 1.8 ms, first text 1.7 ms; bank-digest: anthropic:claude-fake answered \"OK\" in 1.9 ms, first text 1.9 ms"
+>>>>>>>> origin/main:proofs/models.llm/2026-10-20T232322Z/proof.json
+    }
+  ]
+}

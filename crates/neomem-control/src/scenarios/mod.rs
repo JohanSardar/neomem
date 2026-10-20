@@ -5,8 +5,10 @@ mod entity;
 mod index;
 mod intake;
 pub(crate) mod models_embed;
+mod models_idle;
 mod models_judge;
 mod models_llm;
+mod models_swap;
 mod raw;
 mod search;
 mod spool;
@@ -23,6 +25,8 @@ pub struct Scenario {
 }
 
 pub const ALL: &[Scenario] = &[
+    Scenario { name: "models-idle", run: models_idle::prove },
+    Scenario { name: "models-swap", run: models_swap::prove },
     Scenario { name: "daemon", run: daemon::prove },
     Scenario { name: "intake", run: intake::prove },
     Scenario { name: "vault", run: vault::prove },

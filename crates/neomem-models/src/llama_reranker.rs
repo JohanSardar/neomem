@@ -1,6 +1,10 @@
+use crate::local_slot::{LocalSlot, WallClock};
+use neomem_core::{Clock, EpochMs};
 use std::num::NonZeroU32;
 use std::path::{Path, PathBuf};
-use std::sync::OnceLock;
+use std::sync::Arc;
+use std::sync::atomic::AtomicI64;
+use std::time::Duration;
 
 use llama_cpp_2::context::LlamaContext;
 use llama_cpp_2::context::params::LlamaContextParams;
@@ -190,26 +194,36 @@ impl Judge for LlamaReranker {
 #[derive(Debug)]
 pub struct LazyReranker {
     path: PathBuf,
-    loaded: OnceLock<Result<LlamaReranker, ModelError>>,
+    loaded: LocalSlot<LlamaReranker>,
 }
 
 impl LazyReranker {
     pub fn at(path: PathBuf) -> Self {
-        Self { path, loaded: OnceLock::new() }
+        Self::with_activity(path, Arc::new(WallClock), Arc::new(AtomicI64::new(i64::MIN)))
     }
 
-    fn reranker(&self) -> Result<&LlamaReranker, ModelError> {
-        self.loaded.get_or_init(|| LlamaReranker::open(&self.path)).as_ref().map_err(Clone::clone)
+    pub(crate) fn with_activity(path: PathBuf, clock: Arc<dyn Clock>, last_read: Arc<AtomicI64>) -> Self {
+        Self { path, loaded: LocalSlot::new(clock, last_read) }
+    }
+
+    pub(crate) fn maintain(&self, now: EpochMs, timeout: Duration) {
+        self.loaded.maintain(now, timeout);
+    }
+
+    pub(crate) fn is_loaded(&self) -> bool {
+        self.loaded.is_loaded()
     }
 }
 
 impl Judge for LazyReranker {
     fn decide(&self, context: &str, question: &str, options: &[Choice<'_>]) -> Result<Decision, ModelError> {
-        self.reranker()?.decide(context, question, options)
+        self.loaded
+            .run(|| LlamaReranker::open(&self.path), |reranker| reranker.decide(context, question, options))
     }
 
     fn score(&self, context: &str, question: &str, candidates: &[&str]) -> Result<Vec<f32>, ModelError> {
-        self.reranker()?.score(context, question, candidates)
+        self.loaded
+            .run(|| LlamaReranker::open(&self.path), |reranker| reranker.score(context, question, candidates))
     }
 
     fn model_id(&self) -> ModelId {

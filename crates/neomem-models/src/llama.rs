@@ -21,7 +21,8 @@ static BACKEND: OnceLock<Result<LlamaBackend, String>> = OnceLock::new();
 #[derive(Debug)]
 pub(crate) struct LocalModel {
     id: ModelId,
-    jobs: Sender<Job>,
+    jobs: Option<Sender<Job>>,
+    worker: Option<thread::JoinHandle<()>>,
 }
 
 impl LocalModel {
@@ -35,12 +36,12 @@ impl LocalModel {
         let (jobs, waiting) = mpsc::channel::<Job>();
         let (ready, loaded) = mpsc::sync_channel(1);
         let owned_path = path.to_path_buf();
-        thread::Builder::new()
+        let worker = thread::Builder::new()
             .name(format!("llama.cpp {}", file_stem(path)))
             .spawn(move || serve(&owned_path, prepare, &ready, &waiting))
             .map_err(|error| ModelError::Unavailable(format!("starting the llama.cpp thread: {error}")))?;
         let facts = loaded.recv().map_err(|_| stopped())??;
-        Ok((Self { id: local_model_id(path), jobs }, facts))
+        Ok((Self { id: local_model_id(path), jobs: Some(jobs), worker: Some(worker) }, facts))
     }
 
     pub(crate) fn id(&self) -> ModelId {
@@ -57,8 +58,17 @@ impl LocalModel {
         let job: Job = Box::new(move |model, context| {
             let _ = reply.send(work(model, context));
         });
-        self.jobs.send(job).map_err(|_| stopped())?;
+        self.jobs.as_ref().ok_or_else(stopped)?.send(job).map_err(|_| stopped())?;
         answer.recv().map_err(|_| stopped())?
+    }
+}
+
+impl Drop for LocalModel {
+    fn drop(&mut self) {
+        self.jobs.take();
+        if let Some(worker) = self.worker.take() {
+            let _ = worker.join();
+        }
     }
 }
 

@@ -51,3 +51,7 @@ What follows:
 - EmbeddingGemma-300m stays the default embedder: 3–7x faster than Qwen3-Embedding-0.6B for the same retrieval behaviour on the probe pairs (related 0.79 vs unrelated 0.10 for EmbeddingGemma; 0.60 vs 0.12 for Qwen3). Repeated queries skip the model through the query cache (0.02–0.1 ms).
 - On this laptop the 20 ms query budget holds on an idle CPU but not under load; the Vulkan build is steadier under CPU load and 3–5x faster for documents and the reranker, so `neomemctl` builds Vulkan here.
 - The reranker fits the 0.1–0.3 s fallback budget on Vulkan for gate-sized calls; scoring 15 candidates takes ~0.4 s.
+
+## Idle unloading
+
+Local model weights and contexts load on the first request that needs them. `neomem models` shows `loaded` or `unloaded` for the embedder and reranker. The daemon releases both after `[models] idle_unload` (default `"15m"`) without a query or recall. The next request reloads transparently, including a previously cached query. Document embeddings from background work do not extend the read idle window. The maintenance tick uses the engine clock, so isolated proofs can advance time without waiting fifteen minutes.
