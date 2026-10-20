@@ -2,16 +2,16 @@
   "feature": "intake",
   "scenario": "intake",
   "passed": true,
-  "started_at": "2026-10-20T205620Z",
-  "duration_ms": 225,
-  "code_version": "674d9c49856b-dirty",
+  "started_at": "2026-10-20T205946Z",
+  "duration_ms": 105,
+  "code_version": "1d92a4d23ceb-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "neomem add returns an int_ ID",
       "passed": true,
-      "detail": "int_01M5DHKKS994AWN6S9P853VAS3"
+      "detail": "int_01M5DHSX58C542J09WZQNWC4G8"
     },
     {
       "claim": "the intake log holds the record exactly as it was sent",
@@ -26,7 +26,7 @@
     {
       "claim": "the same record sent twice is logged twice with two IDs (no dedupe keys)",
       "passed": true,
-      "detail": "int_01M5DHKKSH30EDCW98E1W553KX int_01M5DHKKSQESVVWJ4W76055QG2, 1 -> 3"
+      "detail": "int_01M5DHSX5B3GZ2T4GWJ2HTS13T int_01M5DHSX5D227FBG94PJXY0VTP, 1 -> 3"
     },
     {
       "claim": "empty content, a backwards span and a malformed source are refused and nothing is logged",
@@ -46,7 +46,7 @@
     {
       "claim": "neomem add returns well inside the 50 ms capture budget at p95",
       "passed": true,
-      "detail": "p50 3.874 ms, p95 5.140 ms, max 8.548 ms"
+      "detail": "p50 1.741 ms, p95 1.965 ms, max 2.130 ms"
     },
     {
       "claim": "every logged record is still there after a restart",
