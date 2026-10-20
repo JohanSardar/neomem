@@ -42,6 +42,7 @@ humantime = "=2.4.0"
 serde-saphyr = "=2.0.0"
 ra_ap_rustc_lexer = { package = "ra-ap-rustc_lexer", version = "=0.178.0" }
 walkdir = "=2.5.0"
+form_urlencoded = "=1.2.2"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

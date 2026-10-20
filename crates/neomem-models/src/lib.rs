@@ -1,10 +1,16 @@
+mod anthropic;
 mod config;
 mod duration;
 mod host;
 mod http;
 mod jev;
+mod json_schema;
+mod llm;
+mod openai_chat;
 mod openai_embeddings;
+mod openai_responses;
 mod secrets;
+mod sse;
 
 pub use config::{ModelsConfig, ProviderConfig, ProviderKind, RoleConfig, RolesConfig};
 pub use duration::parse as parse_duration;
