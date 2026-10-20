@@ -2,7 +2,7 @@ use std::fs;
 
 use anyhow::Context;
 use neomem_core::SearchConfig;
-use neomem_engine::{CommitPolicy, NightlyAt};
+use neomem_engine::{CommitPolicy, NightlyAt, WorkerConfig};
 use neomem_models::{ModelsConfig, parse_duration};
 use neomem_proto::Home;
 use serde::Deserialize;
@@ -32,6 +32,8 @@ pub struct DaemonConfig {
     #[serde(default)]
     pub search: SearchConfig,
     #[serde(default)]
+    pub worker: WorkerSection,
+    #[serde(default)]
     pub dev: DevConfig,
     #[serde(flatten)]
     pub models: ModelsConfig,
@@ -43,6 +45,32 @@ pub struct HttpConfig {
     pub enabled: bool,
     #[serde(default = "default_port")]
     pub port: u16,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct WorkerSection {
+    pub session_silence: Option<String>,
+    pub batch_every: Option<String>,
+    pub batch_size: Option<usize>,
+    pub lease: Option<String>,
+}
+
+impl WorkerSection {
+    pub fn config(&self) -> anyhow::Result<WorkerConfig> {
+        let defaults = WorkerConfig::default();
+        let duration = |text: &Option<String>, fallback, name: &str| -> anyhow::Result<std::time::Duration> {
+            text.as_deref().map_or(Ok(fallback), |text| {
+                parse_duration(text)
+                    .ok_or_else(|| anyhow::anyhow!("[worker] {name} `{text}` is not a duration"))
+            })
+        };
+        Ok(WorkerConfig {
+            session_silence: duration(&self.session_silence, defaults.session_silence, "session_silence")?,
+            batch_every: duration(&self.batch_every, defaults.batch_every, "batch_every")?,
+            batch_size: self.batch_size.unwrap_or(defaults.batch_size),
+            lease: duration(&self.lease, defaults.lease, "lease")?,
+        })
+    }
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]

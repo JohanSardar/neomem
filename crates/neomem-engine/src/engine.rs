@@ -11,6 +11,7 @@ use crate::ids::IdMint;
 use crate::indexing::IndexHealth;
 use crate::models::ModelProbe;
 use crate::schedule::NightlyAt;
+use crate::worker_config::WorkerConfig;
 
 #[derive(Debug)]
 pub struct EngineParts {
@@ -20,6 +21,7 @@ pub struct EngineParts {
     pub commit_policy: CommitPolicy,
     pub nightly_at: NightlyAt,
     pub search_config: SearchConfig,
+    pub worker: WorkerConfig,
     pub clock: Arc<dyn Clock>,
     pub models: Arc<dyn ModelRoles>,
     pub daemon_version: String,
@@ -36,6 +38,7 @@ pub struct Engine {
     pub(crate) commit_policy: CommitPolicy,
     pub(crate) nightly_at: NightlyAt,
     pub(crate) search_config: SearchConfig,
+    pub(crate) worker: WorkerConfig,
     pub(crate) ids: IdMint,
     pub(crate) models: Arc<dyn ModelRoles>,
     pub(crate) embedder: Option<Arc<dyn Embedder>>,
@@ -81,6 +84,7 @@ impl Engine {
             commit_policy: parts.commit_policy,
             nightly_at: parts.nightly_at,
             search_config: parts.search_config,
+            worker: parts.worker,
             clock: parts.clock,
             daemon_version: parts.daemon_version,
             started_at,

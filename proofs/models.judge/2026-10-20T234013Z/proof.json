@@ -1,0 +1,37 @@
+{
+  "feature": "models.judge",
+  "scenario": "models-judge",
+  "passed": true,
+  "started_at": "2026-10-20T234013Z",
+  "duration_ms": 9443,
+  "code_version": "0739c07f93c2-dirty",
+  "models": "fake Jev with the real llama.cpp reranker as fallback, live Jev",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "neomem models test judge answers through the Jev API (the fake) without touching the fallback",
+      "passed": true,
+      "detail": "jev:jev-fake answered \"yes (0.93)\" in 1.7 ms, scores []; 1 Jev calls"
+    },
+    {
+      "claim": "when Jev answers slower than the 600 ms role timeout, the local reranker answers each call instead, long before the slow Jev would",
+      "passed": true,
+      "detail": "Jev delayed 2000 ms; 6 fallbacks logged; first call (loads the reranker) jev:jev-fake answered \"yes (0.65)\" in 2193.4 ms, scores []; then p50 800.781 ms, p95 858.068 ms, max 858.068 ms"
+    },
+    {
+      "claim": "with no Jev key the local reranker answers by itself, never calling Jev",
+      "passed": true,
+      "detail": "0 Jev calls; first call llama.cpp:qwen3-reranker-0.6b-Q8_0 answered \"yes (0.65)\" in 1082.2 ms, scores []; then p50 162.468 ms, p95 176.265 ms, max 176.265 ms"
+    },
+    {
+      "claim": "the local reranker scores the memory that helps right now above an unrelated one",
+      "passed": true,
+      "detail": "llama.cpp:qwen3-reranker-0.6b-Q8_0 answered \"2 candidates scored\" in 217.8 ms, scores [0.6342686, 5.62275e-6]"
+    },
+    {
+      "claim": "the live Jev API (jev-1.13.0) answers the judge inside its 600 ms timeout, without the fallback",
+      "passed": true,
+      "detail": "5/5 answered; p50 87.890 ms, p95 138.629 ms, max 138.629 ms; first jev:jev-1.13.0 answered \"yes (1.00)\" in 138.6 ms, scores []"
+    }
+  ]
+}

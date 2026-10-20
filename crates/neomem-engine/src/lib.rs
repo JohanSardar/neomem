@@ -13,8 +13,10 @@ mod schedule;
 mod search;
 mod spool;
 mod status;
+mod worker_config;
 
 pub use engine::{Engine, EngineError, EngineParts};
 pub use neomem_vault::CommitPolicy;
 pub use notice::Notice;
 pub use schedule::NightlyAt;
+pub use worker_config::WorkerConfig;

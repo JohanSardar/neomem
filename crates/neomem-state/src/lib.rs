@@ -9,6 +9,6 @@ mod schema;
 
 pub use connection::{StateDb, StateError};
 pub use corrections::CorrectionOutcome;
-pub use jobs::{BatchKey, ExtractionJob};
+pub use jobs::{BatchKey, ClaimedBatch, ExtractionJob, JobId, JobOutcome};
 pub use raw::{RawRecord, RawSearch};
 pub use runs::RunRecord;
