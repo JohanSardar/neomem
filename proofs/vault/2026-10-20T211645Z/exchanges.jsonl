@@ -1,0 +1,1 @@
+{"request":{"protocol":1,"request":{"command":"status"}},"response":{"body":{"daemon_version":"0.1.0","home":"/tmp/neomemctl-XvN5MK","pid":2651360,"protocol":1,"uptime_ms":7066},"reply":"status"},"elapsed_ms":0.552805}
