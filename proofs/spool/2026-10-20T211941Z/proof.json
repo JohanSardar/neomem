@@ -2,21 +2,21 @@
   "feature": "spool",
   "scenario": "spool",
   "passed": true,
-  "started_at": "2026-10-20T211644Z",
-  "duration_ms": 41,
-  "code_version": "6675b2794961",
+  "started_at": "2026-10-20T211941Z",
+  "duration_ms": 129,
+  "code_version": "eb4397efcad2",
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "neomem add with the daemon down exits 0 at once and leaves one spool file per add",
       "passed": true,
-      "detail": "1.620245ms, files [\"01792531004704876145-22bfd10fd7b7f29f.json\", \"01792531004703470841-f8643c0a5cdc4d3a.json\"], stdout {\"spooled\":\"/tmp/neomemctl-5HauLt/spool/01792531004703470841-f8643c0a5cdc4d3a.json\"}"
+      "detail": "6.229344ms, files [\"01792531181854066607-7e0c6d3b641f6253.json\", \"01792531181848772857-4e79a23513eef871.json\"], stdout {\"spooled\":\"/tmp/neomemctl-jEfCtc/spool/01792531181848772857-4e79a23513eef871.json\"}"
     },
     {
       "claim": "a spooled add says so instead of inventing an ID",
       "passed": true,
-      "detail": "{\"spooled\":\"/tmp/neomemctl-5HauLt/spool/01792531004703470841-f8643c0a5cdc4d3a.json\"}\n"
+      "detail": "{\"spooled\":\"/tmp/neomemctl-jEfCtc/spool/01792531181848772857-4e79a23513eef871.json\"}\n"
     },
     {
       "claim": "a corrupt spool file is in place before the daemon starts",
