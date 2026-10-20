@@ -1,6 +1,9 @@
 use std::fmt;
 
-use neomem_core::{EpochMs, LoggedIntake};
+use neomem_core::{EpochMs, IntakeId, LoggedIntake};
+use rusqlite::{OptionalExtension, params};
+
+use crate::{StateDb, StateError};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct BatchKey(String);
@@ -29,4 +32,196 @@ impl fmt::Display for BatchKey {
 pub struct ExtractionJob {
     pub batch: BatchKey,
     pub not_before: EpochMs,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct JobId(i64);
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ClaimedBatch {
+    pub batch: BatchKey,
+    pub jobs: Vec<(JobId, IntakeId)>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum JobOutcome {
+    Done,
+    RetryAfter(EpochMs),
+    GaveUp,
+}
+
+const READY_BATCH: &str = "SELECT batch_key FROM jobs
+    WHERE kind = 'extract' AND state = 'pending'
+    GROUP BY batch_key
+    HAVING max(not_before) <= ?1
+    ORDER BY min(created_at)
+    LIMIT 1";
+
+impl StateDb {
+    pub fn pending_in_batch(&self, batch: &BatchKey) -> Result<usize, StateError> {
+        self.read(|connection| {
+            let count: i64 = connection.query_row(
+                "SELECT count(*) FROM jobs WHERE kind = 'extract' AND state = 'pending' AND batch_key = ?1",
+                [batch.as_str()],
+                |row| row.get(0),
+            )?;
+            Ok(usize::try_from(count).unwrap_or(0))
+        })
+    }
+
+    pub fn hasten_batch(&self, batch: &BatchKey, now: EpochMs) -> Result<(), StateError> {
+        self.writer()?.execute(
+            "UPDATE jobs SET not_before = ?2 WHERE kind = 'extract' AND state = 'pending' AND batch_key = ?1",
+            params![batch.as_str(), now.as_millis()],
+        )?;
+        Ok(())
+    }
+
+    pub fn claim_ready_batch(
+        &self,
+        now: EpochMs,
+        lease_until: EpochMs,
+    ) -> Result<Option<ClaimedBatch>, StateError> {
+        let mut writer = self.writer()?;
+        let transaction = writer.transaction()?;
+        let key: Option<String> =
+            transaction.query_row(READY_BATCH, [now.as_millis()], |row| row.get(0)).optional()?;
+        let Some(key) = key else { return Ok(None) };
+        let jobs = {
+            let mut statement = transaction.prepare(
+                "UPDATE jobs SET state = 'claimed', lease_until = ?2, attempts = attempts + 1
+                 WHERE kind = 'extract' AND state = 'pending' AND batch_key = ?1
+                 RETURNING id, intake_id",
+            )?;
+            let rows = statement.query_map(params![key, lease_until.as_millis()], |row| {
+                Ok((row.get::<_, i64>(0)?, row.get::<_, String>(1)?))
+            })?;
+            let mut jobs = Vec::new();
+            for row in rows {
+                let (id, intake) = row?;
+                let intake =
+                    intake.parse::<IntakeId>().map_err(|error| StateError::Corrupt(error.to_string()))?;
+                jobs.push((JobId(id), intake));
+            }
+            jobs.sort();
+            jobs
+        };
+        transaction.commit()?;
+        Ok(Some(ClaimedBatch { batch: BatchKey(key), jobs }))
+    }
+
+    pub fn finish_jobs(&self, jobs: &[JobId], outcome: JobOutcome, at: EpochMs) -> Result<(), StateError> {
+        let mut writer = self.writer()?;
+        let transaction = writer.transaction()?;
+        for job in jobs {
+            match outcome {
+                JobOutcome::Done => transaction.execute(
+                    "UPDATE jobs SET state = 'done', finished_at = ?2, lease_until = NULL WHERE id = ?1",
+                    params![job.0, at.as_millis()],
+                )?,
+                JobOutcome::GaveUp => transaction.execute(
+                    "UPDATE jobs SET state = 'failed', finished_at = ?2, lease_until = NULL WHERE id = ?1",
+                    params![job.0, at.as_millis()],
+                )?,
+                JobOutcome::RetryAfter(not_before) => transaction.execute(
+                    "UPDATE jobs SET state = 'pending', not_before = ?2, lease_until = NULL WHERE id = ?1",
+                    params![job.0, not_before.as_millis()],
+                )?,
+            };
+        }
+        transaction.commit()?;
+        Ok(())
+    }
+
+    pub fn attempts(&self, job: JobId) -> Result<u32, StateError> {
+        self.read(|connection| {
+            let attempts: i64 =
+                connection.query_row("SELECT attempts FROM jobs WHERE id = ?1", [job.0], |row| row.get(0))?;
+            Ok(u32::try_from(attempts).unwrap_or(u32::MAX))
+        })
+    }
+
+    pub fn reclaim_expired_leases(&self, now: EpochMs) -> Result<usize, StateError> {
+        let changed = self.writer()?.execute(
+            "UPDATE jobs SET state = 'pending', lease_until = NULL WHERE state = 'claimed' AND lease_until < ?1",
+            [now.as_millis()],
+        )?;
+        Ok(changed)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use neomem_core::{IntakeRecord, Source, Span};
+
+    fn log(state: &StateDb, seed: u128, session: Option<&str>, recorded: i64, not_before: i64) -> IntakeId {
+        let logged = LoggedIntake {
+            id: IntakeId::from_parts(EpochMs::from_millis(recorded), seed),
+            recorded_at: EpochMs::from_millis(recorded),
+            record: IntakeRecord {
+                source: Source::new("claude-code").unwrap(),
+                occurred: Span::instant(EpochMs::from_millis(recorded)),
+                tags: vec![],
+                content: format!("turn {seed}"),
+                entity_hints: vec![],
+                source_ref: None,
+                session: session.map(str::to_owned),
+            },
+        };
+        let job = ExtractionJob {
+            batch: BatchKey::for_record(&logged),
+            not_before: EpochMs::from_millis(not_before),
+        };
+        state.log_intake(&logged, &job).unwrap();
+        logged.id
+    }
+
+    fn at(millis: i64) -> EpochMs {
+        EpochMs::from_millis(millis)
+    }
+
+    #[test]
+    fn a_session_is_ready_only_after_its_last_turn_went_quiet() {
+        let directory = tempfile::tempdir().unwrap();
+        let state = StateDb::open(&directory.path().join("state.db")).unwrap();
+        log(&state, 1, Some("s1"), 1_000, 301_000);
+        log(&state, 2, Some("s1"), 200_000, 500_000);
+        assert_eq!(state.claim_ready_batch(at(400_000), at(1_000_000)).unwrap(), None);
+        let claimed = state.claim_ready_batch(at(500_000), at(1_000_000)).unwrap().unwrap();
+        assert_eq!(claimed.batch.as_str(), "claude-code/s1");
+        assert_eq!(claimed.jobs.len(), 2);
+        assert_eq!(state.claim_ready_batch(at(600_000), at(1_000_000)).unwrap(), None);
+    }
+
+    #[test]
+    fn an_expired_lease_puts_the_batch_back() {
+        let directory = tempfile::tempdir().unwrap();
+        let state = StateDb::open(&directory.path().join("state.db")).unwrap();
+        log(&state, 1, Some("s2"), 1_000, 2_000);
+        let claimed = state.claim_ready_batch(at(3_000), at(10_000)).unwrap().unwrap();
+        assert_eq!(state.reclaim_expired_leases(at(9_000)).unwrap(), 0);
+        assert_eq!(state.reclaim_expired_leases(at(11_000)).unwrap(), 1);
+        let again = state.claim_ready_batch(at(12_000), at(20_000)).unwrap().unwrap();
+        assert_eq!(again.jobs, claimed.jobs);
+        state
+            .finish_jobs(
+                &again.jobs.iter().map(|job| job.0).collect::<Vec<_>>(),
+                JobOutcome::Done,
+                at(13_000),
+            )
+            .unwrap();
+        assert_eq!(state.claim_ready_batch(at(99_000), at(100_000)).unwrap(), None);
+    }
+
+    #[test]
+    fn hastening_a_batch_makes_it_ready_now() {
+        let directory = tempfile::tempdir().unwrap();
+        let state = StateDb::open(&directory.path().join("state.db")).unwrap();
+        log(&state, 1, None, 1_000, 1_800_000);
+        let batch = BatchKey("claude-code".to_owned());
+        assert_eq!(state.pending_in_batch(&batch).unwrap(), 1);
+        state.hasten_batch(&batch, at(5_000)).unwrap();
+        assert!(state.claim_ready_batch(at(5_000), at(9_000)).unwrap().is_some());
+    }
 }
