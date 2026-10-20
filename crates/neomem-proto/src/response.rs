@@ -1,0 +1,40 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "reply", content = "body", rename_all = "snake_case")]
+pub enum Response {
+    Status(StatusReport),
+    ShuttingDown,
+    VersionMismatch { daemon: u32, client: u32 },
+    Failed(Failure),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StatusReport {
+    pub daemon_version: String,
+    pub protocol: u32,
+    pub home: String,
+    pub pid: u32,
+    pub uptime_ms: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Failure {
+    pub kind: FailureKind,
+    pub message: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FailureKind {
+    BadRequest,
+    NotFound,
+    Unavailable,
+    Internal,
+}
+
+impl Failure {
+    pub fn new(kind: FailureKind, message: impl Into<String>) -> Self {
+        Self { kind, message: message.into() }
+    }
+}
