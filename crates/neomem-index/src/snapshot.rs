@@ -153,6 +153,11 @@ impl Snapshot {
             .collect()
     }
 
+    pub fn fact_vector(&self, id: FactId) -> Option<Vector> {
+        let slot = self.facts.get(&id)?.slot?;
+        self.fact_vectors.as_ref()?.stored(slot)
+    }
+
     pub fn nearest_entities(&self, query: &Vector, count: usize) -> Vec<(EntityId, f32)> {
         let Some(vectors) = &self.entity_vectors else { return Vec::new() };
         vectors
