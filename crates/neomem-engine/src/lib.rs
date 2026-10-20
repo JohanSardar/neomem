@@ -4,6 +4,7 @@ mod intake;
 mod maintenance;
 mod models;
 mod notice;
+mod raw;
 mod reply;
 mod spool;
 mod status;

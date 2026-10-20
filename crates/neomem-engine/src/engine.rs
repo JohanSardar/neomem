@@ -63,6 +63,7 @@ impl Engine {
                 Response::ShuttingDown
             }
             Request::Add(record) => self.add(record),
+            Request::Raw(query) => self.raw(&query),
             Request::Models => self.model_roster(),
             Request::ModelsTest { role } => self.test_model(role),
         }
