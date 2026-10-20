@@ -5,7 +5,7 @@
   depends_on: []
   proof: daemon
   status: proven
-  last_proof: proofs/daemon/2026-10-20T201605Z
+  last_proof: proofs/daemon/2026-10-20T204134Z
 - id: intake
   does: copies every intake record into the intake log with an int_ ID before any processing and queues its extraction job
   reached_via: [neomem add]
@@ -13,7 +13,7 @@
   depends_on: [daemon]
   proof: intake
   status: proven
-  last_proof: proofs/intake/2026-10-20T201605Z
+  last_proof: proofs/intake/2026-10-20T204134Z
 - id: spool
   does: writes capture signals and adds to spool/ while the daemon is down and drains them when it is back
   reached_via: [neomem add, neomem hook]
