@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex, PoisonError};
 use std::thread;
 use std::time::Duration;
 
-use neomem_core::{Choice, Decision, Judge};
+use neomem_core::{Choice, Decision, Judge, LlmRequest};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use tiny_http::{Request, Server};
@@ -93,6 +93,7 @@ fn answer(shared: &Shared, mut request: Request) {
         "/v1/chat/completions" => wire_chat::reply(&shared.llm, body),
         "/v1/responses" => wire_responses::reply(&shared.llm, body),
         "/v1/messages" => wire_anthropic::reply(&shared.llm, &incoming),
+        "/v1/brain" => brain(shared, body),
         "/fake/rules" => Reply::ok(add_rules(shared, incoming.body)),
         "/fake/calls" => Reply::ok(json!(*shared.calls.lock().unwrap_or_else(PoisonError::into_inner))),
         _ => Reply::Json(404, json!({ "error": format!("the fake has no route {route}") })),
@@ -160,6 +161,13 @@ fn answer_noul(judge: &ScriptedJudge, state: &str, instructions: &str) -> Value 
         .and_then(|scores| scores.first().copied())
         .unwrap_or(0.0);
     json!({ "type": "noul", "noul": noul })
+}
+
+fn brain(shared: &Shared, body: &Value) -> Reply {
+    match serde_json::from_value::<LlmRequest>(body["request"].clone()) {
+        Ok(request) => Reply::ok(json!(shared.llm.answer(&request))),
+        Err(error) => Reply::refused(400, &format!("the brain needs an LLM request: {error}")),
+    }
 }
 
 fn add_rules(shared: &Shared, body: Value) -> Value {
