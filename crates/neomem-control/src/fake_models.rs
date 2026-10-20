@@ -31,15 +31,21 @@ pub fn calls(address: &str) -> anyhow::Result<Vec<RecordedCall>> {
 struct LocalAndLiveRoles {
     live_providers: &'static str,
     embedder: String,
-    judge: &'static str,
+    judge: String,
 }
 
 fn local_and_live_roles(models: Models) -> LocalAndLiveRoles {
+    let reranker = model_files::QWEN3_RERANKER.name;
+    let judge_with_fallback = |provider: &str| {
+        format!(
+            r#"{{ provider = "{provider}", fallback = {{ runtime = "llama.cpp", file = "{reranker}" }} }}"#
+        )
+    };
     match models {
         Models::Fake => LocalAndLiveRoles {
             live_providers: "",
             embedder: r#"{ provider = "fake", model = "hash-256" }"#.to_owned(),
-            judge: r#"{ provider = "fake_jev" }"#,
+            judge: judge_with_fallback("fake_jev"),
         },
         Models::Real => LocalAndLiveRoles {
             live_providers: r#"jev = { kind = "jev", key_env = "JEV_API_KEY", model = "jev-1.13.0" }"#,
@@ -47,7 +53,7 @@ fn local_and_live_roles(models: Models) -> LocalAndLiveRoles {
                 r#"{{ runtime = "llama.cpp", file = "{}" }}"#,
                 model_files::EMBEDDINGGEMMA.name
             ),
-            judge: r#"{ provider = "jev" }"#,
+            judge: judge_with_fallback("jev"),
         },
     }
 }

@@ -3,6 +3,8 @@ use std::process::Command;
 
 use anyhow::{Context, bail};
 
+use crate::gpu_build;
+
 #[derive(Debug, Clone)]
 pub struct Binaries {
     pub neomem: PathBuf,
@@ -49,6 +51,9 @@ fn build(root: &Path, release: bool) -> anyhow::Result<()> {
         .current_dir(root);
     if release {
         build.arg("--release");
+    }
+    if let Some(gpu) = gpu_build::choose()? {
+        build.args(["--features", gpu.feature]).envs(gpu.environment);
     }
     if !build.status().context("running cargo build")?.success() {
         bail!("building neomemd, neomem and the fake LLM processes failed");

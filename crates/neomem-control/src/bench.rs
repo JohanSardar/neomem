@@ -1,13 +1,18 @@
 use std::fs;
 use std::path::Path;
+use std::time::Duration;
 
-use anyhow::Context;
-use neomem_proto::Request;
+use anyhow::{Context, bail};
+use neomem_core::ModelRole;
+use neomem_proto::{Client, Request, Response};
 use serde::{Deserialize, Serialize};
 
 use crate::binaries::Binaries;
-use crate::isolated::IsolatedNeomem;
+use crate::gpu_build;
+use crate::isolated::{IsolatedNeomem, Models};
+use crate::model_files::{self, ModelFile};
 use crate::repo;
+use crate::scenarios::models_embed::distinct_queries;
 use crate::timing::{self, Percentiles};
 
 const REGRESSION_TOLERANCE: f64 = 1.05;
@@ -114,4 +119,100 @@ fn print_result(result: &BenchResult, previous: Option<&BenchResult>) -> bool {
         result.name, result.p50_ms, result.p95_ms, result.max_ms
     );
     result.within_budget() && !regressed
+}
+
+const EMBED_BUDGET_MS: f64 = 20.0;
+const LOCAL_JUDGE_BUDGET_MS: f64 = 300.0;
+const BENCH_SITUATION: &str = "The release build failed again with the same code signing error as last week";
+
+pub fn models() -> anyhow::Result<bool> {
+    let root = repo::root()?;
+    let binaries = Binaries::build_release(&root)?;
+    model_files::ensure(&repo::shared_models_dir(&root), model_files::ALL)?;
+    println!("llama.cpp backend: {}", gpu_build::name(gpu_build::choose()?.as_ref()));
+    let mut results = Vec::new();
+    for file in [model_files::EMBEDDINGGEMMA, model_files::QWEN3_EMBEDDING] {
+        results.extend(embedder_benches(&binaries, file)?);
+    }
+    results.extend(local_judge_benches(&binaries)?);
+    let mut healthy = true;
+    for result in &results {
+        healthy &= print_result(result, None);
+    }
+    Ok(healthy)
+}
+
+fn model_test(client: &mut Client, role: ModelRole, inputs: Vec<String>) -> anyhow::Result<Duration> {
+    let request = Request::ModelsTest { role, source: None, structured: false, inputs };
+    match client.call(request)? {
+        Response::ModelTested(report) => Ok(Duration::from_secs_f64(report.latency_ms / 1000.0)),
+        other => bail!("{role:?} did not answer: {other:?}"),
+    }
+}
+
+fn embedder_benches(binaries: &Binaries, file: ModelFile) -> anyhow::Result<Vec<BenchResult>> {
+    let mut neomem = IsolatedNeomem::prepared_with(binaries, Models::Real)?;
+    let config = fs::read_to_string(neomem.home().config_path())?;
+    fs::write(neomem.home().config_path(), config.replace(model_files::EMBEDDINGGEMMA.name, file.name))?;
+    neomem.start_daemon()?;
+    let mut client = neomem.client()?;
+    model_test(&mut client, ModelRole::Embedder, vec!["warm up".to_owned()])?;
+    let queries = distinct_queries();
+    let mut single = queries
+        .iter()
+        .map(|query| model_test(&mut client, ModelRole::Embedder, vec![query.clone()]))
+        .collect::<anyhow::Result<Vec<_>>>()?;
+    let mut batches = (0..10)
+        .map(|round| {
+            let inputs =
+                queries.iter().cycle().skip(round).take(17).map(|text| format!("{text} batch {round}"));
+            model_test(&mut client, ModelRole::Embedder, inputs.collect())
+        })
+        .collect::<anyhow::Result<Vec<_>>>()?;
+    let name = file.name.trim_end_matches(".gguf");
+    Ok(vec![
+        BenchResult::from(
+            &format!("{name} query"),
+            single.len(),
+            Some(EMBED_BUDGET_MS),
+            timing::percentiles(&mut single),
+        ),
+        BenchResult::from(
+            &format!("{name} +16 docs"),
+            batches.len(),
+            None,
+            timing::percentiles(&mut batches),
+        ),
+    ])
+}
+
+fn local_judge_benches(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> {
+    let mut neomem = IsolatedNeomem::prepared(binaries)?;
+    neomem.remove_the_fake_jev_key()?;
+    neomem.start_daemon()?;
+    let mut client = neomem.client()?;
+    model_test(&mut client, ModelRole::Judge, Vec::new())?;
+    let mut decide = (0..20)
+        .map(|_| model_test(&mut client, ModelRole::Judge, Vec::new()))
+        .collect::<anyhow::Result<Vec<_>>>()?;
+    let candidates = distinct_queries().into_iter().take(15);
+    let inputs: Vec<String> = std::iter::once(BENCH_SITUATION.to_owned()).chain(candidates).collect();
+    let mut score = (0..10)
+        .map(|_| model_test(&mut client, ModelRole::Judge, inputs.clone()))
+        .collect::<anyhow::Result<Vec<_>>>()?;
+    let name = model_files::QWEN3_RERANKER.name.trim_end_matches(".gguf");
+    Ok(vec![
+        BenchResult::from(
+            &format!("{name} decide 2"),
+            decide.len(),
+            Some(LOCAL_JUDGE_BUDGET_MS),
+            timing::percentiles(&mut decide),
+        ),
+        BenchResult::from(
+            &format!("{name} score 15"),
+            score.len(),
+            Some(LOCAL_JUDGE_BUDGET_MS),
+            timing::percentiles(&mut score),
+        ),
+    ])
 }

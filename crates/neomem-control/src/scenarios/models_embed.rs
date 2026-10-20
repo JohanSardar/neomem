@@ -123,7 +123,7 @@ fn the_same_inputs_embed_the_same(proof: &mut ProofRun, neomem: &mut IsolatedNeo
     Ok(())
 }
 
-fn distinct_queries() -> Vec<String> {
+pub(crate) fn distinct_queries() -> Vec<String> {
     let words: Vec<&str> = QUERY_TOPICS.iter().flat_map(|topic| topic.split_whitespace()).collect();
     (0..30)
         .map(|round| {
