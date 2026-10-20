@@ -7,6 +7,7 @@ use anyhow::{Context, bail};
 pub struct Binaries {
     pub neomem: PathBuf,
     pub neomemd: PathBuf,
+    pub fake_llm: PathBuf,
 }
 
 impl Binaries {
@@ -15,7 +16,7 @@ impl Binaries {
             .parent()
             .map(Path::to_path_buf)
             .context("neomemctl has no parent directory")?;
-        Ok(Self { neomem: directory.join("neomem"), neomemd: directory.join("neomemd") })
+        Ok(Self::in_directory(&directory))
     }
 
     pub fn build_fresh(root: &Path) -> anyhow::Result<Self> {
@@ -28,19 +29,29 @@ impl Binaries {
         build(root, true)?;
         let target = std::env::var_os("CARGO_TARGET_DIR")
             .map_or_else(|| root.join("target"), std::path::PathBuf::from);
-        let directory = target.join("release");
-        Ok(Self { neomem: directory.join("neomem"), neomemd: directory.join("neomemd") })
+        Ok(Self::in_directory(&target.join("release")))
+    }
+
+    fn in_directory(directory: &Path) -> Self {
+        Self {
+            neomem: directory.join("neomem"),
+            neomemd: directory.join("neomemd"),
+            fake_llm: directory.join("neomem-fake-llm"),
+        }
     }
 }
 
 fn build(root: &Path, release: bool) -> anyhow::Result<()> {
     let mut build = Command::new("cargo");
-    build.args(["build", "--quiet", "--package", "neomemd", "--package", "neomem-cli"]).current_dir(root);
+    build
+        .args(["build", "--quiet", "--bins", "--package", "neomemd", "--package", "neomem-cli"])
+        .args(["--package", "neomem-testkit"])
+        .current_dir(root);
     if release {
         build.arg("--release");
     }
     if !build.status().context("running cargo build")?.success() {
-        bail!("building neomemd and neomem failed");
+        bail!("building neomemd, neomem and the fake LLM processes failed");
     }
     Ok(())
 }

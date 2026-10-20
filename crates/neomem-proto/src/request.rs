@@ -8,9 +8,24 @@ pub enum Request {
     Shutdown,
     Add(IntakeRecord),
     Raw(RawQuery),
-    Correct { intake: IntakeId, reason: String },
+    Correct {
+        intake: IntakeId,
+        reason: String,
+    },
     Models,
-    ModelsTest { role: ModelRole },
+    ModelsTest {
+        role: ModelRole,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        source: Option<Source>,
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        structured: bool,
+    },
+    Login {
+        provider: String,
+    },
+    LoginFinish {
+        provider: String,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

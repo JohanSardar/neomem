@@ -1,0 +1,75 @@
+{
+  "feature": "intake",
+  "scenario": "intake",
+  "passed": true,
+<<<<<<<< HEAD:proofs/intake/2026-10-20T211530Z/proof.json
+  "started_at": "2026-10-20T211530Z",
+  "duration_ms": 178,
+  "code_version": "b8f0dd71b661-dirty",
+========
+  "started_at": "2026-10-20T210641Z",
+  "duration_ms": 176,
+  "code_version": "889d7e4cde19",
+>>>>>>>> origin/main:proofs/intake/2026-10-20T210641Z/proof.json
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "neomem add returns an int_ ID",
+      "passed": true,
+<<<<<<<< HEAD:proofs/intake/2026-10-20T211530Z/proof.json
+      "detail": "int_01M5DJPQ589QXZJVKR183XE6RE"
+========
+      "detail": "int_01M5DJ6HSM93V08B7ZS6F40ZQP"
+>>>>>>>> origin/main:proofs/intake/2026-10-20T210641Z/proof.json
+    },
+    {
+      "claim": "the intake log holds the record exactly as it was sent",
+      "passed": true,
+      "detail": "Some(IntakeRecord { source: Source(\"oura-digest\"), occurred: Span { start: EpochMs(1792449600000), end: EpochMs(1792479120000) }, tags: [Tag(\"health\"), Tag(\"sleep\")], content: \"Slept 7h 12m, readiness 84. Woke once at 03:10.\", entity_hints: [\"Johan\", \"Oura\"], source_ref: Some(\"oura://sleep/2026-10-20\"), session: None })"
+    },
+    {
+      "claim": "an extraction job is queued for the record",
+      "passed": true,
+      "detail": "Some(\"pending\")"
+    },
+    {
+      "claim": "the same record sent twice is logged twice with two IDs (no dedupe keys)",
+      "passed": true,
+<<<<<<<< HEAD:proofs/intake/2026-10-20T211530Z/proof.json
+      "detail": "int_01M5DJPQ5GEMK9G7PENBYF8S69 int_01M5DJPQ5M16MP0EJZ5ZB2T74Q, 1 -> 3"
+========
+      "detail": "int_01M5DJ6HSX5CJC0VGMYVB2NHEW int_01M5DJ6HT17QE17P1VSCS04XGZ, 1 -> 3"
+>>>>>>>> origin/main:proofs/intake/2026-10-20T210641Z/proof.json
+    },
+    {
+      "claim": "empty content, a backwards span and a malformed source are refused and nothing is logged",
+      "passed": true,
+      "detail": "3 -> 3"
+    },
+    {
+      "claim": "an API key in the content is removed before it is logged",
+      "passed": true,
+      "detail": "Set OPENAI_API_KEY=[redacted] in the deploy env"
+    },
+    {
+      "claim": "40 parallel adds all land with 40 distinct IDs",
+      "passed": true,
+      "detail": "40 distinct"
+    },
+    {
+      "claim": "neomem add returns well inside the 50 ms capture budget at p95",
+      "passed": true,
+<<<<<<<< HEAD:proofs/intake/2026-10-20T211530Z/proof.json
+      "detail": "p50 2.621 ms, p95 4.526 ms, max 4.716 ms"
+========
+      "detail": "p50 3.733 ms, p95 5.122 ms, max 5.375 ms"
+>>>>>>>> origin/main:proofs/intake/2026-10-20T210641Z/proof.json
+    },
+    {
+      "claim": "every logged record is still there after a restart",
+      "passed": true,
+      "detail": "64 -> 64"
+    }
+  ]
+}
