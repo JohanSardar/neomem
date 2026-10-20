@@ -12,6 +12,6 @@ pub use frame::{FrameError, read_frame, write_frame};
 pub use home::Home;
 pub use request::{RawQuery, Request};
 pub use response::{
-    AddReceipt, CorrectionReceipt, Failure, FailureKind, IndexReport, ModelTestReport, RawHit, RebuildReport,
-    Response, StatusReport,
+    AddReceipt, CorrectionReceipt, EntityView, Failure, FailureKind, IndexReport, LinkedEntity,
+    ModelTestReport, RawHit, RebuildReport, ResolvedEntity, Response, ShownMemory, SourceView, StatusReport,
 };

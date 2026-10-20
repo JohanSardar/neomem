@@ -1,4 +1,4 @@
-use neomem_core::{EpochMs, IntakeId, IntakeRecord, ModelRole, Source};
+use neomem_core::{EpochMs, IntakeId, IntakeRecord, MemoryId, ModelRole, Source};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -13,6 +13,15 @@ pub enum Request {
         reason: String,
     },
     Rebuild,
+    Resolve {
+        name: String,
+    },
+    Entity {
+        name: String,
+    },
+    Show {
+        id: MemoryId,
+    },
     Models,
     ModelsTest {
         role: ModelRole,
