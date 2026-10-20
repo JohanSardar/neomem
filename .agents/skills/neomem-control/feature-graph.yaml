@@ -20,8 +20,8 @@
   module: neomem-cli (spool)
   depends_on: [intake]
   proof: spool
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/spool/2026-10-20T205436Z
 - id: raw
   does: keyword and date search over the raw intake log, without decay
   reached_via: [neomem raw]
