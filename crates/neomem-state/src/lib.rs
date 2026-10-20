@@ -1,4 +1,5 @@
 mod connection;
+mod errors;
 mod intake;
 mod jobs;
 mod schema;

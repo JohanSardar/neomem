@@ -2,7 +2,8 @@ use rusqlite::Connection;
 
 use crate::StateError;
 
-const MIGRATIONS: &[&str] = &[r"
+const MIGRATIONS: &[&str] = &[
+    r"
 CREATE TABLE intake (
     id TEXT NOT NULL UNIQUE,
     recorded_at INTEGER NOT NULL,
@@ -34,7 +35,16 @@ CREATE TABLE jobs (
     finished_at INTEGER
 ) STRICT;
 CREATE INDEX jobs_by_state ON jobs (kind, state, batch_key, not_before);
-"];
+",
+    r"
+CREATE TABLE errors (
+    at INTEGER NOT NULL,
+    kind TEXT NOT NULL,
+    subject TEXT NOT NULL
+) STRICT;
+CREATE INDEX errors_by_kind ON errors (kind, at);
+",
+];
 
 pub fn migrate(connection: &mut Connection) -> Result<(), StateError> {
     let applied: i64 = connection.pragma_query_value(None, "user_version", |row| row.get(0))?;

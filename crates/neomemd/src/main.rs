@@ -4,6 +4,7 @@ mod http;
 mod instance;
 mod socket;
 mod system_clock;
+mod watcher;
 
 use std::process::ExitCode;
 use std::sync::Arc;
@@ -38,6 +39,9 @@ fn run() -> anyhow::Result<()> {
     let config = DaemonConfig::load_or_create(&home)?;
     let engine = Arc::new(open_engine(&home, &config)?);
     http::start(Arc::clone(&engine), &config.http, &home)?;
+    engine.run()?;
+    let _watcher =
+        watcher::watch(Arc::clone(&engine), &[home.root().join("facts"), home.root().join("entities")])?;
     tracing::info!("neomemd serving {}", home.root().display());
     socket::serve(&engine, &home.socket_path())?;
     drop(lock);
@@ -51,6 +55,7 @@ fn open_engine(home: &Home, config: &DaemonConfig) -> anyhow::Result<Engine> {
         models: Arc::new(models),
         home: home.root().to_path_buf(),
         state_db: home.state_db_path(),
+        commit_policy: config.vault.policy()?,
         clock: Arc::new(SystemClock),
         daemon_version: env!("CARGO_PKG_VERSION").to_owned(),
     };
