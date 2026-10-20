@@ -97,8 +97,8 @@ impl Engine {
             Request::Entity { name } => self.entity(&name),
             Request::Show { id } => self.show(id),
             Request::Models => self.model_roster(),
-            Request::ModelsTest { role, source, structured } => {
-                self.test_model(ModelProbe { role, source: source.as_ref(), structured })
+            Request::ModelsTest { role, source, structured, inputs } => {
+                self.test_model(ModelProbe { role, source: source.as_ref(), structured, inputs: &inputs })
             }
             Request::Login { provider } => self.start_login(provider),
             Request::LoginFinish { provider } => self.finish_login(provider),

@@ -4,6 +4,8 @@ use std::io::{self, Write};
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::{Path, PathBuf};
 
+use neomem_core::env_file_entries;
+
 #[derive(Clone, Default)]
 pub struct Secrets {
     path: Option<PathBuf>,
@@ -23,12 +25,7 @@ impl std::fmt::Debug for Secrets {
 impl Secrets {
     pub fn load(path: &Path) -> Self {
         let text = fs::read_to_string(path).unwrap_or_default();
-        let from_file = text
-            .lines()
-            .filter_map(entry)
-            .map(|(name, value)| (name.to_owned(), value.trim_matches('"').to_owned()))
-            .collect();
-        Self { path: Some(path.to_path_buf()), from_file }
+        Self { path: Some(path.to_path_buf()), from_file: env_file_entries(&text) }
     }
 
     pub fn get(&self, name: &str) -> Option<String> {
@@ -46,7 +43,7 @@ impl Secrets {
             Err(error) => return Err(error),
         };
         let replaced =
-            |line: &str| entry(line).is_some_and(|(name, _)| values.iter().any(|(key, _)| *key == name));
+            |line: &str| env_file_entries(line).keys().any(|name| values.iter().any(|(key, _)| key == name));
         let kept = current.lines().filter(|line| !replaced(line)).map(str::to_owned);
         let added = values.iter().map(|(name, value)| format!("{name}={value}"));
         let text: String = kept.chain(added).flat_map(|line| [line, "\n".to_owned()]).collect();
@@ -57,17 +54,6 @@ impl Secrets {
         file.sync_all()?;
         fs::rename(&staging, path)
     }
-}
-
-fn entry(line: &str) -> Option<(&str, &str)> {
-    let line = line.trim();
-    if line.is_empty() || line.starts_with('#') {
-        return None;
-    }
-    line.strip_prefix("export ")
-        .unwrap_or(line)
-        .split_once('=')
-        .map(|(name, value)| (name.trim(), value.trim()))
 }
 
 #[cfg(test)]

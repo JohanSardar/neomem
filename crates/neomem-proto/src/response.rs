@@ -83,6 +83,8 @@ pub struct ModelTestReport {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub first_text_ms: Option<f64>,
     pub answer: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub scores: Vec<f32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

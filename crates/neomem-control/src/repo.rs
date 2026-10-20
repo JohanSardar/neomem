@@ -1,4 +1,5 @@
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 use anyhow::Context;
 
@@ -15,4 +16,16 @@ pub fn root() -> anyhow::Result<PathBuf> {
 
 pub fn feature_graph_path(root: &Path) -> PathBuf {
     root.join(GRAPH_FROM_ROOT)
+}
+
+pub fn shared_models_dir(root: &Path) -> PathBuf {
+    let common_git_dir = Command::new("git")
+        .args(["rev-parse", "--path-format=absolute", "--git-common-dir"])
+        .current_dir(root)
+        .output()
+        .ok()
+        .filter(|output| output.status.success())
+        .map(|output| PathBuf::from(String::from_utf8_lossy(&output.stdout).trim()));
+    let main_checkout = common_git_dir.as_deref().and_then(Path::parent).unwrap_or(root);
+    main_checkout.join("models")
 }
