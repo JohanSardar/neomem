@@ -1,4 +1,6 @@
 mod anthropic;
+mod codex;
+mod command;
 mod config;
 mod duration;
 mod host;

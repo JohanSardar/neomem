@@ -5,7 +5,7 @@ use std::time::Instant;
 
 use neomem_core::{Llm, LlmMessage, LlmRequest, LlmRole, ModelRoles, Source};
 use neomem_models::{ModelHost, ModelsConfig, Secrets};
-use neomem_testkit::{FakeModelServer, FakeRules, LlmRule, RecordedCall, llm_contract};
+use neomem_testkit::{FakeModelServer, FakeRules, LlmRule, RecordedCall, fake_llm_binary, llm_contract};
 use serde_json::Value;
 
 struct Fake {
@@ -25,12 +25,15 @@ impl Fake {
 
     fn host(&self, provider: &str, role_extra: &str) -> ModelHost {
         let address = &self.address;
+        let fake_llm = fake_llm_binary().display().to_string();
         let config = format!(
             r#"
 [providers]
 chat = {{ kind = "openai", base_url = "http://{address}/v1", key_env = "NEOMEM_TEST_FAKE_KEY" }}
 responses = {{ kind = "openai", base_url = "http://{address}/v1", api = "responses", key_env = "NEOMEM_TEST_FAKE_KEY" }}
 anthropic = {{ kind = "anthropic", base_url = "http://{address}", key_env = "NEOMEM_TEST_FAKE_KEY" }}
+codex = {{ kind = "codex", cmd = ["{fake_llm}", "--brain", "http://{address}", "codex-app-server"] }}
+command = {{ kind = "command", cmd = ["{fake_llm}", "--brain", "http://{address}", "command"] }}
 
 [models]
 planner = {{ provider = "{provider}", model = "fake-model"{role_extra} }}
@@ -90,8 +93,29 @@ fn the_anthropic_adapter_passes_the_llm_contract() {
 }
 
 #[test]
+fn the_codex_adapter_passes_the_llm_contract() {
+    llm_contract(Fake::start().planner("codex", "").as_ref());
+}
+
+#[test]
+fn the_command_adapter_passes_the_llm_contract() {
+    llm_contract(Fake::start().planner("command", "").as_ref());
+}
+
+#[test]
+fn the_codex_app_server_stays_warm_between_calls() {
+    let fake = Fake::start();
+    let codex = fake.planner("codex", "");
+    codex.complete(&ping(), &mut |_| {}).unwrap();
+    codex.complete(&ping(), &mut |_| {}).unwrap();
+    let threads: Vec<Value> =
+        fake.calls().into_iter().map(|call| call.body["wire"]["threadId"].clone()).collect();
+    assert_eq!(threads, ["thr_fake_1", "thr_fake_3"], "both turns ran in the same app-server process");
+}
+
+#[test]
 fn every_wire_format_streams_text_before_the_reply_completes() {
-    for provider in ["chat", "responses", "anthropic"] {
+    for provider in ["chat", "responses", "anthropic", "codex"] {
         let fake = Fake::start();
         fake.add_rule(LlmRule {
             system_contains: None,
@@ -115,7 +139,7 @@ fn every_wire_format_streams_text_before_the_reply_completes() {
 #[test]
 fn effort_and_caching_reach_each_provider_in_its_own_form() {
     let fake = Fake::start();
-    for provider in ["chat", "responses", "anthropic"] {
+    for provider in ["chat", "responses", "anthropic", "codex", "command"] {
         fake.planner(provider, ", effort = \"low\"").complete(&ping(), &mut |_| {}).unwrap();
     }
     let bodies: Vec<Value> = fake.calls().into_iter().map(|call| call.body).collect();
@@ -123,6 +147,10 @@ fn effort_and_caching_reach_each_provider_in_its_own_form() {
     assert_eq!(bodies[1]["reasoning"]["effort"], "low");
     assert_eq!(bodies[1]["store"], false);
     assert_eq!(bodies[2]["output_config"]["effort"], "low");
+    assert_eq!(bodies[3]["wire"]["effort"], "low");
+    assert_eq!(bodies[3]["via"], "codex-app-server");
+    assert_eq!(bodies[4]["wire"]["effort"], "low");
+    assert_eq!(bodies[4]["via"], "command");
     assert_eq!(bodies[2]["system"][0]["cache_control"]["type"], "ephemeral");
 }
 
