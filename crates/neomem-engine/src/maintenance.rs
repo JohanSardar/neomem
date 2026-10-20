@@ -13,11 +13,16 @@ impl Engine {
         thread::Builder::new().name("neomemd-maintenance".to_owned()).spawn(move || {
             engine.heal_index();
             let mut ticks: u64 = 0;
+            let mut next_nightly = engine.nightly_at.next_after(engine.clock.now());
             loop {
                 if ticks.is_multiple_of(SPOOL_EVERY_TICKS) {
                     engine.drain_spool();
                 }
                 engine.maintain();
+                if engine.clock.now() >= next_nightly {
+                    engine.run_nightly();
+                    next_nightly = engine.nightly_at.next_after(engine.clock.now());
+                }
                 ticks = ticks.wrapping_add(1);
                 thread::sleep(TICK);
             }
@@ -29,6 +34,13 @@ impl Engine {
             Ok(Some(changes)) => tracing::info!("committed {changes} vault changes"),
             Ok(None) => {}
             Err(error) => tracing::error!("committing the vault failed: {error}"),
+        }
+    }
+
+    fn run_nightly(&self) {
+        match self.check_drift() {
+            Ok(report) => tracing::info!("nightly drift check: {} differences repaired", report.differences),
+            Err(error) => tracing::error!("the nightly drift check failed: {error}"),
         }
     }
 

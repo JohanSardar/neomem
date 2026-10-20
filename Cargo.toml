@@ -39,6 +39,7 @@ tempfile = "=3.27.0"
 tiny_http = "=0.12.0"
 half = "=2.7.1"
 humantime = "=2.4.0"
+jiff = "=0.2.38"
 serde-saphyr = "=2.0.0"
 ra_ap_rustc_lexer = { package = "ra-ap-rustc_lexer", version = "=0.178.0" }
 walkdir = "=2.5.0"

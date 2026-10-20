@@ -10,6 +10,7 @@ use neomem_vault::{CommitPolicy, Vault};
 use crate::ids::IdMint;
 use crate::indexing::IndexHealth;
 use crate::models::ModelProbe;
+use crate::schedule::NightlyAt;
 
 #[derive(Debug)]
 pub struct EngineParts {
@@ -17,6 +18,7 @@ pub struct EngineParts {
     pub state_db: PathBuf,
     pub index_db: PathBuf,
     pub commit_policy: CommitPolicy,
+    pub nightly_at: NightlyAt,
     pub clock: Arc<dyn Clock>,
     pub models: Arc<dyn ModelRoles>,
     pub daemon_version: String,
@@ -31,6 +33,7 @@ pub struct Engine {
     pub(crate) state: StateDb,
     pub(crate) vault: Vault,
     pub(crate) commit_policy: CommitPolicy,
+    pub(crate) nightly_at: NightlyAt,
     pub(crate) ids: IdMint,
     pub(crate) models: Arc<dyn ModelRoles>,
     pub(crate) embedder: Option<Arc<dyn Embedder>>,
@@ -74,6 +77,7 @@ impl Engine {
             home: parts.home,
             state: StateDb::open(&parts.state_db)?,
             commit_policy: parts.commit_policy,
+            nightly_at: parts.nightly_at,
             clock: parts.clock,
             daemon_version: parts.daemon_version,
             started_at,
@@ -93,6 +97,11 @@ impl Engine {
             Request::Raw(query) => self.raw(&query),
             Request::Correct { intake, reason } => self.correct(intake, &reason),
             Request::Rebuild => self.rebuild(),
+            Request::CheckDrift => self.drift(),
+            Request::SetClock { .. } => crate::reply::failed(
+                neomem_proto::FailureKind::BadRequest,
+                "this daemon's clock is not settable",
+            ),
             Request::Resolve { name } => self.resolve(&name),
             Request::Entity { name } => self.entity(&name),
             Request::Show { id } => self.show(id),
