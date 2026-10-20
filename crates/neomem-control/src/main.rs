@@ -1,7 +1,9 @@
 use std::process::ExitCode;
 
 use clap::{Args, Parser, Subcommand};
-use neomem_control::{map, prove};
+use std::path::PathBuf;
+
+use neomem_control::{map, prove, session};
 
 #[derive(Debug, Parser)]
 #[command(name = "neomemctl", about = "Control an isolated neomem and prove its features")]
@@ -12,8 +14,25 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Command {
+    Up(UpArgs),
+    Down(HomeArgs),
+    Logs(HomeArgs),
     Prove(ProveArgs),
     Map(MapArgs),
+}
+
+#[derive(Debug, Args)]
+struct UpArgs {
+    #[arg(long, value_enum, default_value_t = session::Models::Fake)]
+    models: session::Models,
+    #[arg(long)]
+    home: Option<PathBuf>,
+}
+
+#[derive(Debug, Args)]
+struct HomeArgs {
+    #[arg(long)]
+    home: Option<PathBuf>,
 }
 
 #[derive(Debug, Args)]
@@ -40,6 +59,9 @@ struct ProveArgs {
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let outcome = match cli.command {
+        Command::Up(args) => session::up(args.models, args.home.as_deref()),
+        Command::Down(args) => session::down(args.home.as_deref()),
+        Command::Logs(args) => session::logs(args.home.as_deref()),
         Command::Prove(args) => prove::run(&selection_from(args)),
         Command::Map(args) => map::run(map_view(&args)),
     };

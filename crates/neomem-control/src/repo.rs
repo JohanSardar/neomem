@@ -2,15 +2,17 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 
+const GRAPH_FROM_ROOT: &str = ".agents/skills/neomem-control/feature-graph.yaml";
+
 pub fn root() -> anyhow::Result<PathBuf> {
-    let control_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
-    control_dir
+    let start = std::env::current_dir().context("reading the current directory")?;
+    start
         .ancestors()
-        .nth(2)
+        .find(|candidate| candidate.join(GRAPH_FROM_ROOT).is_file())
         .map(Path::to_path_buf)
-        .context("neomem-control must live in crates/ below the workspace root")
+        .context("run neomemctl inside the neomem repository")
 }
 
 pub fn feature_graph_path(root: &Path) -> PathBuf {
-    root.join(".agents/skills/neomem-control/feature-graph.yaml")
+    root.join(GRAPH_FROM_ROOT)
 }
