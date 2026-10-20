@@ -10,3 +10,9 @@ pub enum Request {
     Models,
     ModelsTest { role: ModelRole },
 }
+
+impl Request {
+    pub fn waits_in_spool_when_the_daemon_is_down(&self) -> bool {
+        matches!(self, Self::Add(_))
+    }
+}
