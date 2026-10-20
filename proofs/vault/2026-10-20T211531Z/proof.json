@@ -2,9 +2,9 @@
   "feature": "vault",
   "scenario": "vault",
   "passed": true,
-  "started_at": "2026-10-20T210539Z",
-  "duration_ms": 7081,
-  "code_version": "0eff65306982-dirty",
+  "started_at": "2026-10-20T211531Z",
+  "duration_ms": 7098,
+  "code_version": "b8f0dd71b661-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
@@ -21,7 +21,7 @@
     {
       "claim": "facts/ and entities/ exist",
       "passed": true,
-      "detail": "/tmp/neomemctl-znPy4f"
+      "detail": "/tmp/neomemctl-lH4pSy"
     },
     {
       "claim": "a seeded fact chain is committed by the daemon within the batch interval, in one commit",

@@ -2,36 +2,36 @@
   "feature": "daemon",
   "scenario": "daemon",
   "passed": true,
-  "started_at": "2026-10-20T210538Z",
-  "duration_ms": 84,
-  "code_version": "0eff65306982-dirty",
+  "started_at": "2026-10-20T211530Z",
+  "duration_ms": 148,
+  "code_version": "b8f0dd71b661-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "status over the socket names the current protocol and the isolated home",
       "passed": true,
-      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-jDl03i\", pid: 2597652, uptime_ms: 10 })"
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-1sEzgI\", pid: 2637640, uptime_ms: 19 })"
     },
     {
       "claim": "a socket request and reply takes under 0.5 ms at the median",
       "passed": true,
-      "detail": "p50 0.013 ms, p95 0.016 ms, max 0.076 ms"
+      "detail": "p50 0.044 ms, p95 0.050 ms, max 0.269 ms"
     },
     {
       "claim": "neomem status --json prints the daemon's status",
       "passed": true,
-      "detail": "{\"reply\":\"status\",\"body\":{\"daemon_version\":\"0.1.0\",\"protocol\":1,\"home\":\"/tmp/neomemctl-jDl03i\",\"pid\":2597652,\"uptime_ms\":14}}\n"
+      "detail": "{\"reply\":\"status\",\"body\":{\"daemon_version\":\"0.1.0\",\"protocol\":1,\"home\":\"/tmp/neomemctl-1sEzgI\",\"pid\":2637640,\"uptime_ms\":32}}\n"
     },
     {
       "claim": "neomem status answers end to end within 25 ms at the median (the 2-5 ms budget is checked by neomemctl bench on release builds)",
       "passed": true,
-      "detail": "p50 0.756 ms, p95 1.074 ms, max 1.095 ms"
+      "detail": "p50 2.670 ms, p95 3.454 ms, max 3.978 ms"
     },
     {
       "claim": "HTTP POST /v1/request answers status with the same handler",
       "passed": true,
-      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-jDl03i\", pid: 2597652, uptime_ms: 31 })"
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-1sEzgI\", pid: 2637640, uptime_ms: 84 })"
     },
     {
       "claim": "a client on another protocol version gets version_mismatch",
@@ -46,12 +46,12 @@
     {
       "claim": "neomem status starts a stopped daemon and answers within 2 seconds",
       "passed": true,
-      "detail": "12.17021ms"
+      "detail": "12.203762ms"
     },
     {
       "claim": "a home too long for a Unix socket path still gets a working socket elsewhere",
       "passed": true,
-      "detail": "/run/user/1000/neomem-e0c0060da85a3473.sock"
+      "detail": "/run/user/1000/neomem-91b3c68ef22ef8ce.sock"
     }
   ]
 }
