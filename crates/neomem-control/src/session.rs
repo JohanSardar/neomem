@@ -72,3 +72,29 @@ fn stop_fake_models(home: &Home) {
     let Ok(pid) = fs::read_to_string(isolated::fake_models_pid_path(home)) else { return };
     let _ = std::process::Command::new("kill").arg(pid.trim()).status();
 }
+
+pub fn set(setting: &str, home: Option<&Path>) -> anyhow::Result<bool> {
+    let home = resolve_home(home)?;
+    let (key, value) = setting.split_once('=').context("settings look like key=value")?;
+    let request = match key {
+        "clock" => Request::SetClock { now: clock_value(value)? },
+        other => anyhow::bail!("neomemctl cannot set {other} yet"),
+    };
+    let response = Client::connect(&home, std::time::Duration::from_secs(5))?.call(request)?;
+    println!("{}", serde_json::to_string(&response)?);
+    Ok(!matches!(response, neomem_proto::Response::Failed(_)))
+}
+
+fn clock_value(value: &str) -> anyhow::Result<neomem_core::EpochMs> {
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)?.as_millis();
+    let now = neomem_core::EpochMs::from_millis(i64::try_from(now)?);
+    match value.strip_prefix('+') {
+        Some(ahead) => {
+            let duration = humantime::parse_duration(ahead).context("use +<duration>, like +6h or +1day")?;
+            Ok(now.plus_millis(i64::try_from(duration.as_millis())?))
+        }
+        None => Ok(neomem_core::EpochMs::from_millis(
+            value.parse().context("use epoch milliseconds or +<duration>")?,
+        )),
+    }
+}

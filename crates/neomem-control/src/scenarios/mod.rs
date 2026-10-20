@@ -1,5 +1,6 @@
 mod correct;
 mod daemon;
+mod drift;
 mod entity;
 mod index;
 mod intake;
@@ -29,6 +30,7 @@ pub const ALL: &[Scenario] = &[
     Scenario { name: "index", run: index::prove },
     Scenario { name: "correct", run: correct::prove },
     Scenario { name: "entity", run: entity::prove },
+    Scenario { name: "drift", run: drift::prove },
     Scenario { name: "models-llm", run: models_llm::prove },
     Scenario { name: "models-embed", run: models_embed::prove },
     Scenario { name: "models-judge", run: models_judge::prove },

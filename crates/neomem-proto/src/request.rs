@@ -13,6 +13,10 @@ pub enum Request {
         reason: String,
     },
     Rebuild,
+    CheckDrift,
+    SetClock {
+        now: EpochMs,
+    },
     Resolve {
         name: String,
     },

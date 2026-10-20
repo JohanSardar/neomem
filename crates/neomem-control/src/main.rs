@@ -17,6 +17,11 @@ struct Cli {
 enum Command {
     Up(UpArgs),
     Down(HomeArgs),
+    Set {
+        setting: String,
+        #[arg(long)]
+        home: Option<PathBuf>,
+    },
     Logs(HomeArgs),
     Prove(ProveArgs),
     Map(MapArgs),
@@ -77,6 +82,7 @@ fn main() -> ExitCode {
     let outcome = match cli.command {
         Command::Up(args) => session::up(args.models, args.home.as_deref()),
         Command::Down(args) => session::down(args.home.as_deref()),
+        Command::Set { setting, home } => session::set(&setting, home.as_deref()),
         Command::Logs(args) => session::logs(args.home.as_deref()),
         Command::Prove(args) => prove::run(&selection_from(args)),
         Command::Map(args) => map::run(map_view(&args)),

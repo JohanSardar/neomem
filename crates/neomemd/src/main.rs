@@ -1,9 +1,9 @@
 mod config;
+mod daemon_clock;
 mod dispatch;
 mod http;
 mod instance;
 mod socket;
-mod system_clock;
 mod watcher;
 
 use std::process::ExitCode;
@@ -15,8 +15,9 @@ use neomem_models::{ModelHost, Secrets};
 use neomem_proto::Home;
 
 use crate::config::DaemonConfig;
+use crate::daemon_clock::DaemonClock;
+use crate::dispatch::Dispatcher;
 use crate::instance::InstanceLock;
-use crate::system_clock::SystemClock;
 
 fn main() -> ExitCode {
     init_logging();
@@ -37,18 +38,20 @@ fn run() -> anyhow::Result<()> {
         return Ok(());
     };
     let config = DaemonConfig::load_or_create(&home)?;
-    let engine = Arc::new(open_engine(&home, &config)?);
-    http::start(Arc::clone(&engine), &config.http, &home)?;
+    let clock = Arc::new(DaemonClock::new(config.dev.settable_clock));
+    let engine = Arc::new(open_engine(&home, &config, Arc::clone(&clock))?);
+    let dispatcher = Arc::new(Dispatcher::new(Arc::clone(&engine), clock));
+    http::start(Arc::clone(&dispatcher), &config.http, &home)?;
     engine.run()?;
     let _watcher =
         watcher::watch(Arc::clone(&engine), &[home.root().join("facts"), home.root().join("entities")])?;
     tracing::info!("neomemd serving {}", home.root().display());
-    socket::serve(&engine, &home.socket_path())?;
+    socket::serve(&dispatcher, &home.socket_path())?;
     drop(lock);
     Ok(())
 }
 
-fn open_engine(home: &Home, config: &DaemonConfig) -> anyhow::Result<Engine> {
+fn open_engine(home: &Home, config: &DaemonConfig, clock: Arc<DaemonClock>) -> anyhow::Result<Engine> {
     let secrets = Secrets::load(&home.secrets_path());
     let models = ModelHost::new(config.models.clone(), secrets, home.models_dir());
     let parts = EngineParts {
@@ -57,7 +60,8 @@ fn open_engine(home: &Home, config: &DaemonConfig) -> anyhow::Result<Engine> {
         state_db: home.state_db_path(),
         index_db: home.index_db_path(),
         commit_policy: config.vault.policy()?,
-        clock: Arc::new(SystemClock),
+        clock,
+        nightly_at: config.schedule.nightly_at()?,
         daemon_version: env!("CARGO_PKG_VERSION").to_owned(),
     };
     Ok(Engine::open(parts)?)

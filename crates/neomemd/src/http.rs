@@ -7,15 +7,14 @@ use anyhow::Context;
 use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
-use neomem_engine::Engine;
 use neomem_proto::{Home, IncomingEnvelope, Response};
 use tokio::net::TcpListener;
 use tokio::signal::unix::{SignalKind, signal};
 
 use crate::config::HttpConfig;
-use crate::dispatch::{dispatch, finish_if_shutting_down};
+use crate::dispatch::{Dispatcher, finish_if_shutting_down};
 
-pub fn start(engine: Arc<Engine>, config: &HttpConfig, home: &Home) -> anyhow::Result<()> {
+pub fn start(dispatcher: Arc<Dispatcher>, config: &HttpConfig, home: &Home) -> anyhow::Result<()> {
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(2)
         .thread_name("neomemd-http")
@@ -29,7 +28,7 @@ pub fn start(engine: Arc<Engine>, config: &HttpConfig, home: &Home) -> anyhow::R
         tracing::info!("HTTP listening on {address}");
     }
     thread::Builder::new().name("neomemd-async".to_owned()).spawn(move || {
-        runtime.block_on(run(engine, listener));
+        runtime.block_on(run(dispatcher, listener));
     })?;
     Ok(())
 }
@@ -39,11 +38,10 @@ async fn bind(port: u16) -> anyhow::Result<TcpListener> {
     TcpListener::bind(address).await.with_context(|| format!("binding HTTP on {address}"))
 }
 
-async fn run(engine: Arc<Engine>, listener: Option<TcpListener>) {
-    let terminate_engine = Arc::clone(&engine);
-    tokio::spawn(stop_on_terminate(terminate_engine));
+async fn run(dispatcher: Arc<Dispatcher>, listener: Option<TcpListener>) {
+    tokio::spawn(stop_on_terminate(Arc::clone(&dispatcher)));
     if let Some(listener) = listener {
-        let routes = Router::new().route("/v1/request", post(handle_request)).with_state(engine);
+        let routes = Router::new().route("/v1/request", post(handle_request)).with_state(dispatcher);
         if let Err(error) = axum::serve(listener, routes).await {
             tracing::error!("HTTP server stopped: {error}");
         }
@@ -53,11 +51,11 @@ async fn run(engine: Arc<Engine>, listener: Option<TcpListener>) {
 }
 
 async fn handle_request(
-    State(engine): State<Arc<Engine>>,
+    State(dispatcher): State<Arc<Dispatcher>>,
     Json(incoming): Json<IncomingEnvelope>,
 ) -> Json<Response> {
-    let worker_engine = Arc::clone(&engine);
-    let response = tokio::task::spawn_blocking(move || dispatch(&worker_engine, incoming)).await;
+    let worker = Arc::clone(&dispatcher);
+    let response = tokio::task::spawn_blocking(move || worker.dispatch(incoming)).await;
     let response = response.unwrap_or_else(|error| {
         Response::Failed(neomem_proto::Failure::new(neomem_proto::FailureKind::Internal, error.to_string()))
     });
@@ -70,7 +68,7 @@ async fn handle_request(
     Json(response)
 }
 
-async fn stop_on_terminate(engine: Arc<Engine>) {
+async fn stop_on_terminate(dispatcher: Arc<Dispatcher>) {
     let Ok(mut terminate) = signal(SignalKind::terminate()) else {
         tracing::warn!("cannot listen for SIGTERM");
         return;
@@ -83,7 +81,7 @@ async fn stop_on_terminate(engine: Arc<Engine>) {
         _ = terminate.recv() => {}
         _ = interrupt.recv() => {}
     }
-    engine.flush();
+    dispatcher.engine().flush();
     tracing::info!("neomemd stopped by signal");
     std::process::exit(0);
 }

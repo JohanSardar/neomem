@@ -34,6 +34,16 @@ fn print_human(response: &Response) {
         Response::RawHits(hits) => print_raw_hits(hits),
         Response::Corrected(receipt) => println!("{} is marked as logged incorrectly", receipt.intake),
         Response::Rebuilt(report) => print_rebuilt(report),
+        Response::DriftChecked(report) => println!(
+            "drift check: {} differences ({} added, {} changed, {} files missing, {} unreadable) in {} ms",
+            report.differences,
+            report.added,
+            report.changed,
+            report.missing_files,
+            report.unreadable,
+            report.took_ms
+        ),
+        Response::ClockSet { now } => println!("clock set to {}", time_argument::display(*now)),
         Response::Resolved(found) => {
             for entity in found {
                 println!("{}  {} ({})", entity.id, entity.name, entity.kind);
