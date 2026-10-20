@@ -5,6 +5,7 @@ mod http;
 mod jev;
 mod json_schema;
 mod llm;
+mod openai_chat;
 mod openai_embeddings;
 mod secrets;
 mod sse;
