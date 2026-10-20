@@ -4,6 +4,7 @@ use neomem_core::{Llm, LlmRole, ModelError, Source};
 
 use super::ModelHost;
 use crate::anthropic::{self, AnthropicLlm};
+use crate::chatgpt::{self, ChatgptLlm};
 use crate::codex::CodexLlm;
 use crate::command::CommandLlm;
 use crate::config::{ProviderKind, RoleConfig};
@@ -63,13 +64,17 @@ impl ModelHost {
                 let base = base_url.unwrap_or(anthropic::DEFAULT_BASE_URL);
                 Ok(Arc::new(Provider(AnthropicLlm::new(base, key, &settings)?)))
             }
+            ProviderKind::Chatgpt => {
+                let base = base_url.unwrap_or(chatgpt::DEFAULT_BASE_URL);
+                Ok(Arc::new(Provider(ChatgptLlm::new(base, self.chatgpt_account(provider), &settings)?)))
+            }
             ProviderKind::Codex => Ok(Arc::new(Provider(CodexLlm::new(provider.cmd.as_deref(), &settings)))),
             ProviderKind::Command => {
                 let program = provider.cmd.as_deref().unwrap_or_default();
                 Ok(Arc::new(Provider(CommandLlm::new(program, &settings)?)))
             }
-            other => Err(ModelError::NotConfigured(format!(
-                "{role_name}: provider kind {other:?} cannot write text yet"
+            ProviderKind::Jev => Err(ModelError::NotConfigured(format!(
+                "{role_name}: a jev provider only makes decisions; it cannot write text"
             ))),
         }
     }

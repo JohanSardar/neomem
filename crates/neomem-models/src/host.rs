@@ -12,6 +12,7 @@ use crate::openai_embeddings::OpenAiEmbedder;
 use crate::{Secrets, duration};
 
 mod llm_roles;
+mod sign_in;
 
 #[derive(Debug)]
 pub struct ModelHost {
@@ -19,6 +20,7 @@ pub struct ModelHost {
     secrets: Secrets,
     models_dir: PathBuf,
     ready: Mutex<ReadyModels>,
+    accounts: sign_in::Accounts,
 }
 
 #[derive(Debug, Default)]
@@ -30,7 +32,13 @@ struct ReadyModels {
 
 impl ModelHost {
     pub fn new(config: ModelsConfig, secrets: Secrets, models_dir: PathBuf) -> Self {
-        Self { config, secrets, models_dir, ready: Mutex::new(ReadyModels::default()) }
+        Self {
+            config,
+            secrets,
+            models_dir,
+            ready: Mutex::new(ReadyModels::default()),
+            accounts: sign_in::Accounts::default(),
+        }
     }
 
     pub fn models_dir(&self) -> &PathBuf {
@@ -152,11 +160,11 @@ impl ModelRoles for ModelHost {
     }
 
     fn start_login(&self, provider: &str) -> Result<String, ModelError> {
-        Err(ModelError::NotConfigured(format!("{provider}: signing in is not wired yet")))
+        self.open_sign_in(provider)
     }
 
     fn finish_login(&self, provider: &str) -> Result<String, ModelError> {
-        Err(ModelError::NotConfigured(format!("{provider}: signing in is not wired yet")))
+        self.await_sign_in(provider)
     }
 }
 
