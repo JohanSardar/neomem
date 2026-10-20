@@ -1,12 +1,7 @@
-mod changes;
-mod graph;
-mod map;
-mod prove;
-mod repo;
-
 use std::process::ExitCode;
 
 use clap::{Args, Parser, Subcommand};
+use neomem_control::{map, prove};
 
 #[derive(Debug, Parser)]
 #[command(name = "neomemctl", about = "Control an isolated neomem and prove its features")]
@@ -22,11 +17,14 @@ enum Command {
 }
 
 #[derive(Debug, Args)]
+#[group(multiple = false)]
 struct MapArgs {
-    #[arg(long, conflicts_with = "status")]
+    #[arg(long)]
     next: bool,
     #[arg(long)]
     status: bool,
+    #[arg(long)]
+    check: bool,
 }
 
 #[derive(Debug, Args)]
@@ -43,7 +41,7 @@ fn main() -> ExitCode {
     let cli = Cli::parse();
     let outcome = match cli.command {
         Command::Prove(args) => prove::run(&selection_from(args)),
-        Command::Map(args) => map::run(if args.next { map::View::Next } else { map::View::Status }),
+        Command::Map(args) => map::run(map_view(&args)),
     };
     match outcome {
         Ok(true) => ExitCode::SUCCESS,
@@ -60,5 +58,15 @@ fn selection_from(args: ProveArgs) -> prove::Selection {
         (Some(feature), _) => prove::Selection::One(feature),
         (None, true) => prove::Selection::Changed,
         (None, false) => prove::Selection::All,
+    }
+}
+
+fn map_view(args: &MapArgs) -> map::View {
+    if args.next {
+        map::View::Next
+    } else if args.check {
+        map::View::Check
+    } else {
+        map::View::Status
     }
 }
