@@ -4,8 +4,8 @@
   module: neomemd
   depends_on: []
   proof: daemon
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/daemon/2026-10-20T200651Z
 - id: intake
   does: copies every intake record into the intake log with an int_ ID before any processing and queues its extraction job
   reached_via: [neomem add, mcp add]

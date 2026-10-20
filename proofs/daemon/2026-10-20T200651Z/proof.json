@@ -1,0 +1,57 @@
+{
+  "feature": "daemon",
+  "scenario": "daemon",
+  "passed": true,
+  "started_at": "2026-10-20T200651Z",
+  "duration_ms": 116,
+  "code_version": "47e27802cea1-dirty",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "status over the socket names the current protocol and the isolated home",
+      "passed": true,
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-oJUuCv\", pid: 2446810, uptime_ms: 11 })"
+    },
+    {
+      "claim": "a socket request and reply takes under 0.5 ms at the median",
+      "passed": true,
+      "detail": "p50 0.031 ms, p95 0.036 ms, max 0.379 ms"
+    },
+    {
+      "claim": "neomem status --json prints the daemon's status",
+      "passed": true,
+      "detail": "{\"reply\":\"status\",\"body\":{\"daemon_version\":\"0.1.0\",\"protocol\":1,\"home\":\"/tmp/neomemctl-oJUuCv\",\"pid\":2446810,\"uptime_ms\":21}}\n"
+    },
+    {
+      "claim": "neomem status end to end stays inside the 2-5 ms client budget at the median",
+      "passed": true,
+      "detail": "p50 2.488 ms, p95 3.383 ms, max 3.442 ms"
+    },
+    {
+      "claim": "HTTP POST /v1/request answers status with the same handler",
+      "passed": true,
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-oJUuCv\", pid: 2446810, uptime_ms: 74 })"
+    },
+    {
+      "claim": "a client on another protocol version gets version_mismatch",
+      "passed": true,
+      "detail": "VersionMismatch { daemon: 1, client: 2 }"
+    },
+    {
+      "claim": "a second neomemd on the same home exits cleanly and the first keeps serving",
+      "passed": true,
+      "detail": "second exit exit status: 0"
+    },
+    {
+      "claim": "neomem status starts a stopped daemon and answers within 2 seconds",
+      "passed": true,
+      "detail": "14.311696ms"
+    },
+    {
+      "claim": "a home too long for a Unix socket path still gets a working socket elsewhere",
+      "passed": true,
+      "detail": "/run/user/1000/neomem-600766ac91a85a1e.sock"
+    }
+  ]
+}
