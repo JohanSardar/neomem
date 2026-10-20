@@ -2,16 +2,16 @@
   "feature": "correct",
   "scenario": "correct",
   "passed": true,
-  "started_at": "2026-10-20T211645Z",
-  "duration_ms": 28,
-  "code_version": "6675b2794961",
+  "started_at": "2026-10-20T212038Z",
+  "duration_ms": 41,
+  "code_version": "0568a9e41140-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "neomem correct records a correction for the intake record",
       "passed": true,
-      "detail": "{\"reply\":\"corrected\",\"body\":{\"intake\":\"int_01M5DJS08D1BTNSTJJCR0NGG3S\",\"recorded_at\":1792531005710}}"
+      "detail": "{\"reply\":\"corrected\",\"body\":{\"intake\":\"int_01M5DK040A4H98BW8DK9ASRFR6\",\"recorded_at\":1792531238925}}"
     },
     {
       "claim": "the intake record is kept exactly as it was logged",
