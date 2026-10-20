@@ -8,6 +8,7 @@ publish.workspace = true
 [dependencies]
 neomem-core.workspace = true
 neomem-proto.workspace = true
+neomem-state.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
 
