@@ -1,7 +1,0 @@
-2026-10-20T21:52:40.554561Z  INFO neomemd::http: HTTP listening on 127.0.0.1:42749
-2026-10-20T21:52:40.555297Z  INFO neomemd: neomemd serving /tmp/neomemctl-MAZwO7
-2026-10-20T21:52:40.555806Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
-2026-10-20T21:52:41.827572Z  INFO neomem_engine::maintenance: committed 4 vault changes
-2026-10-20T21:52:44.604340Z  INFO neomem_engine::maintenance: committed 1 vault changes
-2026-10-20T21:52:46.313073Z  WARN neomem_engine::notice: vault file fct_01M5AAAAAAAAAAAAAAAAAAAAAA is malformed and was not indexed
-2026-10-20T21:52:47.382503Z  INFO neomem_engine::maintenance: committed 1 vault changes
