@@ -1,3 +1,4 @@
+mod anthropic;
 mod config;
 mod duration;
 mod host;
@@ -7,6 +8,7 @@ mod json_schema;
 mod llm;
 mod openai_chat;
 mod openai_embeddings;
+mod openai_responses;
 mod secrets;
 mod sse;
 

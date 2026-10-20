@@ -3,10 +3,12 @@ use std::sync::Arc;
 use neomem_core::{Llm, LlmRole, ModelError, Source};
 
 use super::ModelHost;
+use crate::anthropic::{self, AnthropicLlm};
 use crate::config::{ProviderKind, RoleConfig};
 use crate::duration;
 use crate::llm::{self, LlmSettings, Provider};
 use crate::openai_chat::OpenAiChat;
+use crate::openai_responses::OpenAiResponses;
 
 const OPENAI_BASE_URL: &str = "https://api.openai.com/v1";
 
@@ -40,10 +42,24 @@ impl ModelHost {
         };
         let base_url = provider.base_url.as_deref();
         match provider.kind {
+            ProviderKind::Openai if provider.api.as_deref() == Some("responses") => {
+                let base = base_url.unwrap_or(OPENAI_BASE_URL);
+                Ok(Arc::new(Provider(OpenAiResponses::new(base, self.key(provider), &settings)?)))
+            }
             ProviderKind::Openai => {
                 let chat =
                     OpenAiChat::new(base_url.unwrap_or(OPENAI_BASE_URL), self.key(provider), &settings)?;
                 Ok(Arc::new(Provider(chat)))
+            }
+            ProviderKind::Anthropic => {
+                let key = self.key(provider).ok_or_else(|| {
+                    ModelError::Unavailable(format!(
+                        "{role_name}: the Anthropic API key ({}) is missing",
+                        provider.key_env.as_deref().unwrap_or("key_env is not set")
+                    ))
+                })?;
+                let base = base_url.unwrap_or(anthropic::DEFAULT_BASE_URL);
+                Ok(Arc::new(Provider(AnthropicLlm::new(base, key, &settings)?)))
             }
             other => Err(ModelError::NotConfigured(format!(
                 "{role_name}: provider kind {other:?} cannot write text yet"
