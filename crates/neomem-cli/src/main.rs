@@ -39,6 +39,10 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
         Command::Status => Request::Status,
         Command::Add(arguments) => Request::Add(intake_record::from_arguments(arguments)?),
         Command::Raw(arguments) => Request::Raw(intake_record::raw_query(arguments)?),
+        Command::Resolve { name } => Request::Resolve { name: name.clone() },
+        Command::Entity { name } => Request::Entity { name: name.clone() },
+        Command::Show { id } => Request::Show { id: id.parse()? },
+        Command::Rebuild => Request::Rebuild,
         Command::Correct(arguments) => {
             Request::Correct { intake: arguments.intake.parse()?, reason: arguments.reason.clone() }
         }

@@ -11,6 +11,7 @@ impl Engine {
     pub fn run(self: &Arc<Self>) -> std::io::Result<thread::JoinHandle<()>> {
         let engine = Arc::clone(self);
         thread::Builder::new().name("neomemd-maintenance".to_owned()).spawn(move || {
+            engine.heal_index();
             let mut ticks: u64 = 0;
             loop {
                 if ticks.is_multiple_of(SPOOL_EVERY_TICKS) {

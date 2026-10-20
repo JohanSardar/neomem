@@ -1058,6 +1058,7 @@ name = "neomem-engine"
 version = "0.1.0"
 dependencies = [
  "neomem-core",
+ "neomem-index",
  "neomem-proto",
  "neomem-state",
  "neomem-vault",

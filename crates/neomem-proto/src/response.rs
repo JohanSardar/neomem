@@ -1,4 +1,7 @@
-use neomem_core::{EpochMs, IntakeId, ModelRole, RoleAssignment, Source, Span, Tag};
+use neomem_core::{
+    Direction, Entity, EntityId, EpochMs, Fact, IntakeId, IntakeRecord, Label, LinkKind, MemoryId, ModelRole,
+    RoleAssignment, Source, Span, Tag,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -8,6 +11,10 @@ pub enum Response {
     Added(AddReceipt),
     RawHits(Vec<RawHit>),
     Corrected(CorrectionReceipt),
+    Rebuilt(RebuildReport),
+    Resolved(Vec<ResolvedEntity>),
+    Entity(Box<EntityView>),
+    Shown(Box<ShownMemory>),
     ModelRoster(Vec<RoleAssignment>),
     ModelTested(ModelTestReport),
     LoginOpened { provider: String, url: String },
@@ -24,6 +31,25 @@ pub struct StatusReport {
     pub home: String,
     pub pid: u32,
     pub uptime_ms: i64,
+    #[serde(default)]
+    pub index: Option<IndexReport>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IndexReport {
+    pub facts: usize,
+    pub entities: usize,
+    pub links: usize,
+    pub names: usize,
+    pub vectors: usize,
+    pub model: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RebuildReport {
+    pub index: IndexReport,
+    pub unreadable_files: usize,
+    pub took_ms: i64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -78,4 +104,40 @@ impl Failure {
     pub fn new(kind: FailureKind, message: impl Into<String>) -> Self {
         Self { kind, message: message.into() }
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ResolvedEntity {
+    pub id: EntityId,
+    pub name: String,
+    pub kind: Label,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct EntityView {
+    pub entity: Entity,
+    pub facts: Vec<Fact>,
+    pub linked: Vec<LinkedEntity>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LinkedEntity {
+    pub kind: LinkKind,
+    pub direction: Direction,
+    pub entity: Entity,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ShownMemory {
+    pub id: MemoryId,
+    pub path: String,
+    pub text: String,
+    pub sources: Vec<SourceView>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SourceView {
+    pub id: neomem_core::IntakeId,
+    pub record: Option<IntakeRecord>,
+    pub corrected: bool,
 }

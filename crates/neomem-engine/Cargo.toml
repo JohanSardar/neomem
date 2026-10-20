@@ -7,6 +7,7 @@ publish.workspace = true
 
 [dependencies]
 neomem-core.workspace = true
+neomem-index.workspace = true
 neomem-proto.workspace = true
 neomem-state.workspace = true
 neomem-vault.workspace = true

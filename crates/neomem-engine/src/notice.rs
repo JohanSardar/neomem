@@ -22,7 +22,11 @@ impl Engine {
         if !path.exists() || self.vault.notice_change(path, now) == ChangeOrigin::OwnWrite {
             return;
         }
-        if self.vault.read(path).is_err() {
+        if let Ok(memory) = self.vault.read(path) {
+            if let Err(error) = self.index_memories(vec![(memory, path.to_path_buf())]) {
+                tracing::error!("indexing {} failed: {error}", file_subject(path));
+            }
+        } else {
             let subject = file_subject(path);
             tracing::warn!("vault file {subject} is malformed and was not indexed");
             if let Err(error) = self.state.log_error(now, "vault_unreadable", &subject) {
