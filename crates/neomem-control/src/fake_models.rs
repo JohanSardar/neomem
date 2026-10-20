@@ -58,11 +58,26 @@ fn local_and_live_roles(models: Models) -> LocalAndLiveRoles {
     }
 }
 
-pub fn config_toml(address: &str, fake_llm: &Path, planner: &str, models: Models) -> String {
+pub fn config_toml(
+    address: &str,
+    fake_llm: &Path,
+    planner: &str,
+    models: Models,
+    home: &Path,
+) -> anyhow::Result<String> {
+    let cc = serde_json::to_string(&home.join("capture/cc"))?;
+    let codex = serde_json::to_string(&home.join("capture/codex"))?;
+    let pi = serde_json::to_string(&home.join("capture/pi"))?;
     let fake_llm = fake_llm.display();
     let LocalAndLiveRoles { live_providers, embedder, judge } = local_and_live_roles(models);
-    format!(
-        r#"[http]
+    Ok(format!(
+        r#"[capture]
+claude_dir = {cc}
+codex_dir = {codex}
+pi_dir = {pi}
+sweep_every = "250ms"
+
+[http]
 enabled = true
 port = 0
 
@@ -93,5 +108,5 @@ consolidator = {{ provider = "fake", model = "fake-consolidator" }}
 [models.extractor_by_source]
 "bank-digest" = {{ provider = "fake_anthropic", model = "claude-fake" }}
 "#
-    )
+    ))
 }

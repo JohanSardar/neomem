@@ -12,9 +12,13 @@ impl BatchKey {
     pub fn for_record(logged: &LoggedIntake) -> Self {
         let record = &logged.record;
         match &record.session {
-            Some(session) => Self(format!("{}/{session}", record.source)),
+            Some(session) => Self::for_session(record.source.as_str(), session),
             None => Self(record.source.to_string()),
         }
+    }
+
+    pub fn for_session(source: &str, session: &str) -> Self {
+        Self(format!("{source}/{session}"))
     }
 
     pub fn as_str(&self) -> &str {
