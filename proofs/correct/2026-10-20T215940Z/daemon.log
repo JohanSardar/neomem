@@ -1,3 +1,0 @@
-2026-10-20T21:59:40.918737Z  INFO neomemd::http: HTTP listening on 127.0.0.1:41369
-2026-10-20T21:59:40.919492Z  INFO neomemd: neomemd serving /tmp/neomemctl-S8CnyN
-2026-10-20T21:59:40.920071Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
