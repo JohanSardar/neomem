@@ -52,6 +52,17 @@ CREATE TABLE corrections (
 ) STRICT;
 CREATE INDEX corrections_by_intake ON corrections (intake_id);
 ",
+    r"
+CREATE TABLE runs (
+    id INTEGER PRIMARY KEY,
+    kind TEXT NOT NULL,
+    started_at INTEGER NOT NULL,
+    finished_at INTEGER NOT NULL,
+    model TEXT,
+    changes TEXT NOT NULL
+) STRICT;
+CREATE INDEX runs_by_kind ON runs (kind, started_at);
+",
 ];
 
 pub fn migrate(connection: &mut Connection) -> Result<(), StateError> {

@@ -12,6 +12,8 @@ pub enum Response {
     RawHits(Vec<RawHit>),
     Corrected(CorrectionReceipt),
     Rebuilt(RebuildReport),
+    DriftChecked(DriftReport),
+    ClockSet { now: EpochMs },
     Resolved(Vec<ResolvedEntity>),
     Entity(Box<EntityView>),
     Shown(Box<ShownMemory>),
@@ -140,4 +142,14 @@ pub struct SourceView {
     pub id: neomem_core::IntakeId,
     pub record: Option<IntakeRecord>,
     pub corrected: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DriftReport {
+    pub differences: usize,
+    pub added: usize,
+    pub changed: usize,
+    pub missing_files: usize,
+    pub unreadable: usize,
+    pub took_ms: i64,
 }
