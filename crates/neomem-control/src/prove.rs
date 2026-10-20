@@ -89,14 +89,7 @@ fn choose<'graph>(
         },
         Selection::Changed => {
             let changed = changes::changed_files(root)?;
-            Ok(features
-                .iter()
-                .filter(|feature| feature.status != crate::graph::Status::Planned)
-                .filter(|feature| {
-                    let crate_dir = format!("crates/{}/", feature.crate_name());
-                    changed.iter().any(|file| file.starts_with(&crate_dir))
-                })
-                .collect())
+            Ok(features.iter().filter(|feature| changes::affects(&changed, feature)).collect())
         }
     }
 }
