@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::fs;
 use std::time::Duration;
 
 use neomem_core::ModelRole;
@@ -7,7 +6,6 @@ use neomem_proto::{ModelTestReport, Request, Response};
 use neomem_testkit::{FakeRules, JudgeAnswer, JudgeRule};
 
 use crate::binaries::Binaries;
-use crate::fake_models;
 use crate::isolated::{IsolatedNeomem, Models};
 use crate::model_files;
 use crate::proof::ProofRun;
@@ -150,9 +148,7 @@ fn without_a_key_the_reranker_answers_alone(
     proof: &mut ProofRun,
     neomem: &mut IsolatedNeomem,
 ) -> anyhow::Result<()> {
-    let keyless: Vec<&str> =
-        fake_models::FAKE_SECRETS.lines().filter(|line| !line.starts_with("NEOMEM_FAKE_JEV_KEY=")).collect();
-    fs::write(neomem.home().secrets_path(), keyless.join("\n"))?;
+    neomem.remove_the_fake_jev_key()?;
     neomem.stop_daemon()?;
     neomem.start_daemon()?;
     let before = jev_calls(neomem)?;

@@ -3,7 +3,7 @@ mod daemon;
 mod entity;
 mod index;
 mod intake;
-mod models_embed;
+pub(crate) mod models_embed;
 mod models_judge;
 mod models_llm;
 mod raw;

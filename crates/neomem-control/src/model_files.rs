@@ -94,8 +94,9 @@ fn fetch(file: &ModelFile, target: &Path) -> anyhow::Result<()> {
     bail!("could not download {}: {}", file.name, problems.join("; "))
 }
 
-fn download(source: &Download, target: &Path) -> anyhow::Result<()> {
-    let partial = target.with_extension("gguf.part");
+pub fn download(source: &Download, target: &Path) -> anyhow::Result<()> {
+    let mut partial = target.as_os_str().to_owned();
+    partial.push(".part");
     let mut response = ureq::get(source.url).call()?;
     let mut reader = response.body_mut().as_reader();
     let mut output = File::create(&partial)?;

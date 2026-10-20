@@ -149,6 +149,15 @@ impl IsolatedNeomem {
         Ok(())
     }
 
+    pub fn remove_the_fake_jev_key(&self) -> anyhow::Result<()> {
+        let keyless: Vec<&str> = fake_models::FAKE_SECRETS
+            .lines()
+            .filter(|line| !line.starts_with("NEOMEM_FAKE_JEV_KEY="))
+            .collect();
+        fs::write(self.home.secrets_path(), keyless.join("\n"))?;
+        Ok(())
+    }
+
     pub fn has_live_key(&self, name: &str) -> bool {
         self.live_keys.has(name)
     }
