@@ -5,13 +5,19 @@ use std::time::Duration;
 use crate::Engine;
 
 const TICK: Duration = Duration::from_millis(250);
+const SPOOL_EVERY_TICKS: u64 = 8;
 
 impl Engine {
     pub fn run(self: &Arc<Self>) -> std::io::Result<thread::JoinHandle<()>> {
         let engine = Arc::clone(self);
         thread::Builder::new().name("neomemd-maintenance".to_owned()).spawn(move || {
+            let mut ticks: u64 = 0;
             loop {
+                if ticks % SPOOL_EVERY_TICKS == 0 {
+                    engine.drain_spool();
+                }
                 engine.maintain();
+                ticks = ticks.wrapping_add(1);
                 thread::sleep(TICK);
             }
         })
