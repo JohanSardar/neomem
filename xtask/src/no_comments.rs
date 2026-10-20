@@ -10,8 +10,8 @@ use crate::workspace;
 pub fn check(root: &Path) -> anyhow::Result<Vec<Violation>> {
     let mut violations = Vec::new();
     for file in workspace::rust_sources(root) {
-        let source = fs::read_to_string(&file)
-            .with_context(|| format!("reading {}", file.display()))?;
+        let source =
+            fs::read_to_string(&file).with_context(|| format!("reading {}", file.display()))?;
         let relative = file.strip_prefix(root).unwrap_or(&file).to_path_buf();
         violations.extend(comment_lines(&source).into_iter().map(|line| Violation {
             check: "no-comments",
@@ -37,7 +37,10 @@ fn comment_lines(source: &str) -> Vec<usize> {
 }
 
 fn is_comment(kind: TokenKind) -> bool {
-    matches!(kind, TokenKind::LineComment { .. } | TokenKind::BlockComment { .. })
+    matches!(
+        kind,
+        TokenKind::LineComment { .. } | TokenKind::BlockComment { .. }
+    )
 }
 
 fn line_number_at(source: &str, offset: usize) -> usize {

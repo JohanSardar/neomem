@@ -8,7 +8,10 @@ use std::process::ExitCode;
 use clap::{Args, Parser, Subcommand};
 
 #[derive(Debug, Parser)]
-#[command(name = "neomemctl", about = "Control an isolated neomem and prove its features")]
+#[command(
+    name = "neomemctl",
+    about = "Control an isolated neomem and prove its features"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
