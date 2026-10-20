@@ -1,5 +1,6 @@
 mod ci;
 mod dependency_rules;
+mod feature_graph;
 mod no_comments;
 mod violation;
 mod workspace;
@@ -24,6 +25,7 @@ fn run_every_check() -> anyhow::Result<Vec<Violation>> {
     let mut violations = Vec::new();
     violations.extend(no_comments::check(&root)?);
     violations.extend(dependency_rules::check(&root)?);
+    violations.extend(feature_graph::check(&root)?);
     Ok(violations)
 }
 

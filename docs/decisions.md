@@ -7,3 +7,4 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - §17 The Actions workflow waits in `ci/workflows/ci.yml`: the gh token has no `workflow` scope, so `scripts/enable-ci.sh` (needs the user's browser sign-in) moves it into `.github/workflows/`. Until then `cargo xtask ci` runs the same steps locally before every merge.
 - §13.2 `neomem-engine` may depend on `neomem-proto`, because `Engine::handle(Request) -> Response` takes the protocol's types.
 - §13.2 Any crate may use `neomem-testkit` as a dev-dependency; runtime dependencies follow the §13.2 table, enforced by `cargo xtask check`.
+- §17.4 Clippy pedantic runs without `missing_errors_doc`, `missing_panics_doc` and `must_use_candidate`: the first two demand doc comments, which the no-comments rule bans, and the third asks for an attribute on nearly every getter.

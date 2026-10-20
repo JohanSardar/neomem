@@ -67,6 +67,25 @@ impl FeatureGraph {
         Self::from_features(features)
     }
 
+    pub fn save(&self, path: &Path) -> anyhow::Result<()> {
+        let mut options = serde_saphyr::SerializerOptions::default();
+        options.prefer_block_scalars = false;
+        let text = serde_saphyr::to_string_with_options(&self.features, options)
+            .context("serializing the feature graph")?;
+        fs::write(path, text).with_context(|| format!("writing {}", path.display()))
+    }
+
+    pub fn record_proof(&mut self, id: &str, passed: bool, bundle: String) {
+        if let Some(feature) = self.features.iter_mut().find(|feature| feature.id == id) {
+            feature.status = match (passed, feature.status) {
+                (true, _) => Status::Proven,
+                (false, Status::Proven | Status::Broken) => Status::Broken,
+                (false, Status::Planned | Status::Building) => Status::Building,
+            };
+            feature.last_proof = Some(bundle);
+        }
+    }
+
     pub fn from_features(features: Vec<Feature>) -> anyhow::Result<Self> {
         let graph = Self { features };
         graph.validate()?;

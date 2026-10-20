@@ -1,10 +1,11 @@
 use crate::graph::{FeatureGraph, Status};
-use crate::repo;
+use crate::{repo, scenarios};
 
 #[derive(Debug, Clone, Copy)]
 pub enum View {
     Status,
     Next,
+    Check,
 }
 
 pub fn run(view: View) -> anyhow::Result<bool> {
@@ -12,8 +13,34 @@ pub fn run(view: View) -> anyhow::Result<bool> {
     match view {
         View::Status => print_status(&graph),
         View::Next => print_next(&graph),
+        View::Check => return Ok(report_drift(&graph)),
     }
     Ok(true)
+}
+
+fn report_drift(graph: &FeatureGraph) -> bool {
+    let drift = drift_between_graph_and_code(graph);
+    for problem in &drift {
+        eprintln!("[feature-graph] {problem}");
+    }
+    drift.is_empty()
+}
+
+pub fn drift_between_graph_and_code(graph: &FeatureGraph) -> Vec<String> {
+    graph
+        .features
+        .iter()
+        .filter(|feature| feature.status != Status::Planned)
+        .filter(|feature| scenarios::find(&feature.proof).is_none())
+        .map(|feature| {
+            format!(
+                "{} is {} but its proof scenario {} does not exist",
+                feature.id,
+                feature.status.label(),
+                feature.proof
+            )
+        })
+        .collect()
 }
 
 fn print_status(graph: &FeatureGraph) {
