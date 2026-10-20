@@ -43,7 +43,10 @@ fn local_and_live_roles(models: Models) -> LocalAndLiveRoles {
         },
         Models::Real => LocalAndLiveRoles {
             live_providers: r#"jev = { kind = "jev", key_env = "JEV_API_KEY", model = "jev-1.13.0" }"#,
-            embedder: format!(r#"{{ runtime = "llama.cpp", file = "{}" }}"#, model_files::EMBEDDINGGEMMA.name),
+            embedder: format!(
+                r#"{{ runtime = "llama.cpp", file = "{}" }}"#,
+                model_files::EMBEDDINGGEMMA.name
+            ),
             judge: r#"{ provider = "jev" }"#,
         },
     }

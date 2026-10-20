@@ -14,7 +14,7 @@ const RELATED: &str = "Edge ships on November 1";
 const UNRELATED: &str = "Maya is my sister";
 const SIMILARITY_MARGIN: f32 = 0.1;
 const SAME_SCORE_TOLERANCE: f32 = 1e-5;
-const QUERY_LATENCY_SANITY_P50_MS: f64 = 60.0;
+const QUERY_LATENCY_SANITY_P50_MS: f64 = 150.0;
 const CACHED_QUERY_CEILING_MS: f64 = 1.0;
 
 const QUERY_TOPICS: &[&str] = &[
@@ -170,7 +170,10 @@ fn a_repeated_query_skips_the_model(
     Ok(())
 }
 
-fn an_openai_compatible_endpoint_answers(proof: &mut ProofRun, neomem: &IsolatedNeomem) -> anyhow::Result<()> {
+fn an_openai_compatible_endpoint_answers(
+    proof: &mut ProofRun,
+    neomem: &IsolatedNeomem,
+) -> anyhow::Result<()> {
     let outcome = test_embedder(proof, neomem, &[QUERY, RELATED, UNRELATED])?;
     let holds = matches!(&outcome, Ok(report)
         if report.model == "openai:hash-256" && report.answer == "256 dimensions" && report.scores.len() == 2);

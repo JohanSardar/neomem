@@ -115,11 +115,12 @@ fn embed_prompts(
         context.clear_kv_cache();
         let mut batch = LlamaBatch::new(usize::try_from(BATCH_TOKENS).unwrap_or(2048), 1);
         for (sequence, tokens) in (0..).zip(group) {
-            batch.add_sequence(tokens, sequence, false).map_err(|error| failure("batch", error))?;
+            batch.add_sequence(tokens, sequence, true).map_err(|error| failure("batch", error))?;
         }
         context.decode(&mut batch).map_err(|error| failure("decode", error))?;
         for sequence in (0..).take(group.len()) {
-            let values = context.embeddings_seq_ith(sequence).map_err(|error| failure("embeddings", error))?;
+            let values =
+                context.embeddings_seq_ith(sequence).map_err(|error| failure("embeddings", error))?;
             vectors.push(Vector::normalized(values.to_vec()));
         }
     }
