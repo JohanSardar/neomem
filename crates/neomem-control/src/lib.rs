@@ -1,7 +1,12 @@
+pub mod binaries;
 pub mod changes;
 pub mod graph;
+pub mod isolated;
 pub mod map;
 pub mod proof;
 pub mod prove;
 pub mod repo;
 pub mod scenarios;
+pub mod session;
+pub mod surfaces;
+pub mod timing;

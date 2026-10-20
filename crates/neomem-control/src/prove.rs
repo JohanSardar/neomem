@@ -3,6 +3,7 @@ use std::process::Command;
 
 use anyhow::bail;
 
+use crate::binaries::Binaries;
 use crate::graph::{Feature, FeatureGraph};
 use crate::proof::ProofRun;
 use crate::{changes, repo, scenarios};
@@ -24,9 +25,10 @@ pub fn run(selection: &Selection) -> anyhow::Result<bool> {
         return Ok(true);
     }
     let code_version = code_version(&root);
+    let binaries = Binaries::build_fresh(&root)?;
     let mut every_proof_passed = true;
     for feature in &chosen {
-        let passed = prove_one(feature, &root, &code_version, &mut graph)?;
+        let passed = prove_one(feature, &root, &code_version, &binaries, &mut graph)?;
         every_proof_passed &= passed;
     }
     graph.save(&graph_path)?;
@@ -37,13 +39,15 @@ fn prove_one(
     feature: &Feature,
     root: &Path,
     code_version: &str,
+    binaries: &Binaries,
     graph: &mut FeatureGraph,
 ) -> anyhow::Result<bool> {
     let mut proof_run = ProofRun::new(&feature.id, &feature.proof);
     let outcome = match scenarios::find(&feature.proof) {
-        Some(scenario) => (scenario.run)(&mut proof_run),
+        Some(scenario) => (scenario.run)(&mut proof_run, binaries),
         None => Err(anyhow::anyhow!("no proof scenario named {} exists", feature.proof)),
     };
+    proof_run.print_claims();
     let bundle = proof_run.finish(outcome, &root.join("proofs"), code_version)?;
     let relative = bundle.path.strip_prefix(root).unwrap_or(&bundle.path).display().to_string();
     let verdict = if bundle.passed { "PROVEN" } else { "FAILED" };

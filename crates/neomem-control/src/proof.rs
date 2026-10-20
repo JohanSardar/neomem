@@ -85,6 +85,13 @@ impl ProofRun {
         self.logs.push_str(&logs[start..]);
     }
 
+    pub fn print_claims(&self) {
+        for check in &self.checks {
+            let mark = if check.passed { "✓" } else { "✗" };
+            eprintln!("  {mark} {}  [{}]", check.claim, check.detail);
+        }
+    }
+
     pub fn finish(
         self,
         outcome: anyhow::Result<()>,
