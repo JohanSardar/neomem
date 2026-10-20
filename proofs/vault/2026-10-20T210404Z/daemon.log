@@ -1,6 +1,0 @@
-2026-10-20T21:04:04.178609Z  INFO neomemd::http: HTTP listening on 127.0.0.1:39119
-2026-10-20T21:04:04.179439Z  INFO neomemd: neomemd serving /tmp/neomemctl-GupTQs
-2026-10-20T21:04:05.441908Z  INFO neomem_engine::maintenance: committed 4 vault changes
-2026-10-20T21:04:08.211087Z  INFO neomem_engine::maintenance: committed 1 vault changes
-2026-10-20T21:04:09.827239Z  WARN neomem_engine::notice: vault file fct_01M5AAAAAAAAAAAAAAAAAAAAAA is malformed and was not indexed
-2026-10-20T21:04:10.982486Z  INFO neomem_engine::maintenance: committed 1 vault changes
