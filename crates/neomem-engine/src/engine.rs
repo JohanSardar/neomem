@@ -67,8 +67,8 @@ impl Engine {
             Request::Raw(query) => self.raw(&query),
             Request::Correct { intake, reason } => self.correct(intake, &reason),
             Request::Models => self.model_roster(),
-            Request::ModelsTest { role, source, structured } => {
-                self.test_model(ModelProbe { role, source: source.as_ref(), structured })
+            Request::ModelsTest { role, source, structured, inputs } => {
+                self.test_model(ModelProbe { role, source: source.as_ref(), structured, inputs: &inputs })
             }
             Request::Login { provider } => self.start_login(provider),
             Request::LoginFinish { provider } => self.finish_login(provider),

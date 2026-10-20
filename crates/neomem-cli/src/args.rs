@@ -54,6 +54,8 @@ pub enum ModelsAction {
         source: Option<String>,
         #[arg(long)]
         structured: bool,
+        #[arg(long = "input")]
+        inputs: Vec<String>,
     },
 }
 

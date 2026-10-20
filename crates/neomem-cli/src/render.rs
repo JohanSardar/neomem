@@ -50,6 +50,9 @@ fn print_human(response: &Response) {
                 report.latency_ms,
                 report.answer
             );
+            for (index, score) in report.scores.iter().enumerate() {
+                println!("  input {}: {score:.4}", index + 2);
+            }
         }
         Response::LoginOpened { url, .. } => println!("{url}"),
         Response::LoggedIn { provider, account } => println!("signed in to {provider} as {account}"),

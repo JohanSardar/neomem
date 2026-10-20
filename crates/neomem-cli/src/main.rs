@@ -44,10 +44,11 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
         }
         Command::Models(arguments) => match &arguments.action {
             None => Request::Models,
-            Some(ModelsAction::Test { role, source, structured }) => Request::ModelsTest {
+            Some(ModelsAction::Test { role, source, structured, inputs }) => Request::ModelsTest {
                 role: role.model_role(),
                 source: source.as_deref().map(Source::new).transpose()?,
                 structured: *structured,
+                inputs: inputs.clone(),
             },
         },
         Command::Login(arguments) => return login::run(&home, arguments).map(Outcome::Answered),

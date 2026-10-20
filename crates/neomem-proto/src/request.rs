@@ -19,6 +19,8 @@ pub enum Request {
         source: Option<Source>,
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
         structured: bool,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        inputs: Vec<String>,
     },
     Login {
         provider: String,
