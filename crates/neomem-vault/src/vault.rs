@@ -5,25 +5,10 @@ use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard, PoisonError};
 use std::time::Duration;
 
-use neomem_core::{Entity, EpochMs, Fact, MemoryId};
+use neomem_core::{EpochMs, Memory, MemoryId};
 
 use crate::paths::{self, ENTITIES_DIR, FACTS_DIR};
 use crate::{format, git};
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Memory {
-    Fact(Fact),
-    Entity(Entity),
-}
-
-impl Memory {
-    pub fn id(&self) -> MemoryId {
-        match self {
-            Self::Fact(fact) => MemoryId::Fact(fact.id()),
-            Self::Entity(entity) => MemoryId::Entity(entity.id()),
-        }
-    }
-}
 
 #[derive(Debug, thiserror::Error)]
 pub enum VaultError {
@@ -202,7 +187,9 @@ fn collect_markdown(directory: &Path, files: &mut Vec<PathBuf>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use neomem_core::{Durability, EntityId, FactId, Importance, IntakeId, Label, NewEntity, NewFact};
+    use neomem_core::{
+        Durability, Entity, EntityId, Fact, FactId, Importance, IntakeId, Label, NewEntity, NewFact,
+    };
 
     fn at(millis: i64) -> EpochMs {
         EpochMs::from_millis(millis)

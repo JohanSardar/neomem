@@ -5,7 +5,9 @@ use neomem_core::{
 use serde::{Deserialize, Serialize};
 use serde_saphyr::FlowSeq;
 
-use crate::{Memory, VaultError};
+use neomem_core::Memory;
+
+use crate::VaultError;
 
 const FENCE: &str = "---\n";
 

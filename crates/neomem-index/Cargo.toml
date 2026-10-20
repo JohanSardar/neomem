@@ -1,0 +1,24 @@
+[package]
+name = "neomem-index"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+arc-swap.workspace = true
+half.workspace = true
+neomem-core.workspace = true
+rusqlite.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+usearch.workspace = true
+
+[dev-dependencies]
+neomem-testkit.workspace = true
+tempfile.workspace = true
+
+[lints]
+workspace = true
