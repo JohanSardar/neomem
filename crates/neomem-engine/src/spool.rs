@@ -14,16 +14,10 @@ impl Engine {
                     Response::Failed(failure) if failure.kind == neomem_proto::FailureKind::Internal => {
                         tracing::warn!("a spooled request will be retried: {}", failure.message);
                     }
-                    _ => self.finish_spooled(&spooled.path),
+                    _ => finish_spooled(&spooled.path),
                 },
                 _ => self.set_spooled_aside(&home, &spooled.path),
             }
-        }
-    }
-
-    fn finish_spooled(&self, path: &std::path::Path) {
-        if let Err(error) = spool::finish(path) {
-            tracing::error!("removing a drained spool file failed: {error}");
         }
     }
 
@@ -36,5 +30,11 @@ impl Engine {
         if let Err(error) = spool::set_aside(home, path) {
             tracing::error!("setting a spool file aside failed: {error}");
         }
+    }
+}
+
+fn finish_spooled(path: &std::path::Path) {
+    if let Err(error) = spool::finish(path) {
+        tracing::error!("removing a drained spool file failed: {error}");
     }
 }

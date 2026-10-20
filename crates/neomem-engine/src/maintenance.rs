@@ -13,7 +13,7 @@ impl Engine {
         thread::Builder::new().name("neomemd-maintenance".to_owned()).spawn(move || {
             let mut ticks: u64 = 0;
             loop {
-                if ticks % SPOOL_EVERY_TICKS == 0 {
+                if ticks.is_multiple_of(SPOOL_EVERY_TICKS) {
                     engine.drain_spool();
                 }
                 engine.maintain();
