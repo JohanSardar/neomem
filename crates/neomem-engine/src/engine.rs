@@ -29,6 +29,7 @@ pub struct EngineParts {
 
 #[derive(Debug)]
 pub struct Engine {
+    pub(crate) capture: Mutex<crate::capture::CaptureRuntime>,
     pub(crate) home: PathBuf,
     pub(crate) clock: Arc<dyn Clock>,
     pub(crate) daemon_version: String,
@@ -74,6 +75,7 @@ impl Engine {
             missing_vectors: opened.missing_vectors.len(),
         };
         Ok(Self {
+            capture: Mutex::default(),
             embedder,
             index: opened.index,
             health: Mutex::new(health),
@@ -95,6 +97,7 @@ impl Engine {
 
     pub fn handle(&self, request: Request) -> Response {
         match request {
+            Request::Capture(signal) => self.capture_signal(&signal),
             Request::Status => Response::Status(self.status()),
             Request::Shutdown => {
                 self.flush();

@@ -8,7 +8,6 @@ use std::time::{Duration, Instant};
 use anyhow::{Context, bail};
 use std::os::unix::fs::PermissionsExt;
 
-use neomem_core::env_file_entries;
 use neomem_proto::{Client, Envelope, Home, Request, Response};
 use neomem_testkit::{FakeRules, RecordedCall};
 
@@ -38,15 +37,11 @@ impl std::fmt::Debug for LiveKeys {
 }
 
 impl LiveKeys {
-    fn from_the_users_secrets() -> Self {
-        let text = std::env::var_os("HOME")
-            .and_then(|user_home| fs::read_to_string(Path::new(&user_home).join(".neomem/secrets.env")).ok())
-            .unwrap_or_default();
-        let mut from_file = env_file_entries(&text);
+    fn from_environment() -> Self {
         let keys = LIVE_KEYS
             .iter()
             .filter_map(|name| {
-                let value = std::env::var(name).ok().or_else(|| from_file.remove(*name))?;
+                let value = std::env::var(name).ok()?;
                 (!value.is_empty()).then(|| ((*name).to_owned(), value))
             })
             .collect();
@@ -117,7 +112,7 @@ impl IsolatedNeomem {
         let fake_models = start_fake_models(&home)?;
         let live_keys = match models {
             Models::Fake => LiveKeys::default(),
-            Models::Real => LiveKeys::from_the_users_secrets(),
+            Models::Real => LiveKeys::from_environment(),
         };
         let isolated = Self {
             home,
@@ -144,7 +139,8 @@ impl IsolatedNeomem {
             &self.binaries.fake_llm,
             planner_provider,
             self.models,
-        );
+            self.home.root(),
+        )?;
         fs::write(self.home.config_path(), config)?;
         Ok(())
     }

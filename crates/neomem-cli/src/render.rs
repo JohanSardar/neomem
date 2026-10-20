@@ -30,6 +30,7 @@ pub fn print_spooled(path: &Path, json: bool) -> ExitCode {
 
 fn print_human(response: &Response) {
     match response {
+        Response::Captured => {}
         Response::Status(report) => print_status(report),
         Response::ShuttingDown => println!("neomemd is shutting down"),
         Response::Added(receipt) => println!("{}", receipt.id),

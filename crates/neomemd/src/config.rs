@@ -26,6 +26,8 @@ pub struct DaemonConfig {
     #[serde(default)]
     pub http: HttpConfig,
     #[serde(default)]
+    pub capture: CaptureConfig,
+    #[serde(default)]
     pub vault: VaultConfig,
     #[serde(default)]
     pub schedule: ScheduleConfig,
@@ -155,5 +157,38 @@ impl DaemonConfig {
         }
         let text = fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
         toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CaptureConfig {
+    pub claude_dir: Option<std::path::PathBuf>,
+    #[serde(default = "default_capture_sweep")]
+    pub sweep_every: String,
+}
+
+fn default_capture_sweep() -> String {
+    "60s".to_owned()
+}
+
+impl Default for CaptureConfig {
+    fn default() -> Self {
+        Self { claude_dir: None, sweep_every: default_capture_sweep() }
+    }
+}
+
+impl CaptureConfig {
+    pub fn sources(&self) -> Vec<neomem_engine::CaptureSource> {
+        let home = std::env::var_os("HOME").map(std::path::PathBuf::from).unwrap_or_default();
+        vec![neomem_engine::CaptureSource {
+            root: self.claude_dir.clone().unwrap_or_else(|| home.join(".claude")).join("projects"),
+            adapter: std::sync::Arc::new(neomem_capture::ClaudeCode),
+        }]
+    }
+
+    pub fn every(&self) -> anyhow::Result<std::time::Duration> {
+        parse_duration(&self.sweep_every)
+            .filter(|every| !every.is_zero())
+            .ok_or_else(|| anyhow::anyhow!("capture.sweep_every must be a positive duration"))
     }
 }

@@ -1,3 +1,4 @@
+mod capture;
 mod clock;
 mod decay;
 mod entity;
@@ -36,3 +37,5 @@ pub use secrets::redact_secrets;
 pub use tag::{InvalidTag, STARTING_TAGS, Tag};
 pub use time::EpochMs;
 pub use ulid::{InvalidUlid, Ulid};
+
+pub use capture::{AgentAdapter, CaptureAgent, CaptureError, CaptureEvent, CaptureSignal, Captured};

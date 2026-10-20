@@ -10,6 +10,9 @@ const SURFACE_KINDS: &[&str] = &["neomem", "http", "hook", "mcp", "pi"];
 pub fn in_code(root: &Path) -> anyhow::Result<BTreeSet<String>> {
     let mut surfaces = BTreeSet::new();
     surfaces.extend(cli_commands(&root.join("crates/neomem-cli/src/args.rs"))?);
+    if surfaces.contains("neomem hook") {
+        surfaces.extend(hook_surfaces(&root.join("crates/neomem-core/src/capture.rs"))?);
+    }
     surfaces.extend(http_routes(&root.join("crates/neomemd/src"))?);
     Ok(surfaces)
 }
@@ -55,6 +58,27 @@ fn cli_commands(args_file: &Path) -> anyhow::Result<Vec<String>> {
         .map(|variant| format!("neomem {}", kebab_case(&variant.ident.to_string())))
         .collect();
     Ok(commands)
+}
+
+fn hook_surfaces(path: &Path) -> anyhow::Result<Vec<String>> {
+    let Some(file) = parse(path)? else { return Ok(Vec::new()) };
+    let variants = |name: &str| {
+        file.items
+            .iter()
+            .filter_map(|item| match item {
+                syn::Item::Enum(found) if found.ident == name => Some(found),
+                _ => None,
+            })
+            .flat_map(|found| found.variants.iter())
+            .map(|variant| kebab_case(&variant.ident.to_string()))
+            .collect::<Vec<_>>()
+    };
+    let agents = variants("CaptureAgent");
+    let events = variants("CaptureEvent");
+    Ok(agents
+        .iter()
+        .flat_map(|agent| events.iter().map(move |event| format!("hook {agent} {event}")))
+        .collect())
 }
 
 fn http_routes(source_dir: &Path) -> anyhow::Result<Vec<String>> {

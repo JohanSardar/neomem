@@ -63,6 +63,15 @@ CREATE TABLE runs (
 ) STRICT;
 CREATE INDEX runs_by_kind ON runs (kind, started_at);
 ",
+    r"
+CREATE TABLE transcript_positions (
+    agent TEXT NOT NULL,
+    path TEXT NOT NULL,
+    session TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    PRIMARY KEY (agent, path)
+) STRICT;
+",
 ];
 
 pub fn migrate(connection: &mut Connection) -> Result<(), StateError> {

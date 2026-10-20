@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "reply", content = "body", rename_all = "snake_case")]
 pub enum Response {
     Status(StatusReport),
+    Captured,
     Added(AddReceipt),
     RawHits(Vec<RawHit>),
     Corrected(CorrectionReceipt),

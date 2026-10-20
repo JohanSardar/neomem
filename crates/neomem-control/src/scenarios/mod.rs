@@ -1,3 +1,7 @@
+mod capture;
+mod capture_cc;
+mod capture_codex;
+mod capture_pi;
 mod correct;
 mod daemon;
 mod drift;
@@ -25,6 +29,9 @@ pub struct Scenario {
 }
 
 pub const ALL: &[Scenario] = &[
+    Scenario { name: "capture-cc", run: capture_cc::prove },
+    Scenario { name: "capture-codex", run: capture_codex::prove },
+    Scenario { name: "capture-pi", run: capture_pi::prove },
     Scenario { name: "models-idle", run: models_idle::prove },
     Scenario { name: "models-swap", run: models_swap::prove },
     Scenario { name: "daemon", run: daemon::prove },

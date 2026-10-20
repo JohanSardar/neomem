@@ -16,7 +16,7 @@ pub fn up(models: Models, home: Option<&Path>) -> anyhow::Result<bool> {
         None => IsolatedNeomem::start_with(&binaries, models)?,
     };
     if models == Models::Real && !isolated.has_live_key("JEV_API_KEY") {
-        println!("neomemctl: no JEV_API_KEY in ~/.neomem/secrets.env, so the judge has no live Jev");
+        println!("neomemctl: no JEV_API_KEY in the environment, so the judge has no live Jev");
     }
     let kept = isolated.detach();
     remember_current_home(&root, &kept)?;
@@ -46,7 +46,7 @@ pub fn logs(home: Option<&Path>) -> anyhow::Result<bool> {
     Ok(true)
 }
 
-fn resolve_home(home: Option<&Path>) -> anyhow::Result<Home> {
+pub(crate) fn resolve_home(home: Option<&Path>) -> anyhow::Result<Home> {
     if let Some(home) = home {
         return Ok(Home::at(home));
     }

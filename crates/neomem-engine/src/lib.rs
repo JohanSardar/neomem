@@ -1,3 +1,4 @@
+mod capture;
 mod drift;
 mod engine;
 mod entity;
@@ -19,4 +20,6 @@ pub use engine::{Engine, EngineError, EngineParts};
 pub use neomem_vault::CommitPolicy;
 pub use notice::Notice;
 pub use schedule::NightlyAt;
+
+pub use capture::CaptureSource;
 pub use worker_config::WorkerConfig;

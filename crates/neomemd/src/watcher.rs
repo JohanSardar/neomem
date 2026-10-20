@@ -19,7 +19,7 @@ pub fn watch(engine: Arc<Engine>, directories: &[PathBuf]) -> anyhow::Result<Rec
         }
     })
     .context("starting the file watcher")?;
-    for directory in directories {
+    for directory in directories.iter().filter(|directory| directory.exists()) {
         watcher
             .watch(directory, RecursiveMode::Recursive)
             .with_context(|| format!("watching {}", directory.display()))?;
@@ -52,24 +52,24 @@ fn collect(event: Event, changed: &mut BTreeSet<PathBuf>) {
     }
     for path in event.paths {
         if path.is_dir() {
-            markdown_below(&path, changed);
-        } else if is_markdown(&path) {
+            watched_files_below(&path, changed);
+        } else if is_watched_file(&path) {
             changed.insert(path);
         }
     }
 }
 
-fn markdown_below(directory: &Path, changed: &mut BTreeSet<PathBuf>) {
+fn watched_files_below(directory: &Path, changed: &mut BTreeSet<PathBuf>) {
     let Ok(entries) = std::fs::read_dir(directory) else { return };
     for path in entries.filter_map(Result::ok).map(|entry| entry.path()) {
         if path.is_dir() {
-            markdown_below(&path, changed);
-        } else if is_markdown(&path) {
+            watched_files_below(&path, changed);
+        } else if is_watched_file(&path) {
             changed.insert(path);
         }
     }
 }
 
-fn is_markdown(path: &Path) -> bool {
-    path.extension().is_some_and(|extension| extension == "md")
+fn is_watched_file(path: &Path) -> bool {
+    path.extension().is_some_and(|extension| extension == "md" || extension == "jsonl")
 }
