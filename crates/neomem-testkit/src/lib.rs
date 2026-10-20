@@ -5,9 +5,13 @@ mod embedder;
 mod judge;
 mod llm;
 mod server;
+mod transport;
+mod wire_anthropic;
+mod wire_chat;
+mod wire_responses;
 
-pub use contract::{embedder_contract, judge_contract};
+pub use contract::{embedder_contract, judge_contract, llm_contract};
 pub use embedder::HashEmbedder;
 pub use judge::{JudgeAnswer, JudgeRule, ScriptedJudge};
-pub use llm::{LlmRule, ScriptedLlm};
+pub use llm::{LlmRule, ScriptedAnswer, ScriptedLlm};
 pub use server::{FakeModelServer, FakeRules, RecordedCall};

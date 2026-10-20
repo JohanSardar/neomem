@@ -5,12 +5,14 @@ use std::sync::{Arc, Mutex, PoisonError};
 use std::thread;
 use std::time::Duration;
 
-use neomem_core::{Choice, Decision, Judge, Llm, LlmMessage, LlmRequest};
+use neomem_core::{Choice, Decision, Judge};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use tiny_http::{Header, Request, Response, Server};
+use tiny_http::{Request, Server};
 
+use crate::transport::{Incoming, Reply};
 use crate::{HashEmbedder, JudgeRule, LlmRule, ScriptedJudge, ScriptedLlm};
+use crate::{wire_anthropic, wire_chat, wire_responses};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FakeRules {
@@ -72,37 +74,30 @@ impl FakeModelServer {
 }
 
 fn answer(shared: &Shared, mut request: Request) {
-    let route = request.url().split('?').next().unwrap_or_default().to_owned();
-    let mut text = String::new();
-    let body: Value = match request.as_reader().read_to_string(&mut text) {
-        Ok(_) if text.trim().is_empty() => Value::Null,
-        Ok(_) => serde_json::from_str(&text).unwrap_or(Value::Null),
-        Err(_) => Value::Null,
-    };
+    let incoming = Incoming::read(&mut request);
+    let route = incoming.route.clone();
     if !route.starts_with("/fake/") {
         shared
             .calls
             .lock()
             .unwrap_or_else(PoisonError::into_inner)
-            .push(RecordedCall { route: route.clone(), body: body.clone() });
+            .push(RecordedCall { route: route.clone(), body: incoming.body.clone() });
     }
     let delay =
         shared.latency_ms.lock().unwrap_or_else(PoisonError::into_inner).get(&route).copied().unwrap_or(0);
     thread::sleep(Duration::from_millis(delay));
-    let (status, reply) = match route.as_str() {
-        "/v1/embeddings" => (200, embeddings(&body)),
-        "/v1/systemone" => (200, system_one(shared, &body)),
-        "/v1/chat/completions" => chat(shared, &body),
-        "/fake/rules" => (200, add_rules(shared, body)),
-        "/fake/calls" => (200, json!(*shared.calls.lock().unwrap_or_else(PoisonError::into_inner))),
-        _ => (404, json!({ "error": format!("the fake has no route {route}") })),
+    let body = &incoming.body;
+    let reply = match route.as_str() {
+        "/v1/embeddings" => Reply::ok(embeddings(body)),
+        "/v1/systemone" => Reply::ok(system_one(shared, body)),
+        "/v1/chat/completions" => wire_chat::reply(&shared.llm, body),
+        "/v1/responses" => wire_responses::reply(&shared.llm, body),
+        "/v1/messages" => wire_anthropic::reply(&shared.llm, &incoming),
+        "/fake/rules" => Reply::ok(add_rules(shared, incoming.body)),
+        "/fake/calls" => Reply::ok(json!(*shared.calls.lock().unwrap_or_else(PoisonError::into_inner))),
+        _ => Reply::Json(404, json!({ "error": format!("the fake has no route {route}") })),
     };
-    let header = Header::from_bytes("content-type", "application/json").ok();
-    let mut response = Response::from_string(reply.to_string()).with_status_code(status);
-    if let Some(header) = header {
-        response = response.with_header(header);
-    }
-    let _ = request.respond(response);
+    reply.send(request);
 }
 
 fn embeddings(body: &Value) -> Value {
@@ -165,38 +160,6 @@ fn answer_noul(judge: &ScriptedJudge, state: &str, instructions: &str) -> Value 
         .and_then(|scores| scores.first().copied())
         .unwrap_or(0.0);
     json!({ "type": "noul", "noul": noul })
-}
-
-fn chat(shared: &Shared, body: &Value) -> (u16, Value) {
-    let empty = Vec::new();
-    let messages = body["messages"].as_array().unwrap_or(&empty);
-    let text_of = |role: &str| -> String {
-        messages
-            .iter()
-            .filter(|message| message["role"] == role)
-            .filter_map(|message| message["content"].as_str())
-            .collect::<Vec<_>>()
-            .join("\n")
-    };
-    let request = LlmRequest {
-        system: text_of("system"),
-        messages: vec![LlmMessage::User(text_of("user"))],
-        response_schema: None,
-        tools: Vec::new(),
-        max_output_tokens: 0,
-    };
-    match shared.llm.complete(&request, &mut |_| {}) {
-        Ok(reply) => (
-            200,
-            json!({
-                "id": "chatcmpl-fake",
-                "object": "chat.completion",
-                "model": body["model"],
-                "choices": [{ "index": 0, "message": { "role": "assistant", "content": reply.text }, "finish_reason": "stop" }],
-            }),
-        ),
-        Err(error) => (503, json!({ "error": { "message": error.to_string() } })),
-    }
 }
 
 fn add_rules(shared: &Shared, body: Value) -> Value {
