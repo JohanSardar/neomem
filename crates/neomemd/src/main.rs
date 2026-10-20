@@ -53,7 +53,7 @@ fn run() -> anyhow::Result<()> {
 
 fn open_engine(home: &Home, config: &DaemonConfig, clock: Arc<DaemonClock>) -> anyhow::Result<Engine> {
     let secrets = Secrets::load(&home.secrets_path());
-    let models = ModelHost::new(config.models.clone(), secrets, home.models_dir());
+    let models = ModelHost::new(config.models.clone(), secrets, home.models_dir()).with_clock(clock.clone());
     let parts = EngineParts {
         models: Arc::new(models),
         home: home.root().to_path_buf(),

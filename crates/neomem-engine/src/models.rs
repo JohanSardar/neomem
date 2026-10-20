@@ -50,6 +50,7 @@ impl Engine {
     }
 
     pub(crate) fn test_model(&self, probe: ModelProbe<'_>) -> Response {
+        self.models.record_read();
         let started = Instant::now();
         let outcome = match probe.role {
             ModelRole::Embedder => self.test_embedder(probe.inputs),

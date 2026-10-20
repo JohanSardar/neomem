@@ -1,16 +1,20 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicI64, Ordering};
 use std::sync::{Arc, Mutex, PoisonError};
+use std::time::Duration;
 
 use neomem_core::{
-    Embedder, Judge, JudgeRole, Llm, LlmRole, ModelError, ModelRole, ModelRoles, RoleAssignment, Source,
+    Clock, Embedder, EpochMs, Judge, JudgeRole, Llm, LlmRole, ModelError, ModelRole, ModelRoles,
+    RoleAssignment, Source,
 };
 
 use crate::config::{ModelsConfig, ProviderConfig, ProviderKind, RoleConfig};
 use crate::fallback_judge::FallbackJudge;
 use crate::jev::{self, JevJudge};
-use crate::llama_embedder::LlamaEmbedder;
+use crate::lazy_embedder::LazyEmbedder;
 use crate::llama_reranker::LazyReranker;
+use crate::local_slot::WallClock;
 use crate::openai_embeddings::OpenAiEmbedder;
 use crate::query_cache::{QUERY_CACHE_ENTRIES, QueryCache};
 use crate::{Secrets, duration};
@@ -23,6 +27,8 @@ const LLAMA_CPP: &str = "llama.cpp";
 #[derive(Debug)]
 pub struct ModelHost {
     config: ModelsConfig,
+    clock: Arc<dyn Clock>,
+    last_read: Arc<AtomicI64>,
     secrets: Secrets,
     models_dir: PathBuf,
     ready: Mutex<ReadyModels>,
@@ -32,14 +38,23 @@ pub struct ModelHost {
 #[derive(Debug, Default)]
 struct ReadyModels {
     embedder: Option<Arc<dyn Embedder>>,
+    local_embedder: Option<Arc<LazyEmbedder>>,
     judges: HashMap<JudgeRole, Arc<dyn Judge>>,
     llms: HashMap<(LlmRole, Option<String>), Arc<dyn Llm>>,
     rerankers: HashMap<PathBuf, Arc<LazyReranker>>,
 }
 
 impl ReadyModels {
-    fn reranker(&mut self, path: PathBuf) -> Arc<dyn Judge> {
-        let shared = self.rerankers.entry(path.clone()).or_insert_with(|| Arc::new(LazyReranker::at(path)));
+    fn reranker(
+        &mut self,
+        path: PathBuf,
+        clock: Arc<dyn Clock>,
+        last_read: Arc<AtomicI64>,
+    ) -> Arc<dyn Judge> {
+        let shared = self
+            .rerankers
+            .entry(path.clone())
+            .or_insert_with(|| Arc::new(LazyReranker::with_activity(path, clock, last_read)));
         Arc::clone(shared) as Arc<dyn Judge>
     }
 }
@@ -48,11 +63,18 @@ impl ModelHost {
     pub fn new(config: ModelsConfig, secrets: Secrets, models_dir: PathBuf) -> Self {
         Self {
             config,
+            clock: Arc::new(WallClock),
+            last_read: Arc::new(AtomicI64::new(i64::MIN)),
             secrets,
             models_dir,
             ready: Mutex::new(ReadyModels::default()),
             accounts: sign_in::Accounts::default(),
         }
+    }
+
+    pub fn with_clock(mut self, clock: Arc<dyn Clock>) -> Self {
+        self.clock = clock;
+        self
     }
 
     pub fn models_dir(&self) -> &PathBuf {
@@ -99,16 +121,13 @@ impl ModelHost {
         configured.map_or_else(|| "not configured".to_owned(), describe_role_config)
     }
 
-    fn build_embedder(&self) -> Result<Arc<dyn Embedder>, ModelError> {
+    fn build_remote_embedder(&self) -> Result<Arc<dyn Embedder>, ModelError> {
         let role = self
             .config
             .models
             .embedder
             .as_ref()
             .ok_or_else(|| ModelError::NotConfigured("embedder".into()))?;
-        if let Some(path) = self.local_model_path(role, "embedder")? {
-            return Ok(Arc::new(LlamaEmbedder::open(&path)?));
-        }
         let provider = self.provider(role, "embedder")?;
         match provider.kind {
             ProviderKind::Openai => {
@@ -135,14 +154,17 @@ impl ModelHost {
         }
         .ok_or_else(|| ModelError::NotConfigured(format!("{role_name:?}")))?;
         if let Some(path) = self.local_model_path(role, "judge")? {
-            return Ok(ready.reranker(path));
+            return Ok(ready.reranker(path, Arc::clone(&self.clock), Arc::clone(&self.last_read)));
         }
         let primary = self.build_remote_judge(role);
         let Some(fallback) = role.fallback.as_deref() else { return primary };
         let path = self.local_model_path(fallback, "judge fallback")?.ok_or_else(|| {
             ModelError::NotConfigured("judge fallback: only a llama.cpp reranker can be the fallback".into())
         })?;
-        Ok(Arc::new(FallbackJudge::new(primary, ready.reranker(path))))
+        Ok(Arc::new(FallbackJudge::new(
+            primary,
+            ready.reranker(path, Arc::clone(&self.clock), Arc::clone(&self.last_read)),
+        )))
     }
 
     fn build_remote_judge(&self, role: &RoleConfig) -> Result<Arc<dyn Judge>, ModelError> {
@@ -165,13 +187,48 @@ impl ModelHost {
 }
 
 impl ModelRoles for ModelHost {
+    fn record_read(&self) {
+        self.last_read.store(self.clock.now().as_millis(), Ordering::SeqCst);
+    }
+
+    fn maintain(&self, now: EpochMs) {
+        let timeout = self
+            .config
+            .models
+            .idle_unload
+            .as_deref()
+            .and_then(duration::parse)
+            .unwrap_or(Duration::from_mins(15));
+        let ready = self.ready.lock().unwrap_or_else(PoisonError::into_inner);
+        if let Some(embedder) = &ready.local_embedder {
+            embedder.maintain(now, timeout);
+        }
+        for reranker in ready.rerankers.values() {
+            reranker.maintain(now, timeout);
+        }
+    }
+
     fn embedder(&self) -> Result<Arc<dyn Embedder>, ModelError> {
         let mut ready = self.ready.lock().unwrap_or_else(PoisonError::into_inner);
         if let Some(embedder) = &ready.embedder {
             return Ok(Arc::clone(embedder));
         }
-        let embedder: Arc<dyn Embedder> =
-            Arc::new(QueryCache::around(self.build_embedder()?, QUERY_CACHE_ENTRIES));
+        let local_path = self
+            .config
+            .models
+            .embedder
+            .as_ref()
+            .map(|role| self.local_model_path(role, "embedder"))
+            .transpose()?
+            .flatten();
+        let embedder: Arc<dyn Embedder> = if let Some(path) = local_path {
+            let local =
+                Arc::new(LazyEmbedder::at(path, Arc::clone(&self.clock), Arc::clone(&self.last_read))?);
+            ready.local_embedder = Some(Arc::clone(&local));
+            local
+        } else {
+            Arc::new(QueryCache::around(self.build_remote_embedder()?, QUERY_CACHE_ENTRIES))
+        };
         ready.embedder = Some(Arc::clone(&embedder));
         Ok(embedder)
     }
@@ -201,7 +258,39 @@ impl ModelRoles for ModelHost {
     fn describe(&self) -> Vec<RoleAssignment> {
         ModelRole::ALL
             .iter()
-            .map(|role| RoleAssignment { role: *role, assignment: self.describe_role(*role) })
+            .map(|role| RoleAssignment {
+                role: *role,
+                assignment: {
+                    let ready = self.ready.lock().unwrap_or_else(PoisonError::into_inner);
+                    let loaded = match role {
+                        ModelRole::Embedder => self
+                            .config
+                            .models
+                            .embedder
+                            .as_ref()
+                            .filter(|role| role.runtime.as_deref() == Some(LLAMA_CPP))
+                            .map(|_| ready.local_embedder.as_ref().is_some_and(|local| local.is_loaded())),
+                        ModelRole::Judge | ModelRole::Checker => match role {
+                            ModelRole::Checker => self.config.models.checker.as_ref(),
+                            _ => self.config.models.judge.as_ref(),
+                        }
+                        .and_then(|configured| {
+                            configured.file.as_ref().or_else(|| {
+                                configured.fallback.as_ref().and_then(|fallback| fallback.file.as_ref())
+                            })
+                        })
+                        .map(|file| {
+                            ready
+                                .rerankers
+                                .get(&self.models_dir.join(file))
+                                .is_some_and(|local| local.is_loaded())
+                        }),
+                        _ => None,
+                    };
+                    let state = loaded.map_or("", |loaded| if loaded { "loaded " } else { "unloaded " });
+                    format!("{state}{}", self.describe_role(*role))
+                },
+            })
             .collect()
     }
 
