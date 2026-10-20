@@ -1,0 +1,15 @@
+[package]
+name = "neomem-engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+neomem-core.workspace = true
+neomem-proto.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[lints]
+workspace = true
