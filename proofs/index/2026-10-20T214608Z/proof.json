@@ -2,9 +2,9 @@
   "feature": "index",
   "scenario": "index",
   "passed": true,
-  "started_at": "2026-10-20T212206Z",
-  "duration_ms": 745,
-  "code_version": "7819e28cbfb3-dirty",
+  "started_at": "2026-10-20T214608Z",
+  "duration_ms": 683,
+  "code_version": "ce054a6dba6f-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
@@ -26,7 +26,7 @@
     {
       "claim": "neomem rebuild re-creates index.db from the files with identical rows",
       "passed": true,
-      "detail": "19 rows before, 19 after; {\"reply\":\"rebuilt\",\"body\":{\"index\":{\"facts\":3,\"entities\":2,\"links\":6,\"names\":3,\"vectors\":5,\"model\":\"openai:hash-256\"},\"unreadable_files\":0,\"took_ms\":15}}"
+      "detail": "19 rows before, 19 after; {\"reply\":\"rebuilt\",\"body\":{\"index\":{\"facts\":3,\"entities\":2,\"links\":6,\"names\":3,\"vectors\":5,\"model\":\"openai:hash-256\"},\"unreadable_files\":0,\"took_ms\":14}}"
     },
     {
       "claim": "a restart loads the index and its vectors from index.db without embedding the memories again",
