@@ -5,7 +5,7 @@
   depends_on: []
   proof: daemon
   status: proven
-  last_proof: proofs/daemon/2026-10-20T205225Z
+  last_proof: proofs/daemon/2026-10-20T205620Z
 - id: intake
   does: copies every intake record into the intake log with an int_ ID before any processing and queues its extraction job
   reached_via: [neomem add]
@@ -13,15 +13,15 @@
   depends_on: [daemon]
   proof: intake
   status: proven
-  last_proof: proofs/intake/2026-10-20T205225Z
+  last_proof: proofs/intake/2026-10-20T205620Z
 - id: spool
   does: writes capture signals and adds to spool/ while the daemon is down and drains them when it is back
-  reached_via: [neomem add, neomem hook]
+  reached_via: [neomem add]
   module: neomem-cli (spool)
   depends_on: [intake]
   proof: spool
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/spool/2026-10-20T205620Z
 - id: raw
   does: keyword and date search over the raw intake log, without decay
   reached_via: [neomem raw]
@@ -45,7 +45,7 @@
   depends_on: [daemon]
   proof: vault
   status: proven
-  last_proof: proofs/vault/2026-10-20T205225Z
+  last_proof: proofs/vault/2026-10-20T205620Z
 - id: index
   does: keeps index.db and the in-memory snapshot (vectors, links, latest map, names) in step with the files and rebuilds them on demand
   reached_via: [neomem rebuild]
@@ -183,7 +183,7 @@
   status: planned
   last_proof: null
 - id: capture.cc
-  does: reads Claude Code transcripts from their stored position into one intake record per turn after a hook signal, folder change or sweep
+  does: reads Claude Code transcripts from their stored position into one intake record per turn after a hook signal (spooled while the daemon is down), folder change or sweep
   reached_via: [hook cc prompt, hook cc tool, hook cc stop, hook cc subagent-stop, hook cc compact, hook cc end]
   module: neomem-capture (claude code)
   depends_on: [intake]

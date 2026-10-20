@@ -4,6 +4,7 @@ mod frame;
 mod home;
 mod request;
 mod response;
+pub mod spool;
 
 pub use client::{CallError, Client};
 pub use envelope::{Envelope, IncomingEnvelope, PROTOCOL_VERSION};
