@@ -68,8 +68,15 @@ pub enum ModelError {
     InvalidOutput(String),
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Purpose {
+    Query,
+    Document,
+}
+
 pub trait Embedder: Send + Sync + Debug {
-    fn embed(&self, texts: &[&str]) -> Result<Vec<Vector>, ModelError>;
+    fn embed(&self, texts: &[&str], purpose: Purpose) -> Result<Vec<Vector>, ModelError>;
     fn model_id(&self) -> ModelId;
     fn dims(&self) -> usize;
 }

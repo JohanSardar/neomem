@@ -1,4 +1,4 @@
-use neomem_core::{Choice, Embedder, Judge};
+use neomem_core::{Choice, Embedder, Judge, Purpose};
 
 const RELATIONS: &[Choice<'static>] = &[
     Choice { label: "same", meaning: "says the same thing as the existing fact" },
@@ -8,7 +8,7 @@ const RELATIONS: &[Choice<'static>] = &[
 
 pub fn embedder_contract(embedder: &dyn Embedder) {
     let texts = ["Edge ships on November 1", "Maya is my sister", "Edge ships on November 1"];
-    let vectors = embedder.embed(&texts).expect("the embedder answers");
+    let vectors = embedder.embed(&texts, Purpose::Document).expect("the embedder answers");
     assert_eq!(vectors.len(), texts.len(), "one vector per text");
     assert!(vectors.iter().all(|vector| vector.dims() == embedder.dims()), "every vector has dims()");
     for vector in &vectors {
@@ -16,7 +16,11 @@ pub fn embedder_contract(embedder: &dyn Embedder) {
         assert!((length - 1.0).abs() < 1e-3, "vectors are unit length, got {length}");
     }
     assert!(vectors[0].cosine(&vectors[2]) > 0.999, "the same text embeds the same");
-    assert_eq!(embedder.embed(&[]).expect("empty input answers"), Vec::new(), "no texts, no vectors");
+    assert_eq!(
+        embedder.embed(&[], Purpose::Query).expect("empty input answers"),
+        Vec::new(),
+        "no texts, no vectors"
+    );
     assert!(!embedder.model_id().as_str().is_empty(), "the model names itself");
 }
 
