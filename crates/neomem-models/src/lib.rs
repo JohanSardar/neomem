@@ -3,8 +3,11 @@ mod duration;
 mod host;
 mod http;
 mod jev;
+mod json_schema;
+mod llm;
 mod openai_embeddings;
 mod secrets;
+mod sse;
 
 pub use config::{ModelsConfig, ProviderConfig, ProviderKind, RoleConfig, RolesConfig};
 pub use duration::parse as parse_duration;
