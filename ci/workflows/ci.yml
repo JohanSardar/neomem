@@ -27,11 +27,13 @@ jobs:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
         with:
-          components: clippy
+          components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-nextest,cargo-deny
+      - name: format
+        run: cargo fmt --all --check
       - name: build
         run: cargo build --workspace --all-targets --locked
       - name: tests

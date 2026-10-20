@@ -16,8 +16,18 @@ pub fn rust_sources(root: &Path) -> Vec<PathBuf> {
         .iter()
         .map(|top| root.join(top))
         .flat_map(|top| WalkDir::new(top).into_iter().filter_map(Result::ok))
-        .filter(|entry| !entry.path().components().any(|part| part.as_os_str() == "target"))
-        .filter(|entry| entry.path().extension().is_some_and(|extension| extension == "rs"))
+        .filter(|entry| {
+            !entry
+                .path()
+                .components()
+                .any(|part| part.as_os_str() == "target")
+        })
+        .filter(|entry| {
+            entry
+                .path()
+                .extension()
+                .is_some_and(|extension| extension == "rs")
+        })
         .map(walkdir::DirEntry::into_path)
         .collect()
 }

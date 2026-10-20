@@ -18,7 +18,10 @@ pub fn run(selection: &Selection) -> anyhow::Result<bool> {
         eprintln!("prove: no features selected");
         return Ok(true);
     }
-    bail!("no proof scenarios exist yet for {} feature(s)", chosen.len())
+    bail!(
+        "no proof scenarios exist yet for {} feature(s)",
+        chosen.len()
+    )
 }
 
 fn choose<'graph>(

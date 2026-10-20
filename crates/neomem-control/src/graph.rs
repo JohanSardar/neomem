@@ -27,7 +27,10 @@ pub enum Status {
 
 impl Feature {
     pub fn crate_name(&self) -> &str {
-        self.module.split_whitespace().next().unwrap_or(&self.module)
+        self.module
+            .split_whitespace()
+            .next()
+            .unwrap_or(&self.module)
     }
 }
 
