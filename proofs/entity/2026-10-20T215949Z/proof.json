@@ -2,9 +2,15 @@
   "feature": "entity",
   "scenario": "entity",
   "passed": true,
+<<<<<<<< HEAD:proofs/entity/2026-10-20T215949Z/proof.json
   "started_at": "2026-10-20T215949Z",
   "duration_ms": 543,
   "code_version": "92ca9e663e99-dirty",
+========
+  "started_at": "2026-10-20T220159Z",
+  "duration_ms": 500,
+  "code_version": "2ef1d12eca0b",
+>>>>>>>> origin/main:proofs/entity/2026-10-20T220159Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
@@ -46,7 +52,11 @@
     {
       "claim": "neomem show returns the memory's file exactly as it is on disk",
       "passed": true,
+<<<<<<<< HEAD:proofs/entity/2026-10-20T215949Z/proof.json
       "detail": "/tmp/neomemctl-L6yHTc/facts/2026/10/fct_01M59NY2N09AC5V7E9Z0C1HT0K_edge-launch-event.md"
+========
+      "detail": "/tmp/neomemctl-wFjXfI/facts/2026/10/fct_01M59NY2N09AC5V7E9Z0C1HT0K_edge-launch-event.md"
+>>>>>>>> origin/main:proofs/entity/2026-10-20T220159Z/proof.json
     },
     {
       "claim": "it lists the fact's sources with the logged intake records",

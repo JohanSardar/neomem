@@ -5,6 +5,7 @@ pub mod fake_models;
 pub mod graph;
 pub mod isolated;
 pub mod map;
+pub mod model_files;
 pub mod proof;
 pub mod prove;
 pub mod repo;

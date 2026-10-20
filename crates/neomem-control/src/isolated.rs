@@ -8,60 +8,127 @@ use std::time::{Duration, Instant};
 use anyhow::{Context, bail};
 use std::os::unix::fs::PermissionsExt;
 
+use neomem_core::env_file_entries;
 use neomem_proto::{Client, Envelope, Home, Request, Response};
 use neomem_testkit::{FakeRules, RecordedCall};
 
 use crate::binaries::Binaries;
-use crate::fake_models;
 use crate::proof::{Exchange, ProofRun};
+use crate::{fake_models, model_files, repo};
 
 const START_WAIT: Duration = Duration::from_secs(10);
 const CALL_TIMEOUT: Duration = Duration::from_secs(60);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
+pub enum Models {
+    Fake,
+    Real,
+}
+
+const LIVE_KEYS: &[&str] = &["JEV_API_KEY"];
+
+#[derive(Default)]
+struct LiveKeys(Vec<(String, String)>);
+
+impl std::fmt::Debug for LiveKeys {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let names: Vec<&str> = self.0.iter().map(|(name, _)| name.as_str()).collect();
+        formatter.debug_tuple("LiveKeys").field(&names).finish()
+    }
+}
+
+impl LiveKeys {
+    fn from_the_users_secrets() -> Self {
+        let text = std::env::var_os("HOME")
+            .and_then(|user_home| fs::read_to_string(Path::new(&user_home).join(".neomem/secrets.env")).ok())
+            .unwrap_or_default();
+        let mut from_file = env_file_entries(&text);
+        let keys = LIVE_KEYS
+            .iter()
+            .filter_map(|name| {
+                let value = std::env::var(name).ok().or_else(|| from_file.remove(*name))?;
+                (!value.is_empty()).then(|| ((*name).to_owned(), value))
+            })
+            .collect();
+        Self(keys)
+    }
+
+    fn has(&self, name: &str) -> bool {
+        self.0.iter().any(|(present, _)| present == name)
+    }
+}
 
 #[derive(Debug)]
 pub struct IsolatedNeomem {
     home: Home,
     binaries: Binaries,
+    models: Models,
     daemon: Option<Child>,
     fake_models: Option<Child>,
     keep_running: bool,
     temporary_dir: Option<tempfile::TempDir>,
     environment: Vec<(String, PathBuf)>,
+    live_keys: LiveKeys,
 }
 
 impl IsolatedNeomem {
     pub fn start(binaries: &Binaries) -> anyhow::Result<Self> {
-        let mut isolated = Self::prepared(binaries)?;
+        Self::start_with(binaries, Models::Fake)
+    }
+
+    pub fn start_with(binaries: &Binaries, models: Models) -> anyhow::Result<Self> {
+        let mut isolated = Self::prepared_with(binaries, models)?;
         isolated.start_daemon()?;
         Ok(isolated)
     }
 
     pub fn start_at(root: &Path, binaries: &Binaries) -> anyhow::Result<Self> {
-        let mut isolated = Self::prepare(root, binaries)?;
+        Self::start_at_with(root, binaries, Models::Fake)
+    }
+
+    pub fn start_at_with(root: &Path, binaries: &Binaries, models: Models) -> anyhow::Result<Self> {
+        let mut isolated = Self::prepare(root, binaries, models)?;
         isolated.start_daemon()?;
         Ok(isolated)
     }
 
     pub fn prepared(binaries: &Binaries) -> anyhow::Result<Self> {
+        Self::prepared_with(binaries, Models::Fake)
+    }
+
+    pub fn prepared_with(binaries: &Binaries, models: Models) -> anyhow::Result<Self> {
         let temporary = tempfile::Builder::new().prefix("neomemctl-").tempdir()?;
-        let mut isolated = Self::prepare(temporary.path(), binaries)?;
+        let mut isolated = Self::prepare(temporary.path(), binaries, models)?;
         isolated.temporary_dir = Some(temporary);
         Ok(isolated)
     }
 
-    fn prepare(root: &Path, binaries: &Binaries) -> anyhow::Result<Self> {
+    fn prepare(root: &Path, binaries: &Binaries, models: Models) -> anyhow::Result<Self> {
         refuse_the_real_home(root)?;
         let home = Home::at(root);
         fs::create_dir_all(home.run_dir())?;
+        let shared_models = repo::shared_models_dir(&repo::root()?);
+        if models == Models::Real {
+            model_files::ensure(&shared_models, &[model_files::EMBEDDINGGEMMA, model_files::QWEN3_RERANKER])?;
+        }
+        if shared_models.is_dir() && !home.models_dir().exists() {
+            std::os::unix::fs::symlink(&shared_models, home.models_dir())?;
+        }
         let fake_models = start_fake_models(&home)?;
+        let live_keys = match models {
+            Models::Fake => LiveKeys::default(),
+            Models::Real => LiveKeys::from_the_users_secrets(),
+        };
         let isolated = Self {
             home,
             binaries: binaries.clone(),
+            models,
             daemon: None,
             fake_models: Some(fake_models),
             keep_running: false,
             temporary_dir: None,
             environment: Vec::new(),
+            live_keys,
         };
         if !isolated.home.config_path().exists() {
             isolated.plan_with("fake")?;
@@ -72,10 +139,18 @@ impl IsolatedNeomem {
     }
 
     pub fn plan_with(&self, planner_provider: &str) -> anyhow::Result<()> {
-        let config =
-            fake_models::config_toml(&self.fake_models_address()?, &self.binaries.fake_llm, planner_provider);
+        let config = fake_models::config_toml(
+            &self.fake_models_address()?,
+            &self.binaries.fake_llm,
+            planner_provider,
+            self.models,
+        );
         fs::write(self.home.config_path(), config)?;
         Ok(())
+    }
+
+    pub fn has_live_key(&self, name: &str) -> bool {
+        self.live_keys.has(name)
     }
 
     pub fn set_env(&mut self, name: &str, value: &Path) {
@@ -107,6 +182,7 @@ impl IsolatedNeomem {
         let child = Command::new(&self.binaries.neomemd)
             .env("NEOMEM_HOME", self.home.root())
             .envs(self.environment.iter().map(|(name, value)| (name, value)))
+            .envs(self.live_keys.0.iter().map(|(name, value)| (name, value)))
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(log)

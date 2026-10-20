@@ -15,22 +15,32 @@ const YES_NO: &[Choice<'static>] = &[
 
 const STRUCTURED_TEST_SCHEMA: &str = r#"{"type":"object","properties":{"answer":{"type":"string"}},"required":["answer"],"additionalProperties":false}"#;
 
+const EMBEDDER_PROBE: &str = "neomem model test";
+
+const HELPS_NOW: &str = "Would this memory help with what is happening right now?";
+
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct ModelProbe<'request> {
     pub role: ModelRole,
     pub source: Option<&'request Source>,
     pub structured: bool,
+    pub inputs: &'request [String],
 }
 
 struct ProbeAnswer {
     model: String,
     answer: String,
     first_text_ms: Option<f64>,
+    scores: Vec<f32>,
 }
 
 impl ProbeAnswer {
     fn plain(model: String, answer: String) -> Self {
-        Self { model, answer, first_text_ms: None }
+        Self { model, answer, first_text_ms: None, scores: Vec::new() }
+    }
+
+    fn scored(model: String, answer: String, scores: Vec<f32>) -> Self {
+        Self { model, answer, first_text_ms: None, scores }
     }
 }
 
@@ -42,9 +52,9 @@ impl Engine {
     pub(crate) fn test_model(&self, probe: ModelProbe<'_>) -> Response {
         let started = Instant::now();
         let outcome = match probe.role {
-            ModelRole::Embedder => self.test_embedder(),
-            ModelRole::Judge => self.test_judge(JudgeRole::Judge),
-            ModelRole::Checker => self.test_judge(JudgeRole::Checker),
+            ModelRole::Embedder => self.test_embedder(probe.inputs),
+            ModelRole::Judge => self.test_judge(JudgeRole::Judge, probe.inputs),
+            ModelRole::Checker => self.test_judge(JudgeRole::Checker, probe.inputs),
             ModelRole::Planner => self.test_llm(LlmRole::Planner, probe, started),
             ModelRole::Extractor => self.test_llm(LlmRole::Extractor, probe, started),
             ModelRole::Consolidator => self.test_llm(LlmRole::Consolidator, probe, started),
@@ -57,6 +67,7 @@ impl Engine {
                 latency_ms,
                 first_text_ms: answer.first_text_ms,
                 answer: answer.answer,
+                scores: answer.scores,
             }),
             Err(error) => failed(FailureKind::Unavailable, format!("{}: {error}", probe.role.name())),
         }
@@ -76,15 +87,33 @@ impl Engine {
         }
     }
 
-    fn test_embedder(&self) -> Result<ProbeAnswer, ModelError> {
+    fn test_embedder(&self, inputs: &[String]) -> Result<ProbeAnswer, ModelError> {
         let embedder = self.models.embedder()?;
-        let vectors = embedder.embed(&["neomem model test"], Purpose::Query)?;
-        let dims = vectors.first().map_or(0, neomem_core::Vector::dims);
-        Ok(ProbeAnswer::plain(embedder.model_id().to_string(), format!("{dims} dimensions")))
+        let (query, documents) =
+            inputs.split_first().map_or((EMBEDDER_PROBE, &[][..]), |(first, rest)| (first.as_str(), rest));
+        let query_vector = embedder
+            .embed(&[query], Purpose::Query)?
+            .into_iter()
+            .next()
+            .ok_or_else(|| ModelError::InvalidOutput("the embedder returned no vector".to_owned()))?;
+        let documents: Vec<&str> = documents.iter().map(String::as_str).collect();
+        let scores = embedder
+            .embed(&documents, Purpose::Document)?
+            .iter()
+            .map(|vector| vector.cosine(&query_vector))
+            .collect();
+        let answer = format!("{} dimensions", query_vector.dims());
+        Ok(ProbeAnswer::scored(embedder.model_id().to_string(), answer, scores))
     }
 
-    fn test_judge(&self, role: JudgeRole) -> Result<ProbeAnswer, ModelError> {
+    fn test_judge(&self, role: JudgeRole, inputs: &[String]) -> Result<ProbeAnswer, ModelError> {
         let judge = self.models.judge(role)?;
+        if let Some((context, candidates)) = inputs.split_first() {
+            let candidates: Vec<&str> = candidates.iter().map(String::as_str).collect();
+            let scores = judge.score(context, HELPS_NOW, &candidates)?;
+            let answer = format!("{} candidates scored", scores.len());
+            return Ok(ProbeAnswer::scored(judge.model_id().to_string(), answer, scores));
+        }
         let decision = judge.decide("The user asks for a test.", "Is this a test request?", YES_NO)?;
         let label = YES_NO.get(decision.choice()).map_or("", |option| option.label);
         Ok(ProbeAnswer::plain(
@@ -111,6 +140,7 @@ impl Engine {
             model: llm.model_id().to_string(),
             answer: reply.text.trim().to_owned(),
             first_text_ms,
+            scores: Vec::new(),
         })
     }
 }

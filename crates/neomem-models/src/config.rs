@@ -30,6 +30,8 @@ pub struct ProviderConfig {
     pub model: Option<String>,
     pub api: Option<String>,
     pub cmd: Option<Vec<String>>,
+    pub issuer: Option<String>,
+    pub callback_port: Option<u16>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]

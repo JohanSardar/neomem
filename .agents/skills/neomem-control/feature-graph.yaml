@@ -5,7 +5,7 @@
   depends_on: []
   proof: daemon
   status: proven
-  last_proof: proofs/daemon/2026-10-20T215938Z
+  last_proof: proofs/daemon/2026-10-20T220146Z
 - id: intake
   does: copies every intake record into the intake log with an int_ ID before any processing and queues its extraction job
   reached_via: [neomem add]
@@ -13,7 +13,7 @@
   depends_on: [daemon]
   proof: intake
   status: proven
-  last_proof: proofs/intake/2026-10-20T215938Z
+  last_proof: proofs/intake/2026-10-20T220146Z
 - id: spool
   does: writes capture signals and adds to spool/ while the daemon is down and drains them when it is back
   reached_via: [neomem add]
@@ -21,7 +21,7 @@
   depends_on: [intake]
   proof: spool
   status: proven
-  last_proof: proofs/spool/2026-10-20T215938Z
+  last_proof: proofs/spool/2026-10-20T220146Z
 - id: raw
   does: keyword and date search over the raw intake log, without decay
   reached_via: [neomem raw]
@@ -29,7 +29,7 @@
   depends_on: [intake]
   proof: raw
   status: proven
-  last_proof: proofs/raw/2026-10-20T215938Z
+  last_proof: proofs/raw/2026-10-20T220146Z
 - id: correct
   does: marks an intake record as logged incorrectly, hides facts drawn only from it and queues them for re-checking
   reached_via: [neomem correct]
@@ -37,7 +37,7 @@
   depends_on: [intake]
   proof: correct
   status: proven
-  last_proof: proofs/correct/2026-10-20T215940Z
+  last_proof: proofs/correct/2026-10-20T220147Z
 - id: vault
   does: keeps every fact and entity as a Markdown file with a YAML header, written atomically and committed to a local git repository with no remote
   reached_via: [daemon writer, daemon vault watcher]
@@ -45,7 +45,7 @@
   depends_on: [daemon]
   proof: vault
   status: proven
-  last_proof: proofs/vault/2026-10-20T215940Z
+  last_proof: proofs/vault/2026-10-20T220147Z
 - id: index
   does: keeps index.db and the in-memory snapshot (vectors, links, latest map, names) in step with the files and rebuilds them on demand
   reached_via: [neomem rebuild]
@@ -53,15 +53,15 @@
   depends_on: [vault]
   proof: index
   status: proven
-  last_proof: proofs/index/2026-10-20T215948Z
+  last_proof: proofs/index/2026-10-20T220154Z
 - id: drift
   does: the nightly drift check finds differences between the files and index.db and repairs them
   reached_via: [daemon nightly drift check]
   module: neomem-engine (drift)
   depends_on: [index]
   proof: drift
-  status: proven
-  last_proof: proofs/drift/2026-10-20T215948Z
+  status: planned
+  last_proof: null
 - id: models.embed
   does: embeds text locally with llama.cpp (Vulkan, CUDA, CPU or Metal) or any OpenAI-compatible embeddings endpoint, with a small query cache
   reached_via: [neomem models, neomem models test]
@@ -84,8 +84,9 @@
   module: neomem-models (llm)
   depends_on: [daemon]
   proof: models-llm
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/models.llm/2026-10-20T220155Z
+  blocked: "needs-user: live provider checks need the user: neomem login chatgpt needs a browser sign-in, openai and anthropic need API keys (none on this machine), and codex needs Codex's own login, which neomem must not use; every kind is proven against fakes"
 - id: models.swap
   does: swapping the embedder re-embeds every memory into a second vector set in the background and switches search over in one step
   reached_via: [neomem models use]
@@ -157,7 +158,7 @@
   depends_on: [index]
   proof: entity
   status: proven
-  last_proof: proofs/entity/2026-10-20T215949Z
+  last_proof: proofs/entity/2026-10-20T220159Z
 - id: decay
   does: ranks facts by ACT-R activation over evidence events, squashed into 0.3 to 1.5, with per-kind rates and an explicit useful signal
   reached_via: [neomem useful, neomem search]

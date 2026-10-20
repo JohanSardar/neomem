@@ -2,16 +2,26 @@
   "feature": "intake",
   "scenario": "intake",
   "passed": true,
+<<<<<<<< HEAD:proofs/intake/2026-10-20T215938Z/proof.json
   "started_at": "2026-10-20T215938Z",
   "duration_ms": 170,
   "code_version": "92ca9e663e99-dirty",
+========
+  "started_at": "2026-10-20T220146Z",
+  "duration_ms": 148,
+  "code_version": "2ef1d12eca0b",
+>>>>>>>> origin/main:proofs/intake/2026-10-20T220146Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "neomem add returns an int_ ID",
       "passed": true,
+<<<<<<<< HEAD:proofs/intake/2026-10-20T215938Z/proof.json
       "detail": "int_01M5DN7GEH8WW97BWT4WW4YH5M"
+========
+      "detail": "int_01M5DNBDMDE15VP6W5DDNM0N04"
+>>>>>>>> origin/main:proofs/intake/2026-10-20T220146Z/proof.json
     },
     {
       "claim": "the intake log holds the record exactly as it was sent",
@@ -26,7 +36,11 @@
     {
       "claim": "the same record sent twice is logged twice with two IDs (no dedupe keys)",
       "passed": true,
+<<<<<<<< HEAD:proofs/intake/2026-10-20T215938Z/proof.json
       "detail": "int_01M5DN7GEP8ZH7D912FA9JXEN3 int_01M5DN7GER1094DHV8RDA099FB, 1 -> 3"
+========
+      "detail": "int_01M5DNBDMHC039TTAGA5EHB0EK int_01M5DNBDMK9S28GNE5KWGAB4ZB, 1 -> 3"
+>>>>>>>> origin/main:proofs/intake/2026-10-20T220146Z/proof.json
     },
     {
       "claim": "empty content, a backwards span and a malformed source are refused and nothing is logged",
@@ -46,7 +60,11 @@
     {
       "claim": "neomem add returns well inside the 50 ms capture budget at p95",
       "passed": true,
+<<<<<<<< HEAD:proofs/intake/2026-10-20T215938Z/proof.json
       "detail": "p50 2.495 ms, p95 2.810 ms, max 2.820 ms"
+========
+      "detail": "p50 1.696 ms, p95 2.354 ms, max 2.367 ms"
+>>>>>>>> origin/main:proofs/intake/2026-10-20T220146Z/proof.json
     },
     {
       "claim": "every logged record is still there after a restart",
