@@ -97,12 +97,12 @@
   last_proof: null
 - id: models.idle
   does: unloads local models after 15 minutes without a search or recall and reloads them on the next use
-  reached_via: [daemon model host]
+  reached_via: [neomem models, neomem models test]
   module: neomem-models (host)
   depends_on: [models.embed]
   proof: models-idle
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/models.idle/2026-10-20T231527Z
 - id: extract
   does: the worker batches intake (5 minutes of session silence, compaction or session end), extracts facts and entities with one model call and writes them through the writer
   reached_via: [daemon worker, neomem reextract]

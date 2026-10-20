@@ -54,7 +54,7 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     let warm = roster(&neomem, proof)?;
     proof.claim(
         "the default idle timeout exceeds fourteen minutes",
-        !warm.contains("embedder:unloaded"),
+        warm.contains("embedder:loaded") && warm.contains("judge:loaded"),
         warm,
     );
     neomem.set_clock(now.plus_millis(16 * 60_000))?;

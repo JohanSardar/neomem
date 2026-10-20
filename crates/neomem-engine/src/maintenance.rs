@@ -30,6 +30,7 @@ impl Engine {
     }
 
     fn maintain(&self) {
+        self.models.maintain(self.clock.now());
         match self.vault.commit_pending(self.clock.now(), self.commit_policy) {
             Ok(Some(changes)) => tracing::info!("committed {changes} vault changes"),
             Ok(None) => {}

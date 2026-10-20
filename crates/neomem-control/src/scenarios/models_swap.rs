@@ -64,7 +64,7 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn vectors(neomem: &IsolatedNeomem) -> anyhow::Result<Vec<(String, usize)>> {
+fn vectors(neomem: &IsolatedNeomem) -> anyhow::Result<Vec<(String, i64)>> {
     let connection =
         Connection::open_with_flags(neomem.home().index_db_path(), OpenFlags::SQLITE_OPEN_READ_ONLY)?;
     let mut statement =
