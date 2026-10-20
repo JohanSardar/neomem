@@ -1,6 +1,8 @@
 mod args;
 mod connection;
+mod intake_record;
 mod render;
+mod time_argument;
 
 use std::process::ExitCode;
 
@@ -25,6 +27,7 @@ fn run(cli: &Cli) -> anyhow::Result<Response> {
     let home = Home::from_env().ok_or_else(|| anyhow::anyhow!("neither NEOMEM_HOME nor HOME is set"))?;
     let request = match &cli.command {
         Command::Status => Request::Status,
+        Command::Add(arguments) => Request::Add(intake_record::from_arguments(arguments)?),
     };
     DaemonConnection::open(&home)?.call(request)
 }
