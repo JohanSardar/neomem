@@ -55,6 +55,7 @@ fn open_engine(home: &Home, config: &DaemonConfig) -> anyhow::Result<Engine> {
         models: Arc::new(models),
         home: home.root().to_path_buf(),
         state_db: home.state_db_path(),
+        index_db: home.index_db_path(),
         commit_policy: config.vault.policy()?,
         clock: Arc::new(SystemClock),
         daemon_version: env!("CARGO_PKG_VERSION").to_owned(),
