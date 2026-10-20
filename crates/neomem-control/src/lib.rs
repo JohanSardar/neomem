@@ -1,3 +1,4 @@
+pub mod bench;
 pub mod binaries;
 pub mod changes;
 pub mod fake_models;
@@ -8,6 +9,7 @@ pub mod proof;
 pub mod prove;
 pub mod repo;
 pub mod scenarios;
+pub mod seed;
 pub mod session;
 pub mod surfaces;
 pub mod timing;

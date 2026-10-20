@@ -1,4 +1,6 @@
 mod clock;
+mod entity;
+mod fact;
 mod ids;
 mod intake;
 mod models;
@@ -8,6 +10,10 @@ mod time;
 mod ulid;
 
 pub use clock::Clock;
+pub use entity::{
+    Entity, EntityLink, EntityLinkKind, InvalidEntity, Label, NewEntity, Relation, StoredEntity,
+};
+pub use fact::{Durability, Fact, FactLink, FactLinkKind, Importance, InvalidFact, NewFact, StoredFact};
 pub use ids::{EntityId, FactId, IntakeId, InvalidId, MemoryId};
 pub use intake::{IntakeRecord, InvalidIntake, LoggedIntake, Source, Span};
 pub use models::{

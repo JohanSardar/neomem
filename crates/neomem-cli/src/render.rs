@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::process::ExitCode;
 
 use neomem_proto::{Response, StatusReport};
@@ -12,6 +13,15 @@ pub fn print(response: &Response, json: bool) -> ExitCode {
         Response::Failed(_) | Response::VersionMismatch { .. } => ExitCode::FAILURE,
         _ => ExitCode::SUCCESS,
     }
+}
+
+pub fn print_spooled(path: &Path, json: bool) -> ExitCode {
+    if json {
+        println!("{}", serde_json::json!({ "spooled": path }));
+    } else {
+        println!("spooled: neomemd is down; the request waits in {}", path.display());
+    }
+    ExitCode::SUCCESS
 }
 
 fn print_human(response: &Response) {

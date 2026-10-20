@@ -1,0 +1,29 @@
+{
+  "code_version": "1d92a4d23ceb-dirty",
+  "results": [
+    {
+      "name": "socket_round_trip",
+      "p50_ms": 0.012,
+      "p95_ms": 0.026,
+      "max_ms": 0.356,
+      "samples": 2000,
+      "budget_ms": 0.5
+    },
+    {
+      "name": "client_status_end_to_end",
+      "p50_ms": 1.249,
+      "p95_ms": 2.168,
+      "max_ms": 3.074,
+      "samples": 200,
+      "budget_ms": 5.0
+    },
+    {
+      "name": "client_add_end_to_end",
+      "p50_ms": 0.993,
+      "p95_ms": 1.077,
+      "max_ms": 1.348,
+      "samples": 200,
+      "budget_ms": 50.0
+    }
+  ]
+}

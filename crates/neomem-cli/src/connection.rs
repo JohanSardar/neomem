@@ -19,6 +19,10 @@ pub struct DaemonConnection {
 }
 
 impl DaemonConnection {
+    pub fn existing(home: &Home) -> anyhow::Result<Self> {
+        Ok(Self { home: home.clone(), client: Client::connect(home, REQUEST_TIMEOUT)? })
+    }
+
     pub fn open(home: &Home) -> anyhow::Result<Self> {
         let client = match Client::connect(home, REQUEST_TIMEOUT) {
             Ok(client) => client,

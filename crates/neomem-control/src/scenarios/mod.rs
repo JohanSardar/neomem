@@ -1,6 +1,8 @@
 mod daemon;
 mod intake;
 mod models_llm;
+mod spool;
+mod vault;
 
 use crate::binaries::Binaries;
 use crate::proof::ProofRun;
@@ -14,6 +16,8 @@ pub struct Scenario {
 pub const ALL: &[Scenario] = &[
     Scenario { name: "daemon", run: daemon::prove },
     Scenario { name: "intake", run: intake::prove },
+    Scenario { name: "vault", run: vault::prove },
+    Scenario { name: "spool", run: spool::prove },
     Scenario { name: "models-llm", run: models_llm::prove },
 ];
 

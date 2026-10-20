@@ -32,6 +32,9 @@ pub fn config_toml(address: &str, fake_llm: &Path, planner: &str) -> String {
 enabled = true
 port = 0
 
+[vault]
+commit_every = "1s"
+
 [providers]
 fake = {{ kind = "openai", base_url = "http://{address}/v1", key_env = "NEOMEM_FAKE_OPENAI_KEY" }}
 fake_responses = {{ kind = "openai", base_url = "http://{address}/v1", key_env = "NEOMEM_FAKE_OPENAI_KEY", api = "responses" }}

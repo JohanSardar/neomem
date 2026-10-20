@@ -9,6 +9,7 @@ publish.workspace = true
 neomem-core.workspace = true
 neomem-proto.workspace = true
 neomem-state.workspace = true
+neomem-vault.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
 

@@ -62,7 +62,7 @@ fn prove_one(
     Ok(bundle.passed)
 }
 
-fn code_version(root: &Path) -> String {
+pub fn code_version(root: &Path) -> String {
     let git = |arguments: &[&str]| {
         Command::new("git")
             .args(arguments)

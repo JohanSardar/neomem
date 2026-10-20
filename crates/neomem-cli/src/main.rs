@@ -8,8 +8,10 @@ mod time_argument;
 use std::process::ExitCode;
 
 use clap::Parser;
+use std::path::PathBuf;
+
 use neomem_core::Source;
-use neomem_proto::{Home, Request, Response};
+use neomem_proto::{Envelope, Home, Request, Response, spool};
 
 use crate::args::{Cli, Command, ModelsAction};
 use crate::connection::DaemonConnection;
@@ -17,7 +19,8 @@ use crate::connection::DaemonConnection;
 fn main() -> ExitCode {
     let cli = Cli::parse();
     match run(&cli) {
-        Ok(response) => render::print(&response, cli.json),
+        Ok(Outcome::Answered(response)) => render::print(&response, cli.json),
+        Ok(Outcome::Spooled(path)) => render::print_spooled(&path, cli.json),
         Err(error) => {
             eprintln!("neomem: {error:#}");
             ExitCode::FAILURE
@@ -25,7 +28,12 @@ fn main() -> ExitCode {
     }
 }
 
-fn run(cli: &Cli) -> anyhow::Result<Response> {
+enum Outcome {
+    Answered(Response),
+    Spooled(PathBuf),
+}
+
+fn run(cli: &Cli) -> anyhow::Result<Outcome> {
     let home = Home::from_env().ok_or_else(|| anyhow::anyhow!("neither NEOMEM_HOME nor HOME is set"))?;
     let request = match &cli.command {
         Command::Status => Request::Status,
@@ -38,7 +46,13 @@ fn run(cli: &Cli) -> anyhow::Result<Response> {
                 structured: *structured,
             },
         },
-        Command::Login(arguments) => return login::run(&home, arguments),
+        Command::Login(arguments) => return login::run(&home, arguments).map(Outcome::Answered),
     };
-    DaemonConnection::open(&home)?.call(request)
+    if request.waits_in_spool_when_the_daemon_is_down() {
+        return match DaemonConnection::existing(&home) {
+            Ok(connection) => connection.call(request).map(Outcome::Answered),
+            Err(_) => Ok(Outcome::Spooled(spool::spool(&home, &Envelope::current(request))?)),
+        };
+    }
+    DaemonConnection::open(&home)?.call(request).map(Outcome::Answered)
 }

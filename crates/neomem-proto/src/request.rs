@@ -22,3 +22,9 @@ pub enum Request {
         provider: String,
     },
 }
+
+impl Request {
+    pub fn waits_in_spool_when_the_daemon_is_down(&self) -> bool {
+        matches!(self, Self::Add(_))
+    }
+}
