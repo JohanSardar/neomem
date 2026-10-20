@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
 
+use neomem_core::env_file_entries;
+
 #[derive(Clone, Default)]
 pub struct Secrets {
     from_file: BTreeMap<String, String>,
@@ -16,14 +18,7 @@ impl std::fmt::Debug for Secrets {
 impl Secrets {
     pub fn load(path: &Path) -> Self {
         let text = fs::read_to_string(path).unwrap_or_default();
-        let from_file = text
-            .lines()
-            .map(str::trim)
-            .filter(|line| !line.is_empty() && !line.starts_with('#'))
-            .filter_map(|line| line.strip_prefix("export ").unwrap_or(line).split_once('='))
-            .map(|(name, value)| (name.trim().to_owned(), value.trim().trim_matches('"').to_owned()))
-            .collect();
-        Self { from_file }
+        Self { from_file: env_file_entries(&text) }
     }
 
     pub fn get(&self, name: &str) -> Option<String> {

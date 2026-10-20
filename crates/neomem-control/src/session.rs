@@ -5,22 +5,19 @@ use anyhow::Context;
 use neomem_proto::{Client, Home, Request};
 
 use crate::binaries::Binaries;
-use crate::isolated::{self, IsolatedNeomem};
+use crate::isolated::{self, IsolatedNeomem, Models};
 use crate::repo;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
-pub enum Models {
-    Fake,
-    Real,
-}
 
 pub fn up(models: Models, home: Option<&Path>) -> anyhow::Result<bool> {
     let root = repo::root()?;
     let binaries = Binaries::build_fresh(&root)?;
     let isolated = match home {
-        Some(home) => IsolatedNeomem::start_at(home, &binaries)?,
-        None => IsolatedNeomem::start(&binaries)?,
+        Some(home) => IsolatedNeomem::start_at_with(home, &binaries, models)?,
+        None => IsolatedNeomem::start_with(&binaries, models)?,
     };
+    if models == Models::Real && !isolated.has_live_key("JEV_API_KEY") {
+        println!("neomemctl: no JEV_API_KEY in ~/.neomem/secrets.env, so the judge has no live Jev");
+    }
     let kept = isolated.detach();
     remember_current_home(&root, &kept)?;
     println!("neomemctl: isolated neomem running with {models:?} models");

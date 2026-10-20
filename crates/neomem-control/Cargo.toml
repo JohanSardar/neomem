@@ -23,6 +23,7 @@ tempfile.workspace = true
 ureq.workspace = true
 serde.workspace = true
 serde-saphyr.workspace = true
+sha2.workspace = true
 
 [lints]
 workspace = true
