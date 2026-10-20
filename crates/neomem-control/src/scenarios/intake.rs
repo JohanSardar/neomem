@@ -164,7 +164,11 @@ fn secrets_never_reach_the_log(proof: &mut ProofRun, neomem: &IsolatedNeomem) ->
     let content = format!("Set OPENAI_API_KEY={secret} in the deploy env");
     let id = add(neomem, &[&content, "--source", "note"])?.ok_or_else(|| anyhow::anyhow!("add failed"))?;
     let record = logged(neomem, id)?.map(|logged| logged.record.content).unwrap_or_default();
-    proof.claim("an API key in the content is removed before it is logged", !record.contains(&secret), record);
+    proof.claim(
+        "an API key in the content is removed before it is logged",
+        !record.contains(&secret),
+        record,
+    );
     Ok(())
 }
 
