@@ -1,0 +1,192 @@
+<title>neomem Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: full-screen Excalidraw whiteboard; a slim tour bar on top, a caption card at the bottom that walks section by section like a recorded explainer. */
+@font-face { font-family: "Virgil"; src: url(data:font/woff2;base64,__VIRGIL__) format("woff2"); font-display: block; }
+@font-face { font-family: "Cascadia"; src: url(data:font/woff2;base64,__CASCADIA__) format("woff2"); font-display: block; }
+:root {
+  --paper: #ffffff; --ink: #1e1e1e; --muted: #6b6f76; --line: #e6e3d8;
+  --marker: #ffec99; --accent: #1971c2; --card: #fffdf3;
+  --hand: "Virgil", "Segoe Print", "Comic Sans MS", cursive;
+  --ui: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #121212; --ink: #e8e6e1; --muted: #a3a6ad; --line: #2e2d2a;
+  --marker: #5c4f12; --accent: #74b4f0; --card: #1c1b18; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #121212; --ink: #e8e6e1; --muted: #a3a6ad; --line: #2e2d2a;
+  --marker: #5c4f12; --accent: #74b4f0; --card: #1c1b18; color-scheme: dark }
+html, body { height: 100%; }
+body { background: var(--paper); color: var(--ink); font-family: var(--ui); overflow: hidden; }
+.app { height: 100%; display: flex; flex-direction: column; }
+.bar { display: flex; align-items: center; gap: 12px; padding-block: 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px solid var(--line); background: var(--paper); }
+.brand { font-family: var(--hand); font-size: 26px; white-space: nowrap;
+  background: linear-gradient(transparent 55%, var(--marker) 55%, var(--marker) 92%, transparent 92%); padding: 0 4px; }
+.steps { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
+.steps::-webkit-scrollbar { display: none; }
+.steps button, .ctl button { font: 600 13px var(--ui); color: var(--ink); background: transparent; border: 1px solid var(--line);
+  border-radius: 999px; padding: 6px 12px; cursor: pointer; white-space: nowrap; }
+.steps button[aria-current="true"] { background: var(--marker); border-color: transparent; }
+.steps button:focus-visible, .ctl button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ctl { display: flex; gap: 6px; }
+.stage { position: relative; flex: 1; min-height: 0; }
+#board { position: absolute; inset: 0; }
+.caption { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  max-width: min(420px, calc(100% - 32px)); background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 16px 18px 14px; box-shadow: 0 8px 30px rgba(0,0,0,.12); z-index: 5; }
+.caption .k { font: 700 11px var(--ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.caption h2 { font-family: var(--hand); font-weight: 400; font-size: 26px; margin: 4px 0 6px; text-wrap: balance; }
+.caption p { margin: 0; font-size: 15px; line-height: 1.5; }
+.caption .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+.caption .nav span { font: 12px var(--ui); color: var(--muted); font-variant-numeric: tabular-nums; }
+.caption.min p, .caption.min .k { display: none; }
+@media (max-width: 640px) { .brand { font-size: 20px; } .ctl .wide { display: none; } .caption p { font-size: 14px; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="app">
+  <div class="bar">
+    <span class="brand">neomem</span>
+    <nav class="steps" id="steps" aria-label="Tour sections"></nav>
+    <div class="ctl">
+      <button id="edit" class="wide" type="button">Edit board</button>
+    </div>
+  </div>
+  <div class="stage">
+    <div id="board"></div>
+    <section class="caption" id="caption" aria-live="polite">
+      <div class="k" id="cap-k"></div>
+      <h2 id="cap-h"></h2>
+      <p id="cap-p"></p>
+      <div class="nav">
+        <button id="prev" type="button" class="ctlbtn">Back</button>
+        <span id="cap-n"></span>
+        <button id="next" type="button" class="ctlbtn">Next</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>window.EXCALIDRAW_ASSET_PATH = "https://unpkg.com/@excalidraw/excalidraw@0.17.6/dist/";</script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@excalidraw/excalidraw@0.17.6/dist/excalidraw.production.min.js"></script>
+<script>
+const SCENE = __SCENE__;
+const SECTIONS = __SECTIONS__;
+const TOUR = [
+  { key: "all", k: "Overview", h: "neomem on one board",
+    p: "One semantic memory that every agent shares: Claude Code, Codex, pi and your own pi harness. Sessions are captured automatically; agents search when they need something. The branches cover what long-term memory is, where it's stored, what a memory is, how facts get in, how they're cleaned up, how search works, optional recall, decay, how other systems link in, and how the code is split for speed." },
+  { key: "ltm", k: "0 · Start here", h: "What is long-term memory?",
+    p: "An LLM remembers nothing between calls, and an agent's chat history dies with the session. Long-term memory lives outside the conversation and is shared by every agent. neomem's rules: semantic facts and entities only, nothing deleted, nothing inferred, every fact cites its source, files are the master copy, search always returns the latest fact, and nothing is injected unless you turn on recall mode." },
+  { key: "stores", k: "1 · Stores", h: "Files, two SQLite files, and memory",
+    p: "Markdown files are the truth: one readable file per fact or entity, in a local git repo. state.db holds what can't be rebuilt: the exact intake log, the job queue, transcript positions and the logs. index.db is a rebuildable index: content, vectors, every link and a pointer from every fact to its latest version. The daemon keeps the vector index and the link map in memory, so search never leaves the process. No database services to run." },
+  { key: "model", k: "2 · Memory model", h: "Facts, entities, sources",
+    p: "Every input is kept as an intake record: the exact source, never edited (a mistake gets a correction record). A fact is something true about at least one entity, with valid_at and invalid_at. When a fact changes, the new one 'updates' the old one, which is kept forever, so you can still ask what was true on any date. Entities appear once they keep coming up. Only facts decay." },
+  { key: "ingest", k: "3 · Ingestion", h: "From a message to a fact",
+    p: "Agent sessions are read from their transcripts; hooks only nudge. Your automations send digests with `neomem add`. Everything is copied into the intake log instantly. After 5 quiet minutes a cheap worker, not an agent, makes one LLM call that returns facts and entities. Each new fact is checked against the 5 closest by Jev: same, extends, updates, contradicts or new. Updates are linked right here, which is what lets search promise the latest fact." },
+  { key: "dream", k: "4 · Consolidation", h: "Agents tidy up in batches",
+    p: "After 50 new facts, every night at 3:00, when late data or a correction arrives, or on `neomem dream`, two agents run in order. The reconciler settles conflicts that slipped through and merges duplicates. The entity keeper creates and merges entities. This is cleanup only: no tool can delete anything or infer new conclusions, and every write must cite real sources." },
+  { key: "retrieve", k: "5 · Search", h: "A fast pipeline, never an agent",
+    p: "The agent calls `neomem search`. The query is embedded locally and the in-memory vector index returns the top 10 facts, old versions included. Each one is swapped for the latest version of its fact, so the true current fact always wins. The link map looks one link away, and linked facts are kept only if they're useful to the query. No model is called, and results come back in about 10–30 ms." },
+  { key: "recall", k: "6 · Recall mode", h: "Optional, gated injection",
+    p: "Off by default; switch it on per agent or project. Before the agent answers, Jev (a fast decision model) decides whether the turn needs memory at all. If yes, the planner (GPT-6.1-Sol on low effort by default) rewrites the recent session into a few fact-shaped queries, the normal search runs for each, the judge approves only the memories that help right now, and at most five are injected with their IDs. Jev returns calibrated probabilities, and the thresholds lean towards no." },
+  { key: "decay", k: "7 · Decay", h: "Fading without forgetting",
+    p: "Only facts decay, and only in ranking. A fact's strength comes from evidence: being written, being seen again, or an agent marking it useful. Being retrieved doesn't count, so popular facts don't crowd out the rest. A power-law curve with a 0.3 floor means an old but strong match still surfaces. Nothing is ever deleted." },
+  { key: "contract", k: "8 · Shared contract", h: "How other systems link in",
+    p: "neomem has no episodes. A separate episode system can be built later and link in through a published contract: permanent IDs that never break (merged IDs still resolve), one tag registry owned by neomem, a fixed list of link types, `neomem resolve` to find an entity by name, and two-way references. neomem stores only the reference, never the other system's content." },
+  { key: "models", k: "Models", h: "What runs where",
+    p: "Extraction and consolidation use Claude Sonnet or a local model, chosen per source. Recall's query rewrite uses GPT-6.1-Sol on low effort through your ChatGPT login (about 2 seconds, no API key), Jev, TypeSafe's fast decision model, makes every yes/no and multiple-choice call: the recall gate, approval and the write-time check. It can't write text, which is why the planner is a separate model. Every cloud role can point at any provider: your ChatGPT login, OpenAI, OpenRouter, Anthropic, Hugging Face, Gemini, Ollama, or any command-line tool. Embeddings always run locally with llama.cpp on the Mac’s GPU, and a local reranker stands in for Jev when it's unreachable. Every role can be swapped in config: a new embedding model is re-embedded in the background and switched over when done. Local models unload after 15 idle minutes." },
+  { key: "modules", k: "9 · Modules", h: "Built for speed, swappable where it matters",
+    p: "One always-running daemon holds everything warm; the neomem command is a tiny client that answers in about 10–30 ms. All behaviour lives in one deep engine module behind a single Request -> Response interface that the CLI, hooks, HTTP, MCP and pi all speak. Seams exist only where things really vary: models (embedder, judge, LLMs) and agents (Claude Code, Codex, pi). Hooks only send a signal and never block or fail your agent." },
+  { key: "build", k: "10 · How it's built", h: "A feature map gives context, a CLI gives control",
+    p: "neomem is built with poteto's pstack method. A feature graph lists every feature: what it does, how it's reached, what it depends on and how it's proven. It is both the map and the build plan. neomemctl runs an isolated neomem, drives it and captures proof; a feature counts as done only when its proof passes. Agents take unblocked features in parallel, write the proof first, then pass review. Every correction is fixed at the highest level: make it impossible, then lint, then rules. No code comments at all." },
+];
+const byId = new Map(SCENE.elements.map(e => [e.id, e]));
+const dark = () => document.documentElement.dataset.theme === "dark" ||
+  (document.documentElement.dataset.theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+let api = null, step = 0, editing = false;
+
+const stepsEl = document.getElementById("steps");
+TOUR.forEach((t, i) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.textContent = t.k.replace(/^\d · /, ""); b.id = "step-" + t.key;
+  b.addEventListener("click", () => go(i));
+  stepsEl.appendChild(b);
+});
+
+function go(i) {
+  step = Math.max(0, Math.min(TOUR.length - 1, i));
+  const t = TOUR[step];
+  [...stepsEl.children].forEach((b, j) => b.setAttribute("aria-current", j === step ? "true" : "false"));
+  stepsEl.children[step].scrollIntoView({ block: "nearest", inline: "nearest" });
+  document.getElementById("cap-k").textContent = t.k;
+  document.getElementById("cap-h").textContent = t.h;
+  document.getElementById("cap-p").textContent = t.p;
+  document.getElementById("cap-n").textContent = (step + 1) + " / " + TOUR.length;
+  document.getElementById("prev").disabled = step === 0;
+  document.getElementById("next").textContent = step === TOUR.length - 1 ? "Start over" : "Next";
+  if (!api) return;
+  const els = t.key === "all" ? api.getSceneElements()
+    : SECTIONS[t.key].map(id => api.getSceneElements().find(e => e.id === id) || byId.get(id)).filter(Boolean);
+  flyTo(els);
+}
+
+let flight = 0;
+function flyTo(els) {
+  const [x1, y1, x2, y2] = ExcalidrawLib.getCommonBounds(els);
+  const st = api.getAppState();
+  const cap = document.getElementById("caption");
+  const narrow = st.width < 900;
+  // Wide screens: the caption sits on the left, so fit the section into the space to its right.
+  // Narrow screens: the caption sits along the bottom, so fit into the space above it.
+  const capW = editing || narrow ? 0 : cap.offsetWidth + 32;
+  const capH = editing || !narrow ? 0 : cap.offsetHeight + 24;
+  const availW = st.width - capW - 48, availH = st.height - capH - 48;
+  const z1 = Math.max(0.1, Math.min(1.2, Math.min(availW / (x2 - x1), availH / (y2 - y1))));
+  const cx1 = (x1 + x2) / 2, cy1 = (y1 + y2) / 2;
+  const viewCx = capW + 24 + availW / 2, viewCy = 24 + availH / 2;
+  const z0 = st.zoom.value, cx0 = viewCx / z0 - st.scrollX, cy0 = viewCy / z0 - st.scrollY;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const id = ++flight, t0 = performance.now(), dur = reduce ? 0 : 750;
+  const ease = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  // setTimeout instead of requestAnimationFrame: rAF pauses in background tabs, which would strand the view mid-flight.
+  (function frame() {
+    if (id !== flight) return;
+    const t = dur ? Math.min(1, (performance.now() - t0) / dur) : 1, e = ease(t);
+    const z = z0 * Math.pow(z1 / z0, e), cx = cx0 + (cx1 - cx0) * e, cy = cy0 + (cy1 - cy0) * e;
+    api.updateScene({ appState: { zoom: { value: z }, scrollX: viewCx / z - cx, scrollY: viewCy / z - cy } });
+    if (t < 1) setTimeout(frame, 16);
+  })();
+}
+document.getElementById("prev").addEventListener("click", () => go(step - 1));
+document.getElementById("next").addEventListener("click", () => go(step === TOUR.length - 1 ? 0 : step + 1));
+document.getElementById("edit").addEventListener("click", (e) => {
+  editing = !editing;
+  e.currentTarget.textContent = editing ? "Done editing" : "Edit board";
+  document.getElementById("caption").classList.toggle("min", editing);
+  render();
+});
+addEventListener("keydown", (e) => {
+  if (editing || e.target.closest("input,textarea")) return;
+  if (e.key === "ArrowRight") go(step + 1);
+  if (e.key === "ArrowLeft") go(step - 1);
+});
+
+const root = ReactDOM.createRoot(document.getElementById("board"));
+function render() {
+  root.render(React.createElement(ExcalidrawLib.Excalidraw, {
+    initialData: { elements: SCENE.elements, appState: { viewBackgroundColor: "#ffffff", currentItemFontFamily: 1 }, scrollToContent: true },
+    excalidrawAPI: (a) => { if (!api) { api = a; setTimeout(() => go(step), 400); } },
+    viewModeEnabled: !editing,
+    zenModeEnabled: !editing,
+    theme: dark() ? "dark" : "light",
+    UIOptions: { canvasActions: { loadScene: false, saveToActiveFile: false, saveAsImage: true, export: false } },
+  }));
+}
+Promise.all([document.fonts.load('24px "Virgil"'), document.fonts.load('24px "Cascadia"')]).finally(render);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+go(0);
+</script>
