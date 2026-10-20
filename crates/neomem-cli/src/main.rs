@@ -39,6 +39,9 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
         Command::Status => Request::Status,
         Command::Add(arguments) => Request::Add(intake_record::from_arguments(arguments)?),
         Command::Raw(arguments) => Request::Raw(intake_record::raw_query(arguments)?),
+        Command::Correct(arguments) => {
+            Request::Correct { intake: arguments.intake.parse()?, reason: arguments.reason.clone() }
+        }
         Command::Models(arguments) => match &arguments.action {
             None => Request::Models,
             Some(ModelsAction::Test { role, source, structured }) => Request::ModelsTest {

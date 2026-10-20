@@ -17,7 +17,8 @@ pub struct RawSearch<'query> {
 
 const MATCHING: &str =
     "SELECT i.id, i.recorded_at, i.source, i.occurred_start, i.occurred_end, i.tags, i.content,
-        i.entity_hints, i.source_ref, i.session
+        i.entity_hints, i.source_ref, i.session,
+        EXISTS (SELECT 1 FROM corrections c WHERE c.intake_id = i.id)
     FROM intake_text JOIN intake i ON i.rowid = intake_text.rowid
     WHERE intake_text MATCH ?1
       AND (?2 IS NULL OR i.occurred_end >= ?2)
@@ -27,7 +28,8 @@ const MATCHING: &str =
     LIMIT ?5";
 
 const IN_WINDOW: &str = "SELECT id, recorded_at, source, occurred_start, occurred_end, tags, content,
-        entity_hints, source_ref, session
+        entity_hints, source_ref, session,
+        EXISTS (SELECT 1 FROM corrections c WHERE c.intake_id = intake.id)
     FROM intake
     WHERE (?1 IS NULL OR occurred_end >= ?1)
       AND (?2 IS NULL OR occurred_start <= ?2)
@@ -36,7 +38,7 @@ const IN_WINDOW: &str = "SELECT id, recorded_at, source, occurred_start, occurre
     LIMIT ?4";
 
 impl StateDb {
-    pub fn raw_search(&self, search: &RawSearch<'_>) -> Result<Vec<LoggedIntake>, StateError> {
+    pub fn raw_search(&self, search: &RawSearch<'_>) -> Result<Vec<RawRecord>, StateError> {
         let limit = i64::try_from(search.limit.clamp(1, LONGEST_PAGE)).unwrap_or(20);
         let from = search.from.map(EpochMs::as_millis);
         let to = search.to.map(EpochMs::as_millis);
@@ -45,18 +47,28 @@ impl StateDb {
         self.read(|connection| {
             let mut statement =
                 connection.prepare_cached(if expression.is_some() { MATCHING } else { IN_WINDOW })?;
-            let rows: Vec<Result<LoggedIntake, StateError>> = if let Some(expression) = &expression {
+            let rows: Vec<Result<RawRecord, StateError>> = if let Some(expression) = &expression {
                 statement
-                    .query_map(params![expression, from, to, source, limit], |row| Ok(logged_from(row)))?
+                    .query_map(params![expression, from, to, source, limit], |row| Ok(raw_record_from(row)))?
                     .collect::<Result<_, _>>()?
             } else {
                 statement
-                    .query_map(params![from, to, source, limit], |row| Ok(logged_from(row)))?
+                    .query_map(params![from, to, source, limit], |row| Ok(raw_record_from(row)))?
                     .collect::<Result<_, _>>()?
             };
             rows.into_iter().collect()
         })
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RawRecord {
+    pub logged: LoggedIntake,
+    pub corrected: bool,
+}
+
+fn raw_record_from(row: &rusqlite::Row<'_>) -> Result<RawRecord, StateError> {
+    Ok(RawRecord { logged: logged_from(row)?, corrected: row.get(10)? })
 }
 
 fn match_expression(text: &str) -> Option<String> {

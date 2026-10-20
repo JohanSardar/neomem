@@ -65,6 +65,7 @@ impl Engine {
             }
             Request::Add(record) => self.add(record),
             Request::Raw(query) => self.raw(&query),
+            Request::Correct { intake, reason } => self.correct(intake, &reason),
             Request::Models => self.model_roster(),
             Request::ModelsTest { role, source, structured } => {
                 self.test_model(ModelProbe { role, source: source.as_ref(), structured })

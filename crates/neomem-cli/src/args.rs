@@ -14,8 +14,16 @@ pub enum Command {
     Status,
     Add(AddArgs),
     Raw(RawArgs),
+    Correct(CorrectArgs),
     Models(ModelsArgs),
     Login(LoginArgs),
+}
+
+#[derive(Debug, Args)]
+pub struct CorrectArgs {
+    pub intake: String,
+    #[arg(long)]
+    pub reason: String,
 }
 
 #[derive(Debug, Args)]
