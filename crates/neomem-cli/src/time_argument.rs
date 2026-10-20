@@ -15,6 +15,11 @@ pub fn parse(text: &str) -> anyhow::Result<EpochMs> {
     }
 }
 
+pub fn display(moment: EpochMs) -> String {
+    let since_epoch = std::time::Duration::from_millis(u64::try_from(moment.as_millis()).unwrap_or(0));
+    humantime::format_rfc3339_seconds(UNIX_EPOCH + since_epoch).to_string()
+}
+
 pub fn now() -> EpochMs {
     epoch_ms(SystemTime::now())
 }

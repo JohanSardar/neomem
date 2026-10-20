@@ -1,7 +1,9 @@
 use std::path::Path;
 use std::process::ExitCode;
 
-use neomem_proto::{Response, StatusReport};
+use crate::time_argument;
+
+use neomem_proto::{RawHit, Response, StatusReport};
 
 pub fn print(response: &Response, json: bool) -> ExitCode {
     if json {
@@ -29,6 +31,7 @@ fn print_human(response: &Response) {
         Response::Status(report) => print_status(report),
         Response::ShuttingDown => println!("neomemd is shutting down"),
         Response::Added(receipt) => println!("{}", receipt.id),
+        Response::RawHits(hits) => print_raw_hits(hits),
         Response::ModelRoster(roster) => {
             for assignment in roster {
                 println!("{:<13} {}", assignment.role.name(), assignment.assignment);
@@ -61,4 +64,15 @@ fn print_status(report: &StatusReport) {
     println!("home     {}", report.home);
     println!("pid      {}", report.pid);
     println!("uptime   {} s", report.uptime_ms / 1000);
+}
+
+fn print_raw_hits(hits: &[RawHit]) {
+    if hits.is_empty() {
+        println!("no intake records match");
+    }
+    for hit in hits {
+        let corrected = if hit.corrected { "  [corrected]" } else { "" };
+        println!("{}  {}  {}{corrected}", time_argument::display(hit.occurred.start), hit.source, hit.id);
+        println!("  {}", hit.content.replace('\n', "\n  "));
+    }
 }

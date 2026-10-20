@@ -1,6 +1,7 @@
 mod daemon;
 mod intake;
 mod models_llm;
+mod raw;
 mod spool;
 mod vault;
 
@@ -18,6 +19,7 @@ pub const ALL: &[Scenario] = &[
     Scenario { name: "intake", run: intake::prove },
     Scenario { name: "vault", run: vault::prove },
     Scenario { name: "spool", run: spool::prove },
+    Scenario { name: "raw", run: raw::prove },
     Scenario { name: "models-llm", run: models_llm::prove },
 ];
 

@@ -1,4 +1,4 @@
-use neomem_core::{IntakeRecord, ModelRole, Source};
+use neomem_core::{EpochMs, IntakeRecord, ModelRole, Source};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -7,6 +7,7 @@ pub enum Request {
     Status,
     Shutdown,
     Add(IntakeRecord),
+    Raw(RawQuery),
     Models,
     ModelsTest {
         role: ModelRole,
@@ -21,6 +22,23 @@ pub enum Request {
     LoginFinish {
         provider: String,
     },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RawQuery {
+    pub text: String,
+    #[serde(default)]
+    pub from: Option<EpochMs>,
+    #[serde(default)]
+    pub to: Option<EpochMs>,
+    #[serde(default)]
+    pub source: Option<Source>,
+    #[serde(default = "default_raw_limit")]
+    pub limit: usize,
+}
+
+fn default_raw_limit() -> usize {
+    20
 }
 
 impl Request {

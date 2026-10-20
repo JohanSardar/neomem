@@ -13,8 +13,23 @@ pub struct Cli {
 pub enum Command {
     Status,
     Add(AddArgs),
+    Raw(RawArgs),
     Models(ModelsArgs),
     Login(LoginArgs),
+}
+
+#[derive(Debug, Args)]
+pub struct RawArgs {
+    #[arg(default_value = "")]
+    pub text: String,
+    #[arg(long)]
+    pub from: Option<String>,
+    #[arg(long)]
+    pub to: Option<String>,
+    #[arg(long)]
+    pub source: Option<String>,
+    #[arg(long, default_value_t = 20)]
+    pub limit: usize,
 }
 
 #[derive(Debug, Args)]

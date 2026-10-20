@@ -64,6 +64,7 @@ impl Engine {
                 Response::ShuttingDown
             }
             Request::Add(record) => self.add(record),
+            Request::Raw(query) => self.raw(&query),
             Request::Models => self.model_roster(),
             Request::ModelsTest { role, source, structured } => {
                 self.test_model(ModelProbe { role, source: source.as_ref(), structured })
