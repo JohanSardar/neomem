@@ -2,9 +2,15 @@
   "feature": "index",
   "scenario": "index",
   "passed": true,
+<<<<<<<< HEAD:proofs/index/2026-10-20T223232Z/proof.json
   "started_at": "2026-10-20T223232Z",
   "duration_ms": 609,
   "code_version": "26464e11897f-dirty",
+========
+  "started_at": "2026-10-20T223808Z",
+  "duration_ms": 641,
+  "code_version": "9c2504409957-dirty",
+>>>>>>>> origin/main:proofs/index/2026-10-20T223808Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
@@ -26,7 +32,11 @@
     {
       "claim": "neomem rebuild re-creates index.db from the files with identical rows",
       "passed": true,
+<<<<<<<< HEAD:proofs/index/2026-10-20T223232Z/proof.json
       "detail": "19 rows before, 19 after; {\"reply\":\"rebuilt\",\"body\":{\"index\":{\"facts\":3,\"entities\":2,\"links\":6,\"names\":3,\"vectors\":5,\"model\":\"openai:hash-256\"},\"unreadable_files\":0,\"took_ms\":5}}"
+========
+      "detail": "19 rows before, 19 after; {\"reply\":\"rebuilt\",\"body\":{\"index\":{\"facts\":3,\"entities\":2,\"links\":6,\"names\":3,\"vectors\":5,\"model\":\"openai:hash-256\"},\"unreadable_files\":0,\"took_ms\":6}}"
+>>>>>>>> origin/main:proofs/index/2026-10-20T223808Z/proof.json
     },
     {
       "claim": "a restart loads the index and its vectors from index.db without embedding the memories again",

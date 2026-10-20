@@ -44,7 +44,7 @@ struct UpArgs {
 
 #[derive(Debug, Args)]
 struct BenchArgs {
-    #[arg(value_parser = ["latency"], default_value = "latency")]
+    #[arg(value_parser = ["latency", "models"], default_value = "latency")]
     kind: String,
     #[arg(long)]
     save_baseline: bool,
@@ -86,6 +86,7 @@ fn main() -> ExitCode {
         Command::Logs(args) => session::logs(args.home.as_deref()),
         Command::Prove(args) => prove::run(&selection_from(args)),
         Command::Map(args) => map::run(map_view(&args)),
+        Command::Bench(args) if args.kind == "models" => bench::models(),
         Command::Bench(args) => bench::run(args.save_baseline),
         Command::FetchModels => model_files::fetch_all(),
         Command::FakeModels { address_file } => fake_models::serve(&address_file),

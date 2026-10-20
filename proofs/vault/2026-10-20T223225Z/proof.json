@@ -2,9 +2,15 @@
   "feature": "vault",
   "scenario": "vault",
   "passed": true,
+<<<<<<<< HEAD:proofs/vault/2026-10-20T223225Z/proof.json
   "started_at": "2026-10-20T223225Z",
   "duration_ms": 7086,
   "code_version": "26464e11897f-dirty",
+========
+  "started_at": "2026-10-20T223801Z",
+  "duration_ms": 7184,
+  "code_version": "9c2504409957-dirty",
+>>>>>>>> origin/main:proofs/vault/2026-10-20T223801Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
@@ -21,7 +27,11 @@
     {
       "claim": "facts/ and entities/ exist",
       "passed": true,
+<<<<<<<< HEAD:proofs/vault/2026-10-20T223225Z/proof.json
       "detail": "/tmp/neomemctl-TrjNaC"
+========
+      "detail": "/tmp/neomemctl-sWEEjw"
+>>>>>>>> origin/main:proofs/vault/2026-10-20T223801Z/proof.json
     },
     {
       "claim": "a seeded fact chain is committed by the daemon within the batch interval, in one commit",

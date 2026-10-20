@@ -1,0 +1,51 @@
+{
+  "feature": "spool",
+  "scenario": "spool",
+  "passed": true,
+<<<<<<<< HEAD:proofs/spool/2026-10-20T223224Z/proof.json
+  "started_at": "2026-10-20T223224Z",
+  "duration_ms": 63,
+  "code_version": "26464e11897f-dirty",
+========
+  "started_at": "2026-10-20T223800Z",
+  "duration_ms": 67,
+  "code_version": "9c2504409957-dirty",
+>>>>>>>> origin/main:proofs/spool/2026-10-20T223800Z/proof.json
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "neomem add with the daemon down exits 0 at once and leaves one spool file per add",
+      "passed": true,
+<<<<<<<< HEAD:proofs/spool/2026-10-20T223224Z/proof.json
+      "detail": "1.73092ms, files [\"01792535544616820595-33d5d9f15058ebc2.json\", \"01792535544615406918-614297605309bcda.json\"], stdout {\"spooled\":\"/tmp/neomemctl-ugVLp9/spool/01792535544615406918-614297605309bcda.json\"}"
+========
+      "detail": "2.980043ms, files [\"01792535880266881044-016900e3387599c7.json\", \"01792535880264477337-c22b0369c03e15e0.json\"], stdout {\"spooled\":\"/tmp/neomemctl-6WX8Zx/spool/01792535880264477337-c22b0369c03e15e0.json\"}"
+>>>>>>>> origin/main:proofs/spool/2026-10-20T223800Z/proof.json
+    },
+    {
+      "claim": "a spooled add says so instead of inventing an ID",
+      "passed": true,
+<<<<<<<< HEAD:proofs/spool/2026-10-20T223224Z/proof.json
+      "detail": "{\"spooled\":\"/tmp/neomemctl-ugVLp9/spool/01792535544615406918-614297605309bcda.json\"}\n"
+========
+      "detail": "{\"spooled\":\"/tmp/neomemctl-6WX8Zx/spool/01792535880264477337-c22b0369c03e15e0.json\"}\n"
+>>>>>>>> origin/main:proofs/spool/2026-10-20T223800Z/proof.json
+    },
+    {
+      "claim": "a corrupt spool file is in place before the daemon starts",
+      "passed": true,
+      "detail": "3 files"
+    },
+    {
+      "claim": "after a restart both spooled adds are in the intake log, each once, and the spool is empty",
+      "passed": true,
+      "detail": "logged 2, left []"
+    },
+    {
+      "claim": "the corrupt file was moved to spool/rejected instead of blocking the drain",
+      "passed": true,
+      "detail": "true"
+    }
+  ]
+}

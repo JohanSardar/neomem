@@ -1,0 +1,47 @@
+{
+  "feature": "correct",
+  "scenario": "correct",
+  "passed": true,
+<<<<<<<< HEAD:proofs/correct/2026-10-20T223225Z/proof.json
+  "started_at": "2026-10-20T223225Z",
+  "duration_ms": 40,
+  "code_version": "26464e11897f-dirty",
+========
+  "started_at": "2026-10-20T223801Z",
+  "duration_ms": 60,
+  "code_version": "9c2504409957-dirty",
+>>>>>>>> origin/main:proofs/correct/2026-10-20T223801Z/proof.json
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "neomem correct records a correction for the intake record",
+      "passed": true,
+<<<<<<<< HEAD:proofs/correct/2026-10-20T223225Z/proof.json
+      "detail": "{\"reply\":\"corrected\",\"body\":{\"intake\":\"int_01M5DQ3HPZBPTD4K8G6E9VM1T5\",\"recorded_at\":1792535545570}}"
+========
+      "detail": "{\"reply\":\"corrected\",\"body\":{\"intake\":\"int_01M5DQDSCJ6HMDHP3VQ2JM6JFJ\",\"recorded_at\":1792535881110}}"
+>>>>>>>> origin/main:proofs/correct/2026-10-20T223801Z/proof.json
+    },
+    {
+      "claim": "the intake record is kept exactly as it was logged",
+      "passed": true,
+      "detail": "Some(\"Slept 4h 05m, readiness 41 (this was the wrong night)\")"
+    },
+    {
+      "claim": "raw search still finds the record and marks it corrected",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "claim": "its pending extraction is skipped and a re-check of facts drawn from it is queued",
+      "passed": true,
+      "detail": "extract Some(\"skipped\"), recheck Some(\"pending\")"
+    },
+    {
+      "claim": "correcting an unknown intake ID fails and records nothing",
+      "passed": true,
+      "detail": "neomem: there is no intake record int_00000000010000000000000001"
+    }
+  ]
+}

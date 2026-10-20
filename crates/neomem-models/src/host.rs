@@ -7,8 +7,10 @@ use neomem_core::{
 };
 
 use crate::config::{ModelsConfig, ProviderConfig, ProviderKind, RoleConfig};
+use crate::fallback_judge::FallbackJudge;
 use crate::jev::{self, JevJudge};
 use crate::llama_embedder::LlamaEmbedder;
+use crate::llama_reranker::LazyReranker;
 use crate::openai_embeddings::OpenAiEmbedder;
 use crate::query_cache::{QUERY_CACHE_ENTRIES, QueryCache};
 use crate::{Secrets, duration};
@@ -32,6 +34,14 @@ struct ReadyModels {
     embedder: Option<Arc<dyn Embedder>>,
     judges: HashMap<JudgeRole, Arc<dyn Judge>>,
     llms: HashMap<(LlmRole, Option<String>), Arc<dyn Llm>>,
+    rerankers: HashMap<PathBuf, Arc<LazyReranker>>,
+}
+
+impl ReadyModels {
+    fn reranker(&mut self, path: PathBuf) -> Arc<dyn Judge> {
+        let shared = self.rerankers.entry(path.clone()).or_insert_with(|| Arc::new(LazyReranker::at(path)));
+        Arc::clone(shared) as Arc<dyn Judge>
+    }
 }
 
 impl ModelHost {
@@ -113,13 +123,29 @@ impl ModelHost {
         }
     }
 
-    fn build_judge(&self, role_name: JudgeRole) -> Result<Arc<dyn Judge>, ModelError> {
+    fn build_judge(
+        &self,
+        role_name: JudgeRole,
+        ready: &mut ReadyModels,
+    ) -> Result<Arc<dyn Judge>, ModelError> {
         let roles = &self.config.models;
         let role = match role_name {
             JudgeRole::Judge => roles.judge.as_ref(),
             JudgeRole::Checker => roles.checker.as_ref(),
         }
         .ok_or_else(|| ModelError::NotConfigured(format!("{role_name:?}")))?;
+        if let Some(path) = self.local_model_path(role, "judge")? {
+            return Ok(ready.reranker(path));
+        }
+        let primary = self.build_remote_judge(role);
+        let Some(fallback) = role.fallback.as_deref() else { return primary };
+        let path = self.local_model_path(fallback, "judge fallback")?.ok_or_else(|| {
+            ModelError::NotConfigured("judge fallback: only a llama.cpp reranker can be the fallback".into())
+        })?;
+        Ok(Arc::new(FallbackJudge::new(primary, ready.reranker(path))))
+    }
+
+    fn build_remote_judge(&self, role: &RoleConfig) -> Result<Arc<dyn Judge>, ModelError> {
         let provider = self.provider(role, "judge")?;
         match provider.kind {
             ProviderKind::Jev => {
@@ -155,7 +181,7 @@ impl ModelRoles for ModelHost {
         if let Some(judge) = ready.judges.get(&role) {
             return Ok(Arc::clone(judge));
         }
-        let judge = self.build_judge(role)?;
+        let judge = self.build_judge(role, &mut ready)?;
         ready.judges.insert(role, Arc::clone(&judge));
         Ok(judge)
     }

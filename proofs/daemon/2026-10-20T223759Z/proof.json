@@ -1,0 +1,91 @@
+{
+  "feature": "daemon",
+  "scenario": "daemon",
+  "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-20T223224Z/proof.json
+  "started_at": "2026-10-20T223224Z",
+  "duration_ms": 133,
+  "code_version": "26464e11897f-dirty",
+========
+  "started_at": "2026-10-20T223759Z",
+  "duration_ms": 234,
+  "code_version": "9c2504409957-dirty",
+>>>>>>>> origin/main:proofs/daemon/2026-10-20T223759Z/proof.json
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "status over the socket names the current protocol and the isolated home",
+      "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-20T223224Z/proof.json
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-DwaSQW\", pid: 2880371, uptime_ms: 17, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+========
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-FhJ1s9\", pid: 2894124, uptime_ms: 17, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+>>>>>>>> origin/main:proofs/daemon/2026-10-20T223759Z/proof.json
+    },
+    {
+      "claim": "a socket request and reply takes under 0.5 ms at the median",
+      "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-20T223224Z/proof.json
+      "detail": "p50 0.029 ms, p95 0.032 ms, max 0.114 ms"
+========
+      "detail": "p50 0.062 ms, p95 0.068 ms, max 0.209 ms"
+>>>>>>>> origin/main:proofs/daemon/2026-10-20T223759Z/proof.json
+    },
+    {
+      "claim": "neomem status --json prints the daemon's status",
+      "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-20T223224Z/proof.json
+      "detail": "{\"reply\":\"status\",\"body\":{\"daemon_version\":\"0.1.0\",\"protocol\":1,\"home\":\"/tmp/neomemctl-DwaSQW\",\"pid\":2880371,\"uptime_ms\":25,\"index\":{\"facts\":0,\"entities\":0,\"links\":0,\"names\":0,\"vectors\":0,\"model\":\"openai:hash-256\"}}}\n"
+========
+      "detail": "{\"reply\":\"status\",\"body\":{\"daemon_version\":\"0.1.0\",\"protocol\":1,\"home\":\"/tmp/neomemctl-FhJ1s9\",\"pid\":2894124,\"uptime_ms\":39,\"index\":{\"facts\":0,\"entities\":0,\"links\":0,\"names\":0,\"vectors\":0,\"model\":\"openai:hash-256\"}}}\n"
+>>>>>>>> origin/main:proofs/daemon/2026-10-20T223759Z/proof.json
+    },
+    {
+      "claim": "neomem status answers end to end within 25 ms at the median (the 2-5 ms budget is checked by neomemctl bench on release builds)",
+      "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-20T223224Z/proof.json
+      "detail": "p50 1.481 ms, p95 1.800 ms, max 1.817 ms"
+========
+      "detail": "p50 3.255 ms, p95 4.744 ms, max 5.019 ms"
+>>>>>>>> origin/main:proofs/daemon/2026-10-20T223759Z/proof.json
+    },
+    {
+      "claim": "HTTP POST /v1/request answers status with the same handler",
+      "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-20T223224Z/proof.json
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-DwaSQW\", pid: 2880371, uptime_ms: 57, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+========
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-FhJ1s9\", pid: 2894124, uptime_ms: 112, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+>>>>>>>> origin/main:proofs/daemon/2026-10-20T223759Z/proof.json
+    },
+    {
+      "claim": "a client on another protocol version gets version_mismatch",
+      "passed": true,
+      "detail": "VersionMismatch { daemon: 1, client: 2 }"
+    },
+    {
+      "claim": "a second neomemd on the same home exits cleanly and the first keeps serving",
+      "passed": true,
+      "detail": "second exit exit status: 0"
+    },
+    {
+      "claim": "neomem status starts a stopped daemon and answers within 2 seconds",
+      "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-20T223224Z/proof.json
+      "detail": "22.465175ms"
+========
+      "detail": "36.315524ms"
+>>>>>>>> origin/main:proofs/daemon/2026-10-20T223759Z/proof.json
+    },
+    {
+      "claim": "a home too long for a Unix socket path still gets a working socket elsewhere",
+      "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-20T223224Z/proof.json
+      "detail": "/run/user/1000/neomem-14882da5c953609b.sock"
+========
+      "detail": "/run/user/1000/neomem-a7e445998755d4dd.sock"
+>>>>>>>> origin/main:proofs/daemon/2026-10-20T223759Z/proof.json
+    }
+  ]
+}
