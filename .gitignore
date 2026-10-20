@@ -4,3 +4,4 @@ secrets.env
 models/
 diagram/video/
 .DS_Store
+.claude/
