@@ -1,3 +1,4 @@
+mod ci;
 mod no_comments;
 mod violation;
 mod workspace;
@@ -7,11 +8,13 @@ use std::process::ExitCode;
 use violation::Violation;
 
 fn main() -> ExitCode {
-    if std::env::args().nth(1).as_deref() == Some("check") {
-        report(run_every_check())
-    } else {
-        eprintln!("usage: cargo xtask check");
-        ExitCode::FAILURE
+    match std::env::args().nth(1).as_deref() {
+        Some("check") => report(run_every_check()),
+        Some("ci") => finish(workspace::root().and_then(|root| ci::run_every_step(&root))),
+        _ => {
+            eprintln!("usage: cargo xtask check|ci");
+            ExitCode::FAILURE
+        }
     }
 }
 
@@ -20,6 +23,16 @@ fn run_every_check() -> anyhow::Result<Vec<Violation>> {
     let mut violations = Vec::new();
     violations.extend(no_comments::check(&root)?);
     Ok(violations)
+}
+
+fn finish(outcome: anyhow::Result<()>) -> ExitCode {
+    match outcome {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => {
+            eprintln!("{error:#}");
+            ExitCode::FAILURE
+        }
+    }
 }
 
 fn report(outcome: anyhow::Result<Vec<Violation>>) -> ExitCode {
