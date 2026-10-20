@@ -3,9 +3,9 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use neomem_core::{Embedder, Purpose};
-use neomem_models::LlamaEmbedder;
-use neomem_testkit::embedder_contract;
+use neomem_core::{Choice, Embedder, Judge, Purpose};
+use neomem_models::{LlamaEmbedder, LlamaReranker};
+use neomem_testkit::{embedder_contract, judge_contract};
 
 fn shared_model(file: &str) -> PathBuf {
     let output = Command::new("git")
@@ -40,6 +40,44 @@ fn qwen3_embedding_passes_the_embedder_contract() {
     embedder_contract(&embedder);
     assert_eq!(embedder.dims(), 1024);
     assert!(query_beats_unrelated(&embedder));
+}
+
+#[test]
+#[ignore = "loads models/qwen3-reranker-0.6b-Q8_0.gguf; run after neomemctl fetch-models"]
+fn qwen3_reranker_passes_the_judge_contract_and_ranks_what_helps_first() {
+    let reranker = LlamaReranker::open(&shared_model("qwen3-reranker-0.6b-Q8_0.gguf")).unwrap();
+    judge_contract(&reranker);
+    let scores = reranker
+        .score(
+            "The release build failed again with the same code signing error as last week",
+            "Would this memory help with what is happening right now?",
+            &[
+                "Signing the Edge release needs the certificate from the team keychain",
+                "Maya likes green tea",
+            ],
+        )
+        .unwrap();
+    assert!(scores[0] > scores[1], "{scores:?}");
+    let alone = reranker
+        .score(
+            "The release build failed again with the same code signing error as last week",
+            "Would this memory help with what is happening right now?",
+            &["Signing the Edge release needs the certificate from the team keychain"],
+        )
+        .unwrap();
+    assert!((alone[0] - scores[0]).abs() < 0.01, "batched {scores:?} alone {alone:?}");
+    let options = [
+        Choice { label: "updates", meaning: "the new fact replaces the existing fact" },
+        Choice { label: "new", meaning: "the new fact is about something else" },
+    ];
+    let decision = reranker
+        .decide(
+            "New fact: Edge ships Nov 1. Existing fact: Edge ships Oct 15.",
+            "How do the facts relate?",
+            &options,
+        )
+        .unwrap();
+    assert!((decision.probabilities.iter().sum::<f32>() - 1.0).abs() < 1e-4);
 }
 
 #[test]

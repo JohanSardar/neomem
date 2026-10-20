@@ -40,7 +40,7 @@ impl LocalModel {
             .spawn(move || serve(&owned_path, prepare, &ready, &waiting))
             .map_err(|error| ModelError::Unavailable(format!("starting the llama.cpp thread: {error}")))?;
         let facts = loaded.recv().map_err(|_| stopped())??;
-        Ok((Self { id: ModelId::new(format!("llama.cpp:{}", file_stem(path))), jobs }, facts))
+        Ok((Self { id: local_model_id(path), jobs }, facts))
     }
 
     pub(crate) fn id(&self) -> ModelId {
@@ -60,6 +60,10 @@ impl LocalModel {
         self.jobs.send(job).map_err(|_| stopped())?;
         answer.recv().map_err(|_| stopped())?
     }
+}
+
+pub(crate) fn local_model_id(path: &Path) -> ModelId {
+    ModelId::new(format!("llama.cpp:{}", file_stem(path)))
 }
 
 pub(crate) fn context_threads() -> i32 {
