@@ -91,6 +91,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d902e3d592a523def97af8f317b08ce16b7ab854c1985a0c671e6f15cebc236"
 
 [[package]]
+name = "ascii"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d92bec98840b8f03a5ff5413de5293bfcd8bf96467cf5452609f939ec6f5de16"
+
+[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -226,6 +232,12 @@ name = "cfg-if"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
+
+[[package]]
+name = "chunked_transfer"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e4de3bc4ea267985becf712dc6d9eed8b04c953b3fcfb339ebc87acd9804901"
 
 [[package]]
 name = "clap"
@@ -864,6 +876,7 @@ dependencies = [
  "humantime",
  "neomem-core",
  "neomem-proto",
+ "neomem-testkit",
  "rusqlite",
  "serde",
  "serde-saphyr",
@@ -894,6 +907,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "neomem-models"
+version = "0.1.0"
+dependencies = [
+ "neomem-core",
+ "neomem-testkit",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+ "toml",
+ "tracing",
+ "ureq",
+]
+
+[[package]]
 name = "neomem-proto"
 version = "0.1.0"
 dependencies = [
@@ -916,6 +944,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "neomem-testkit"
+version = "0.1.0"
+dependencies = [
+ "neomem-core",
+ "serde",
+ "serde_json",
+ "tiny_http",
+]
+
+[[package]]
 name = "neomemd"
 version = "0.1.0"
 dependencies = [
@@ -923,6 +961,7 @@ dependencies = [
  "axum",
  "neomem-core",
  "neomem-engine",
+ "neomem-models",
  "neomem-proto",
  "serde",
  "serde_json",
@@ -1473,6 +1512,18 @@ checksum = "7e689342a48d2ea927c87ea50cabf8594854bf940e9310208848d680d668ed85"
 dependencies = [
  "num-conv",
  "time-core",
+]
+
+[[package]]
+name = "tiny_http"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "389915df6413a2e74fb181895f933386023c71110878cd0825588928e64cdc82"
+dependencies = [
+ "ascii",
+ "chunked_transfer",
+ "httpdate",
+ "log",
 ]
 
 [[package]]

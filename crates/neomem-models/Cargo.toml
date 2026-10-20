@@ -1,0 +1,22 @@
+[package]
+name = "neomem-models"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+neomem-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+ureq.workspace = true
+
+[dev-dependencies]
+neomem-testkit.workspace = true
+tempfile.workspace = true
+toml.workspace = true
+
+[lints]
+workspace = true
