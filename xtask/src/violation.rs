@@ -11,13 +11,6 @@ pub struct Violation {
 
 impl fmt::Display for Violation {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            formatter,
-            "[{}] {}:{}: {}",
-            self.check,
-            self.file.display(),
-            self.line,
-            self.message
-        )
+        write!(formatter, "[{}] {}:{}: {}", self.check, self.file.display(), self.line, self.message)
     }
 }

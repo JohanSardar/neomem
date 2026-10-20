@@ -1,6 +1,6 @@
 use anyhow::bail;
 
-use crate::graph::{self, Feature};
+use crate::graph::{Feature, FeatureGraph};
 use crate::{changes, repo};
 
 #[derive(Debug)]
@@ -12,16 +12,13 @@ pub enum Selection {
 
 pub fn run(selection: &Selection) -> anyhow::Result<bool> {
     let root = repo::root()?;
-    let features = graph::load(&repo::feature_graph_path(&root))?;
-    let chosen = choose(&features, selection, &root)?;
+    let graph = FeatureGraph::load(&repo::feature_graph_path(&root))?;
+    let chosen = choose(&graph.features, selection, &root)?;
     if chosen.is_empty() {
         eprintln!("prove: no features selected");
         return Ok(true);
     }
-    bail!(
-        "no proof scenarios exist yet for {} feature(s)",
-        chosen.len()
-    )
+    bail!("no proof scenarios exist yet for {} feature(s)", chosen.len())
 }
 
 fn choose<'graph>(

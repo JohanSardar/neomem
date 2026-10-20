@@ -1,5 +1,6 @@
 mod changes;
 mod graph;
+mod map;
 mod prove;
 mod repo;
 
@@ -8,10 +9,7 @@ use std::process::ExitCode;
 use clap::{Args, Parser, Subcommand};
 
 #[derive(Debug, Parser)]
-#[command(
-    name = "neomemctl",
-    about = "Control an isolated neomem and prove its features"
-)]
+#[command(name = "neomemctl", about = "Control an isolated neomem and prove its features")]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -20,6 +18,15 @@ struct Cli {
 #[derive(Debug, Subcommand)]
 enum Command {
     Prove(ProveArgs),
+    Map(MapArgs),
+}
+
+#[derive(Debug, Args)]
+struct MapArgs {
+    #[arg(long, conflicts_with = "status")]
+    next: bool,
+    #[arg(long)]
+    status: bool,
 }
 
 #[derive(Debug, Args)]
@@ -36,6 +43,7 @@ fn main() -> ExitCode {
     let cli = Cli::parse();
     let outcome = match cli.command {
         Command::Prove(args) => prove::run(&selection_from(args)),
+        Command::Map(args) => map::run(if args.next { map::View::Next } else { map::View::Status }),
     };
     match outcome {
         Ok(true) => ExitCode::SUCCESS,
