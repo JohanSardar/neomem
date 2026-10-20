@@ -4,6 +4,7 @@ mod codex;
 mod command;
 mod config;
 mod duration;
+mod fallback_judge;
 mod host;
 mod http;
 mod jev;
@@ -21,6 +22,7 @@ mod sse;
 
 pub use config::{ModelsConfig, ProviderConfig, ProviderKind, RoleConfig, RolesConfig};
 pub use duration::parse as parse_duration;
+pub use fallback_judge::FallbackJudge;
 pub use host::ModelHost;
 pub use jev::JevJudge;
 pub use llama_embedder::LlamaEmbedder;
