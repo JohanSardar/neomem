@@ -19,11 +19,7 @@ fn comparison_base(root: &Path) -> anyhow::Result<String> {
 }
 
 fn git(root: &Path, arguments: &[&str]) -> anyhow::Result<String> {
-    let output = Command::new("git")
-        .args(arguments)
-        .current_dir(root)
-        .output()
-        .context("running git")?;
+    let output = Command::new("git").args(arguments).current_dir(root).output().context("running git")?;
     if !output.status.success() {
         bail!("git {} failed", arguments.join(" "));
     }
