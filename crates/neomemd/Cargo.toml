@@ -20,5 +20,9 @@ toml.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 
+[features]
+vulkan = ["neomem-models/vulkan"]
+cuda = ["neomem-models/cuda"]
+
 [lints]
 workspace = true

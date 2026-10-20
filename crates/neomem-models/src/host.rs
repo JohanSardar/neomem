@@ -8,8 +8,11 @@ use neomem_core::{
 
 use crate::config::{ModelsConfig, ProviderConfig, ProviderKind, RoleConfig};
 use crate::jev::{self, JevJudge};
+use crate::llama_embedder::LlamaEmbedder;
 use crate::openai_embeddings::OpenAiEmbedder;
 use crate::{Secrets, duration};
+
+const LLAMA_CPP: &str = "llama.cpp";
 
 #[derive(Debug)]
 pub struct ModelHost {
@@ -45,6 +48,16 @@ impl ModelHost {
             .ok_or_else(|| ModelError::NotConfigured(format!("{role_name}: unknown provider {name}")))
     }
 
+    fn local_model_path(&self, role: &RoleConfig, role_name: &str) -> Result<Option<PathBuf>, ModelError> {
+        match role.runtime.as_deref() {
+            None => Ok(None),
+            Some(LLAMA_CPP) => role.file.as_deref().map(|file| Some(self.models_dir.join(file))).ok_or_else(
+                || ModelError::NotConfigured(format!("{role_name}: llama.cpp needs a model file")),
+            ),
+            Some(other) => Err(ModelError::NotConfigured(format!("{role_name}: unknown runtime {other}"))),
+        }
+    }
+
     fn key(&self, provider: &ProviderConfig) -> Option<String> {
         provider.key_env.as_deref().and_then(|name| self.secrets.get(name))
     }
@@ -69,6 +82,9 @@ impl ModelHost {
             .embedder
             .as_ref()
             .ok_or_else(|| ModelError::NotConfigured("embedder".into()))?;
+        if let Some(path) = self.local_model_path(role, "embedder")? {
+            return Ok(Arc::new(LlamaEmbedder::open(&path)?));
+        }
         let provider = self.provider(role, "embedder")?;
         match provider.kind {
             ProviderKind::Openai => {
