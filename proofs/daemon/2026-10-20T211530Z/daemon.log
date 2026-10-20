@@ -1,7 +1,0 @@
-2026-10-20T21:15:30.695240Z  INFO neomemd::http: HTTP listening on 127.0.0.1:37831
-2026-10-20T21:15:30.696090Z  INFO neomemd: neomemd serving /tmp/neomemctl-1sEzgI
-2026-10-20T21:15:30.773460Z  INFO neomem_engine::engine: engine flushed
-2026-10-20T21:15:30.773495Z  INFO neomemd::dispatch: neomemd shutting down on request
-2026-10-20T21:15:30.786223Z  INFO neomemd::http: HTTP listening on 127.0.0.1:46125
-2026-10-20T21:15:30.786590Z  INFO neomemd: neomemd serving /tmp/neomemctl-1sEzgI
-2026-10-20T21:15:30.786628Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-1sEzgI/run/neomemd.sock
