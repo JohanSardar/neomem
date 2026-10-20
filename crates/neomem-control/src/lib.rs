@@ -8,6 +8,7 @@ pub mod proof;
 pub mod prove;
 pub mod repo;
 pub mod scenarios;
+pub mod seed;
 pub mod session;
 pub mod surfaces;
 pub mod timing;

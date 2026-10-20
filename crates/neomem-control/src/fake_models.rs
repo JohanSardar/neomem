@@ -28,6 +28,9 @@ pub fn config_toml(address: &str) -> String {
 enabled = true
 port = 0
 
+[vault]
+commit_every = "1s"
+
 [providers]
 fake = {{ kind = "openai", base_url = "http://{address}/v1" }}
 fake_jev = {{ kind = "jev", base_url = "http://{address}", key_env = "NEOMEM_FAKE_JEV_KEY", model = "jev-fake" }}
