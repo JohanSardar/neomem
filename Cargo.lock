@@ -1295,11 +1295,15 @@ dependencies = [
 name = "neomem-models"
 version = "0.1.0"
 dependencies = [
+ "base64",
+ "form_urlencoded",
+ "getrandom 0.4.3",
  "llama-cpp-2",
  "neomem-core",
  "neomem-testkit",
  "serde",
  "serde_json",
+ "sha2",
  "tempfile",
  "thiserror",
  "toml",
@@ -1334,10 +1338,12 @@ dependencies = [
 name = "neomem-testkit"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "form_urlencoded",
  "neomem-core",
  "serde",
  "serde_json",
+ "sha2",
  "tiny_http",
  "ureq",
 ]

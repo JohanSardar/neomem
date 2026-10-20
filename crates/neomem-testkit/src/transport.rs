@@ -76,6 +76,7 @@ impl TimedEvent {
 pub enum Reply {
     Json(u16, Value),
     Events(Vec<TimedEvent>),
+    Redirect(String),
 }
 
 impl Reply {
@@ -97,6 +98,13 @@ impl Reply {
                 let _ = request.respond(response);
             }
             Self::Events(events) => stream(request, events),
+            Self::Redirect(location) => {
+                let mut response = Response::empty(302);
+                if let Ok(header) = Header::from_bytes("location", location.as_bytes()) {
+                    response = response.with_header(header);
+                }
+                let _ = request.respond(response);
+            }
         }
     }
 }

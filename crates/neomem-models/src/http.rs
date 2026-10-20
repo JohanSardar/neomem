@@ -37,6 +37,16 @@ pub fn post_json<Answer: DeserializeOwned>(
     read_json(response)
 }
 
+pub fn post_form<Answer: DeserializeOwned>(
+    agent: &ureq::Agent,
+    url: &str,
+    form: &[(&str, &str)],
+    timeout: Duration,
+) -> Result<Answer, ModelError> {
+    let sent = agent.post(url).send_form(form.iter().copied());
+    read_json(checked(sent, timeout)?)
+}
+
 pub fn post_stream(
     agent: &ureq::Agent,
     url: &str,
