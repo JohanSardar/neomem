@@ -1,29 +1,45 @@
 {
-  "code_version": "1d92a4d23ceb-dirty",
+  "code_version": "5eacf07b7e87-dirty",
   "results": [
     {
       "name": "socket_round_trip",
-      "p50_ms": 0.012,
-      "p95_ms": 0.026,
-      "max_ms": 0.356,
+      "p50_ms": 0.019,
+      "p95_ms": 0.021,
+      "max_ms": 0.929,
       "samples": 2000,
       "budget_ms": 0.5
     },
     {
       "name": "client_status_end_to_end",
-      "p50_ms": 1.249,
-      "p95_ms": 2.168,
-      "max_ms": 3.074,
+      "p50_ms": 2.083,
+      "p95_ms": 5.086,
+      "max_ms": 7.175,
       "samples": 200,
       "budget_ms": 5.0
     },
     {
       "name": "client_add_end_to_end",
-      "p50_ms": 0.993,
-      "p95_ms": 1.077,
-      "max_ms": 1.348,
+      "p50_ms": 3.831,
+      "p95_ms": 6.149,
+      "max_ms": 6.954,
       "samples": 200,
       "budget_ms": 50.0
+    },
+    {
+      "name": "search_socket_real_embedder",
+      "p50_ms": 68.02,
+      "p95_ms": 85.045,
+      "max_ms": 121.989,
+      "samples": 60,
+      "budget_ms": 30.0
+    },
+    {
+      "name": "search_end_to_end_real_embedder",
+      "p50_ms": 67.977,
+      "p95_ms": 91.638,
+      "max_ms": 125.949,
+      "samples": 60,
+      "budget_ms": 30.0
     }
   ]
 }

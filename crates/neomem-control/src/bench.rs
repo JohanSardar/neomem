@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use anyhow::{Context, bail};
 use neomem_core::ModelRole;
-use neomem_proto::{Client, Request, Response};
+use neomem_proto::{Client, Request, Response, SearchQuery};
 use serde::{Deserialize, Serialize};
 
 use crate::binaries::Binaries;
@@ -13,6 +13,7 @@ use crate::isolated::{IsolatedNeomem, Models};
 use crate::model_files::{self, ModelFile};
 use crate::repo;
 use crate::scenarios::models_embed::distinct_queries;
+use crate::seed;
 use crate::timing::{self, Percentiles};
 
 const REGRESSION_TOLERANCE: f64 = 1.05;
@@ -87,11 +88,55 @@ fn latency_benches(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> {
         neomem.neomem(&["add", "bench note about the Edge release", "--source", "bench"])?;
         Ok(())
     })?;
-    Ok(vec![
+    let mut results = vec![
         BenchResult::from("socket_round_trip", 2000, Some(0.5), socket),
         BenchResult::from("client_status_end_to_end", 200, Some(5.0), status),
         BenchResult::from("client_add_end_to_end", 200, Some(50.0), add),
+    ];
+    results.extend(search_benches(binaries)?);
+    Ok(results)
+}
+
+fn search_benches(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> {
+    let root = repo::root()?;
+    model_files::ensure(&repo::shared_models_dir(&root), model_files::ALL)?;
+    let neomem = IsolatedNeomem::start_with(binaries, Models::Real)?;
+    seed::copy_vault_fixture("workspace", neomem.home().root())?;
+    wait_for_facts(&neomem, 13)?;
+    let queries = distinct_queries();
+    let mut asked = queries.iter().cycle();
+    let mut client = neomem.client()?;
+    let socket = timing::measure(60, || {
+        let text = asked.next().map_or("Edge", String::as_str);
+        client.call(Request::Search(SearchQuery {
+            text: format!("{text} search"),
+            ..SearchQuery::default()
+        }))?;
+        Ok(())
+    })?;
+    let mut asked = queries.iter().cycle();
+    let end_to_end = timing::measure(60, || {
+        let text = asked.next().map_or("Edge", String::as_str);
+        neomem.neomem(&["search", &format!("{text} end to end")])?;
+        Ok(())
+    })?;
+    Ok(vec![
+        BenchResult::from("search_socket_real_embedder", 60, Some(30.0), socket),
+        BenchResult::from("search_end_to_end_real_embedder", 60, Some(30.0), end_to_end),
     ])
+}
+
+fn wait_for_facts(neomem: &IsolatedNeomem, facts: usize) -> anyhow::Result<()> {
+    let deadline = std::time::Instant::now() + Duration::from_secs(120);
+    while std::time::Instant::now() < deadline {
+        if let Response::Status(status) = neomem.client()?.call(Request::Status)?
+            && status.index.is_some_and(|index| index.facts >= facts && index.vectors >= facts)
+        {
+            return Ok(());
+        }
+        std::thread::sleep(Duration::from_millis(200));
+    }
+    anyhow::bail!("the bench vault was not indexed in time")
 }
 
 fn to_microseconds(millis: f64) -> f64 {
