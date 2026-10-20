@@ -20,14 +20,27 @@ impl Binaries {
 
     pub fn build_fresh(root: &Path) -> anyhow::Result<Self> {
         let release = std::env::current_exe()?.components().any(|part| part.as_os_str() == "release");
-        let mut build = Command::new("cargo");
-        build.args(["build", "--quiet", "--package", "neomemd", "--package", "neomem-cli"]).current_dir(root);
-        if release {
-            build.arg("--release");
-        }
-        if !build.status().context("running cargo build")?.success() {
-            bail!("building neomemd and neomem failed");
-        }
+        build(root, release)?;
         Self::beside_this_executable()
     }
+
+    pub fn build_release(root: &Path) -> anyhow::Result<Self> {
+        build(root, true)?;
+        let target = std::env::var_os("CARGO_TARGET_DIR")
+            .map_or_else(|| root.join("target"), std::path::PathBuf::from);
+        let directory = target.join("release");
+        Ok(Self { neomem: directory.join("neomem"), neomemd: directory.join("neomemd") })
+    }
+}
+
+fn build(root: &Path, release: bool) -> anyhow::Result<()> {
+    let mut build = Command::new("cargo");
+    build.args(["build", "--quiet", "--package", "neomemd", "--package", "neomem-cli"]).current_dir(root);
+    if release {
+        build.arg("--release");
+    }
+    if !build.status().context("running cargo build")?.success() {
+        bail!("building neomemd and neomem failed");
+    }
+    Ok(())
 }

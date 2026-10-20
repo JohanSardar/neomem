@@ -1,3 +1,4 @@
+pub mod bench;
 pub mod binaries;
 pub mod changes;
 pub mod fake_models;
