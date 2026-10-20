@@ -18,6 +18,7 @@ fn print_human(response: &Response) {
     match response {
         Response::Status(report) => print_status(report),
         Response::ShuttingDown => println!("neomemd is shutting down"),
+        Response::Added(receipt) => println!("{}", receipt.id),
         Response::VersionMismatch { daemon, client } => {
             eprintln!("neomemd speaks protocol {daemon}, this neomem speaks {client}");
         }

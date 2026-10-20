@@ -137,7 +137,8 @@ mod tests {
 
     #[test]
     fn ordinary_prose_and_urls_are_untouched() {
-        let text = "Edge ships Nov 1. See https://example.com/docs:intro and the sk-learn notes; keyboard=fine";
+        let text =
+            "Edge ships Nov 1. See https://example.com/docs:intro and the sk-learn notes; keyboard=fine";
         assert_eq!(redact_secrets(text), text);
     }
 }

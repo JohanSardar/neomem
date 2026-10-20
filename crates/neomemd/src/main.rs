@@ -46,6 +46,7 @@ fn run() -> anyhow::Result<()> {
 fn open_engine(home: &Home) -> anyhow::Result<Engine> {
     let parts = EngineParts {
         home: home.root().to_path_buf(),
+        state_db: home.state_db_path(),
         clock: Arc::new(SystemClock),
         daemon_version: env!("CARGO_PKG_VERSION").to_owned(),
     };

@@ -1,3 +1,4 @@
+use neomem_core::IntakeRecord;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -5,4 +6,5 @@ use serde::{Deserialize, Serialize};
 pub enum Request {
     Status,
     Shutdown,
+    Add(IntakeRecord),
 }
