@@ -16,6 +16,7 @@ pub enum Command {
     Raw(RawArgs),
     Correct(CorrectArgs),
     Rebuild,
+    Search(SearchArgs),
     Resolve { name: String },
     Entity { name: String },
     Show { id: String },
@@ -28,6 +29,27 @@ pub struct CorrectArgs {
     pub intake: String,
     #[arg(long)]
     pub reason: String,
+}
+
+#[derive(Debug, Args)]
+pub struct SearchArgs {
+    pub text: String,
+    #[arg(long)]
+    pub k: Option<usize>,
+    #[arg(long, value_delimiter = ',')]
+    pub tags: Vec<String>,
+    #[arg(long, value_delimiter = ',')]
+    pub entities: Vec<String>,
+    #[arg(long)]
+    pub from: Option<String>,
+    #[arg(long)]
+    pub to: Option<String>,
+    #[arg(long)]
+    pub as_of: Option<String>,
+    #[arg(long)]
+    pub include_invalid: bool,
+    #[arg(long)]
+    pub include_hidden: bool,
 }
 
 #[derive(Debug, Args)]

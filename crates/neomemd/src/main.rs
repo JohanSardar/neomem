@@ -62,6 +62,7 @@ fn open_engine(home: &Home, config: &DaemonConfig, clock: Arc<DaemonClock>) -> a
         commit_policy: config.vault.policy()?,
         clock,
         nightly_at: config.schedule.nightly_at()?,
+        search_config: config.search,
         daemon_version: env!("CARGO_PKG_VERSION").to_owned(),
     };
     Ok(Engine::open(parts)?)

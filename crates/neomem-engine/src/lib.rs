@@ -10,6 +10,7 @@ mod notice;
 mod raw;
 mod reply;
 mod schedule;
+mod search;
 mod spool;
 mod status;
 

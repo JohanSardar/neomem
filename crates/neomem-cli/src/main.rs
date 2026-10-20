@@ -43,6 +43,7 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
         Command::Entity { name } => Request::Entity { name: name.clone() },
         Command::Show { id } => Request::Show { id: id.parse()? },
         Command::Rebuild => Request::Rebuild,
+        Command::Search(arguments) => Request::Search(intake_record::search_query(arguments)?),
         Command::Correct(arguments) => {
             Request::Correct { intake: arguments.intake.parse()?, reason: arguments.reason.clone() }
         }

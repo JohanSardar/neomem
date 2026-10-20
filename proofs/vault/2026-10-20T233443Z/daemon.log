@@ -1,0 +1,7 @@
+2026-10-20T23:34:43.182649Z  INFO neomemd::http: HTTP listening on 127.0.0.1:36177
+2026-10-20T23:34:43.182936Z  INFO neomemd: neomemd serving /tmp/neomemctl-LIWqDu
+2026-10-20T23:34:43.183189Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-20T23:34:44.450319Z  INFO neomem_engine::maintenance: committed 4 vault changes
+2026-10-20T23:34:47.208747Z  INFO neomem_engine::maintenance: committed 1 vault changes
+2026-10-20T23:34:48.851502Z  WARN neomem_engine::notice: vault file fct_01M5AAAAAAAAAAAAAAAAAAAAAA is malformed and was not indexed
+2026-10-20T23:34:49.984780Z  INFO neomem_engine::maintenance: committed 1 vault changes

@@ -1,4 +1,4 @@
-use neomem_core::{EpochMs, IntakeId, IntakeRecord, MemoryId, ModelRole, Source};
+use neomem_core::{EpochMs, IntakeId, IntakeRecord, MemoryId, ModelRole, Source, Tag};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -14,6 +14,7 @@ pub enum Request {
     },
     Rebuild,
     CheckDrift,
+    Search(SearchQuery),
     SetClock {
         now: EpochMs,
     },
@@ -42,6 +43,29 @@ pub enum Request {
     LoginFinish {
         provider: String,
     },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub struct SearchQuery {
+    pub text: String,
+    #[serde(default)]
+    pub k: Option<usize>,
+    #[serde(default)]
+    pub tags: Vec<Tag>,
+    #[serde(default)]
+    pub entities: Vec<String>,
+    #[serde(default)]
+    pub from: Option<EpochMs>,
+    #[serde(default)]
+    pub to: Option<EpochMs>,
+    #[serde(default)]
+    pub as_of: Option<EpochMs>,
+    #[serde(default)]
+    pub include_invalid: bool,
+    #[serde(default)]
+    pub include_hidden: bool,
+    #[serde(default)]
+    pub trace: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

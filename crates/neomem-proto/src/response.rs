@@ -1,6 +1,6 @@
 use neomem_core::{
-    Direction, Entity, EntityId, EpochMs, Fact, IntakeId, IntakeRecord, Label, LinkKind, MemoryId, ModelRole,
-    RoleAssignment, Source, Span, Tag,
+    Direction, Entity, EntityId, EpochMs, Fact, FactId, IntakeId, IntakeRecord, Label, LinkKind, MemoryId,
+    ModelRole, RoleAssignment, Source, Span, Tag,
 };
 use serde::{Deserialize, Serialize};
 
@@ -13,6 +13,7 @@ pub enum Response {
     Corrected(CorrectionReceipt),
     Rebuilt(RebuildReport),
     DriftChecked(DriftReport),
+    SearchResults(Box<SearchResults>),
     ClockSet { now: EpochMs },
     Resolved(Vec<ResolvedEntity>),
     Entity(Box<EntityView>),
@@ -154,4 +155,52 @@ pub struct DriftReport {
     pub missing_files: usize,
     pub unreadable: usize,
     pub took_ms: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SearchResults {
+    pub hits: Vec<SearchHit>,
+    pub model: String,
+    #[serde(default)]
+    pub trace: Option<SearchTrace>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SearchHit {
+    pub fact: Fact,
+    pub score: f32,
+    pub similarity: f32,
+    pub decay: f32,
+    pub replaced: Vec<FactId>,
+    pub conflict: bool,
+    pub linked: Vec<LinkedFact>,
+    pub entities: Vec<EntityRef>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct LinkedFact {
+    pub fact: Fact,
+    pub kind: LinkKind,
+    pub direction: Direction,
+    pub usefulness: f32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct EntityRef {
+    pub id: EntityId,
+    pub name: String,
+    pub kind: Label,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SearchTrace {
+    pub embed_ms: f64,
+    pub seeds_ms: f64,
+    pub latest_ms: f64,
+    pub links_ms: f64,
+    pub rank_ms: f64,
+    pub total_ms: f64,
+    pub seeds: usize,
+    pub after_latest: usize,
+    pub linked_kept: usize,
 }

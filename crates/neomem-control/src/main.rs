@@ -26,6 +26,13 @@ enum Command {
     Prove(ProveArgs),
     Map(MapArgs),
     Bench(BenchArgs),
+    Trace {
+        #[arg(value_parser = ["search"])]
+        what: String,
+        text: String,
+        #[arg(long)]
+        home: Option<PathBuf>,
+    },
     FetchModels,
     #[command(hide = true)]
     FakeModels {
@@ -86,6 +93,7 @@ fn main() -> ExitCode {
         Command::Logs(args) => session::logs(args.home.as_deref()),
         Command::Prove(args) => prove::run(&selection_from(args)),
         Command::Map(args) => map::run(map_view(&args)),
+        Command::Trace { text, home, .. } => session::trace_search(&text, home.as_deref()),
         Command::Bench(args) if args.kind == "models" => bench::models(),
         Command::Bench(args) => bench::run(args.save_baseline),
         Command::FetchModels => model_files::fetch_all(),

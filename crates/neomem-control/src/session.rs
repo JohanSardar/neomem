@@ -98,3 +98,38 @@ fn clock_value(value: &str) -> anyhow::Result<neomem_core::EpochMs> {
         )),
     }
 }
+
+pub fn trace_search(text: &str, home: Option<&Path>) -> anyhow::Result<bool> {
+    let home = resolve_home(home)?;
+    let query = neomem_proto::SearchQuery {
+        text: text.to_owned(),
+        trace: true,
+        ..neomem_proto::SearchQuery::default()
+    };
+    let response =
+        Client::connect(&home, std::time::Duration::from_secs(30))?.call(Request::Search(query))?;
+    let neomem_proto::Response::SearchResults(results) = response else {
+        println!("{}", serde_json::to_string(&response)?);
+        return Ok(false);
+    };
+    if let Some(trace) = &results.trace {
+        println!("embed the query       {:>8.3} ms  ({})", trace.embed_ms, results.model);
+        println!("vector seeds          {:>8.3} ms  {} seeds", trace.seeds_ms, trace.seeds);
+        println!("swap in latest        {:>8.3} ms  {} after merging", trace.latest_ms, trace.after_latest);
+        println!("rank                  {:>8.3} ms", trace.rank_ms);
+        println!("one hop               {:>8.3} ms  {} linked kept", trace.links_ms, trace.linked_kept);
+        println!("total in the daemon   {:>8.3} ms", trace.total_ms);
+    }
+    for (rank, hit) in results.hits.iter().enumerate() {
+        println!(
+            "{}. {:.3} (similarity {:.3}, decay {:.2}) {}  {}",
+            rank + 1,
+            hit.score,
+            hit.similarity,
+            hit.decay,
+            hit.fact.id(),
+            hit.fact.content()
+        );
+    }
+    Ok(true)
+}

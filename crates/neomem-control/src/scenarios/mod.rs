@@ -10,6 +10,7 @@ mod models_judge;
 mod models_llm;
 mod models_swap;
 mod raw;
+mod search;
 mod spool;
 pub mod support;
 mod vault;
@@ -38,6 +39,7 @@ pub const ALL: &[Scenario] = &[
     Scenario { name: "models-llm", run: models_llm::prove },
     Scenario { name: "models-embed", run: models_embed::prove },
     Scenario { name: "models-judge", run: models_judge::prove },
+    Scenario { name: "search", run: search::prove },
 ];
 
 pub fn find(name: &str) -> Option<Scenario> {

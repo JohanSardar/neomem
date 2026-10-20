@@ -1,6 +1,7 @@
 use std::fs;
 
 use anyhow::Context;
+use neomem_core::SearchConfig;
 use neomem_engine::{CommitPolicy, NightlyAt};
 use neomem_models::{ModelsConfig, parse_duration};
 use neomem_proto::Home;
@@ -28,6 +29,8 @@ pub struct DaemonConfig {
     pub vault: VaultConfig,
     #[serde(default)]
     pub schedule: ScheduleConfig,
+    #[serde(default)]
+    pub search: SearchConfig,
     #[serde(default)]
     pub dev: DevConfig,
     #[serde(flatten)]
