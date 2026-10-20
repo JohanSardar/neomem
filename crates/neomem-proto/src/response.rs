@@ -8,6 +8,7 @@ pub enum Response {
     Added(AddReceipt),
     RawHits(Vec<RawHit>),
     Corrected(CorrectionReceipt),
+    Rebuilt(RebuildReport),
     ModelRoster(Vec<RoleAssignment>),
     ModelTested(ModelTestReport),
     LoginOpened { provider: String, url: String },
@@ -24,6 +25,25 @@ pub struct StatusReport {
     pub home: String,
     pub pid: u32,
     pub uptime_ms: i64,
+    #[serde(default)]
+    pub index: Option<IndexReport>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IndexReport {
+    pub facts: usize,
+    pub entities: usize,
+    pub links: usize,
+    pub names: usize,
+    pub vectors: usize,
+    pub model: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RebuildReport {
+    pub index: IndexReport,
+    pub unreadable_files: usize,
+    pub took_ms: i64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

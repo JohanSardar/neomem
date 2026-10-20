@@ -12,6 +12,7 @@ pub enum Request {
         intake: IntakeId,
         reason: String,
     },
+    Rebuild,
     Models,
     ModelsTest {
         role: ModelRole,
