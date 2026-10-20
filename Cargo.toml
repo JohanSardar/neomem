@@ -10,11 +10,22 @@ repository = "https://github.com/JohanSardar/neomem"
 publish = false
 
 [workspace.dependencies]
+neomem-core = { path = "crates/neomem-core" }
+neomem-proto = { path = "crates/neomem-proto" }
+neomem-engine = { path = "crates/neomem-engine" }
+axum = "=0.8.9"
+thiserror = "=2.0.21"
+tokio = { version = "=1.54.0", features = ["rt-multi-thread", "net", "signal", "sync", "macros", "time"] }
+toml = "=1.1.8"
+tracing = "=0.1.44"
+tracing-subscriber = { version = "=0.3.23", features = ["env-filter"] }
+ureq = { version = "=3.4.2", features = ["json"] }
 anyhow = "=1.0.104"
 cargo_metadata = "=0.23.1"
 clap = { version = "=4.6.7", features = ["derive"] }
 serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = "=1.0.154"
+syn = { version = "=3.0.9", default-features = false, features = ["full", "parsing", "visit"] }
 tempfile = "=3.27.0"
 humantime = "=2.4.0"
 serde-saphyr = "=2.0.0"
@@ -30,6 +41,7 @@ pedantic = { level = "warn", priority = -1 }
 missing_errors_doc = "allow"
 missing_panics_doc = "allow"
 must_use_candidate = "allow"
+return_self_not_must_use = "allow"
 unwrap_used = "warn"
 expect_used = "warn"
 panic = "warn"
