@@ -1,18 +1,16 @@
 use std::fs;
-use std::thread;
-use std::time::{Duration, Instant};
 
-use neomem_proto::{IndexReport, Request, Response};
+use neomem_proto::{IndexReport, Response};
 use rusqlite::{Connection, OpenFlags, OptionalExtension};
 
 use crate::binaries::Binaries;
 use crate::isolated::IsolatedNeomem;
 use crate::proof::ProofRun;
+use crate::scenarios::support;
 use crate::seed;
 
 const OCTOBER: &str = "fct_01M56PJAD08JBX4FR84G98PBSK";
 const NOVEMBER: &str = "fct_01M59NY2N09AC5V7E9Z0C1HT0H";
-const WAIT: Duration = Duration::from_secs(8);
 
 pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     let mut neomem = IsolatedNeomem::start(binaries)?;
@@ -27,26 +25,12 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn index_report(neomem: &IsolatedNeomem, proof: &mut ProofRun) -> anyhow::Result<Option<IndexReport>> {
-    Ok(match neomem.call(proof, Request::Status)? {
-        Response::Status(status) => status.index,
-        _ => None,
-    })
-}
-
 fn wait_for_facts(
     neomem: &IsolatedNeomem,
     proof: &mut ProofRun,
     facts: usize,
 ) -> anyhow::Result<Option<IndexReport>> {
-    let deadline = Instant::now() + WAIT;
-    loop {
-        let report = index_report(neomem, proof)?;
-        if report.as_ref().is_some_and(|report| report.facts >= facts) || Instant::now() > deadline {
-            return Ok(report);
-        }
-        thread::sleep(Duration::from_millis(100));
-    }
+    support::wait_for_index(neomem, proof, facts, 0)
 }
 
 fn index_db(neomem: &IsolatedNeomem) -> anyhow::Result<Connection> {

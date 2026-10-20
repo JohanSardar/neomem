@@ -2,36 +2,36 @@
   "feature": "daemon",
   "scenario": "daemon",
   "passed": true,
-  "started_at": "2026-10-20T212156Z",
-  "duration_ms": 264,
-  "code_version": "7819e28cbfb3-dirty",
+  "started_at": "2026-10-20T214559Z",
+  "duration_ms": 135,
+  "code_version": "ce054a6dba6f-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "status over the socket names the current protocol and the isolated home",
       "passed": true,
-      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-7Tfle7\", pid: 2686005, uptime_ms: 45, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-Xj13QG\", pid: 2699891, uptime_ms: 18, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
     },
     {
       "claim": "a socket request and reply takes under 0.5 ms at the median",
       "passed": true,
-      "detail": "p50 0.047 ms, p95 0.062 ms, max 2.081 ms"
+      "detail": "p50 0.033 ms, p95 0.041 ms, max 0.173 ms"
     },
     {
       "claim": "neomem status --json prints the daemon's status",
       "passed": true,
-      "detail": "{\"reply\":\"status\",\"body\":{\"daemon_version\":\"0.1.0\",\"protocol\":1,\"home\":\"/tmp/neomemctl-7Tfle7\",\"pid\":2686005,\"uptime_ms\":61,\"index\":{\"facts\":0,\"entities\":0,\"links\":0,\"names\":0,\"vectors\":0,\"model\":\"openai:hash-256\"}}}\n"
+      "detail": "{\"reply\":\"status\",\"body\":{\"daemon_version\":\"0.1.0\",\"protocol\":1,\"home\":\"/tmp/neomemctl-Xj13QG\",\"pid\":2699891,\"uptime_ms\":27,\"index\":{\"facts\":0,\"entities\":0,\"links\":0,\"names\":0,\"vectors\":0,\"model\":\"openai:hash-256\"}}}\n"
     },
     {
       "claim": "neomem status answers end to end within 25 ms at the median (the 2-5 ms budget is checked by neomemctl bench on release builds)",
       "passed": true,
-      "detail": "p50 3.945 ms, p95 5.878 ms, max 5.884 ms"
+      "detail": "p50 1.529 ms, p95 1.870 ms, max 2.068 ms"
     },
     {
       "claim": "HTTP POST /v1/request answers status with the same handler",
       "passed": true,
-      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-7Tfle7\", pid: 2686005, uptime_ms: 144, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-Xj13QG\", pid: 2699891, uptime_ms: 60, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
     },
     {
       "claim": "a client on another protocol version gets version_mismatch",
@@ -46,12 +46,12 @@
     {
       "claim": "neomem status starts a stopped daemon and answers within 2 seconds",
       "passed": true,
-      "detail": "26.312735ms"
+      "detail": "23.950225ms"
     },
     {
       "claim": "a home too long for a Unix socket path still gets a working socket elsewhere",
       "passed": true,
-      "detail": "/run/user/1000/neomem-184a481268450f0f.sock"
+      "detail": "/run/user/1000/neomem-4a3291d2585b2dce.sock"
     }
   ]
 }

@@ -16,6 +16,9 @@ pub enum Command {
     Raw(RawArgs),
     Correct(CorrectArgs),
     Rebuild,
+    Resolve { name: String },
+    Entity { name: String },
+    Show { id: String },
     Models(ModelsArgs),
     Login(LoginArgs),
 }
