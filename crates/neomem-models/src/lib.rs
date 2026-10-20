@@ -1,4 +1,5 @@
 mod anthropic;
+mod chatgpt;
 mod codex;
 mod command;
 mod config;
