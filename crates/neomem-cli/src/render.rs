@@ -3,7 +3,7 @@ use std::process::ExitCode;
 
 use crate::time_argument;
 
-use neomem_proto::{IndexReport, RawHit, RebuildReport, Response, StatusReport};
+use neomem_proto::{EntityView, IndexReport, RawHit, RebuildReport, Response, ShownMemory, StatusReport};
 
 pub fn print(response: &Response, json: bool) -> ExitCode {
     if json {
@@ -34,6 +34,13 @@ fn print_human(response: &Response) {
         Response::RawHits(hits) => print_raw_hits(hits),
         Response::Corrected(receipt) => println!("{} is marked as logged incorrectly", receipt.intake),
         Response::Rebuilt(report) => print_rebuilt(report),
+        Response::Resolved(found) => {
+            for entity in found {
+                println!("{}  {} ({})", entity.id, entity.name, entity.kind);
+            }
+        }
+        Response::Entity(view) => print_entity(view),
+        Response::Shown(shown) => print_shown(shown),
         Response::ModelRoster(roster) => {
             for assignment in roster {
                 println!("{:<13} {}", assignment.role.name(), assignment.assignment);
@@ -100,4 +107,39 @@ fn print_index(index: &IndexReport) {
         index.vectors,
         index.model.as_deref().unwrap_or("no embedder")
     );
+}
+
+fn print_entity(view: &EntityView) {
+    let entity = &view.entity;
+    println!("{}  {} ({})", entity.id(), entity.name(), entity.kind());
+    if !entity.aliases().is_empty() {
+        println!("also     {}", entity.aliases().join(", "));
+    }
+    if !entity.description().is_empty() {
+        println!("about    {}", entity.description());
+    }
+    for fact in &view.facts {
+        println!(
+            "  {}  {}  (valid since {})",
+            fact.id(),
+            fact.content(),
+            time_argument::display(fact.valid_at())
+        );
+    }
+    for linked in &view.linked {
+        println!("  {} {}  {}", linked.kind, linked.entity.name(), linked.entity.id());
+    }
+}
+
+fn print_shown(shown: &ShownMemory) {
+    print!("{}", shown.text);
+    for source in &shown.sources {
+        let corrected = if source.corrected { "  [corrected]" } else { "" };
+        match &source.record {
+            Some(record) => {
+                println!("source {} ({}){corrected}: {}", source.id, record.source, record.content);
+            }
+            None => println!("source {} is not in the intake log", source.id),
+        }
+    }
 }
