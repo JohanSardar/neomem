@@ -69,6 +69,6 @@ fn open_engine(home: &Home, config: &DaemonConfig, clock: Arc<DaemonClock>) -> a
 
 fn init_logging() {
     let filter = tracing_subscriber::EnvFilter::try_from_env("NEOMEM_LOG")
-        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info,llama-cpp-2=warn"));
     tracing_subscriber::fmt().with_env_filter(filter).with_writer(std::io::stderr).with_ansi(false).init();
 }

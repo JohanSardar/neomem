@@ -9,6 +9,7 @@ publish.workspace = true
 base64.workspace = true
 form_urlencoded.workspace = true
 getrandom.workspace = true
+llama-cpp-2.workspace = true
 neomem-core.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -16,6 +17,13 @@ sha2.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
 ureq.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+llama-cpp-2 = { workspace = true, features = ["metal"] }
+
+[features]
+vulkan = ["llama-cpp-2/vulkan"]
+cuda = ["llama-cpp-2/cuda"]
 
 [dev-dependencies]
 neomem-testkit.workspace = true

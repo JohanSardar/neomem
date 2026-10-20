@@ -8,10 +8,13 @@ mod host;
 mod http;
 mod jev;
 mod json_schema;
+mod llama;
+mod llama_embedder;
 mod llm;
 mod openai_chat;
 mod openai_embeddings;
 mod openai_responses;
+mod query_cache;
 mod secrets;
 mod sse;
 
@@ -19,5 +22,7 @@ pub use config::{ModelsConfig, ProviderConfig, ProviderKind, RoleConfig, RolesCo
 pub use duration::parse as parse_duration;
 pub use host::ModelHost;
 pub use jev::JevJudge;
+pub use llama_embedder::LlamaEmbedder;
 pub use openai_embeddings::OpenAiEmbedder;
+pub use query_cache::QueryCache;
 pub use secrets::Secrets;
