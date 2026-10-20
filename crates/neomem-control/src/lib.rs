@@ -1,5 +1,6 @@
 pub mod binaries;
 pub mod changes;
+pub mod fake_models;
 pub mod graph;
 pub mod isolated;
 pub mod map;
