@@ -1,0 +1,59 @@
+mod config;
+mod dispatch;
+mod http;
+mod instance;
+mod socket;
+mod system_clock;
+
+use std::process::ExitCode;
+use std::sync::Arc;
+
+use anyhow::Context;
+use neomem_engine::{Engine, EngineParts};
+use neomem_proto::Home;
+
+use crate::config::DaemonConfig;
+use crate::instance::InstanceLock;
+use crate::system_clock::SystemClock;
+
+fn main() -> ExitCode {
+    init_logging();
+    match run() {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => {
+            tracing::error!("neomemd stopped: {error:#}");
+            ExitCode::FAILURE
+        }
+    }
+}
+
+fn run() -> anyhow::Result<()> {
+    let home = Home::from_env().context("neither NEOMEM_HOME nor HOME is set")?;
+    instance::prepare_home(&home)?;
+    let Some(lock) = InstanceLock::acquire(&home)? else {
+        tracing::info!("another neomemd already serves {}", home.root().display());
+        return Ok(());
+    };
+    let config = DaemonConfig::load_or_create(&home)?;
+    let engine = Arc::new(open_engine(&home)?);
+    http::start(Arc::clone(&engine), &config.http, &home)?;
+    tracing::info!("neomemd serving {}", home.root().display());
+    socket::serve(&engine, &home.socket_path())?;
+    drop(lock);
+    Ok(())
+}
+
+fn open_engine(home: &Home) -> anyhow::Result<Engine> {
+    let parts = EngineParts {
+        home: home.root().to_path_buf(),
+        clock: Arc::new(SystemClock),
+        daemon_version: env!("CARGO_PKG_VERSION").to_owned(),
+    };
+    Ok(Engine::open(parts)?)
+}
+
+fn init_logging() {
+    let filter = tracing_subscriber::EnvFilter::try_from_env("NEOMEM_LOG")
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+    tracing_subscriber::fmt().with_env_filter(filter).with_writer(std::io::stderr).with_ansi(false).init();
+}
