@@ -3,7 +3,7 @@ use std::process::ExitCode;
 
 use crate::time_argument;
 
-use neomem_proto::{RawHit, Response, StatusReport};
+use neomem_proto::{IndexReport, RawHit, RebuildReport, Response, StatusReport};
 
 pub fn print(response: &Response, json: bool) -> ExitCode {
     if json {
@@ -33,6 +33,7 @@ fn print_human(response: &Response) {
         Response::Added(receipt) => println!("{}", receipt.id),
         Response::RawHits(hits) => print_raw_hits(hits),
         Response::Corrected(receipt) => println!("{} is marked as logged incorrectly", receipt.intake),
+        Response::Rebuilt(report) => print_rebuilt(report),
         Response::ModelRoster(roster) => {
             for assignment in roster {
                 println!("{:<13} {}", assignment.role.name(), assignment.assignment);
@@ -65,6 +66,9 @@ fn print_status(report: &StatusReport) {
     println!("home     {}", report.home);
     println!("pid      {}", report.pid);
     println!("uptime   {} s", report.uptime_ms / 1000);
+    if let Some(index) = &report.index {
+        print_index(index);
+    }
 }
 
 fn print_raw_hits(hits: &[RawHit]) {
@@ -76,4 +80,24 @@ fn print_raw_hits(hits: &[RawHit]) {
         println!("{}  {}  {}{corrected}", time_argument::display(hit.occurred.start), hit.source, hit.id);
         println!("  {}", hit.content.replace('\n', "\n  "));
     }
+}
+
+fn print_rebuilt(report: &RebuildReport) {
+    println!(
+        "rebuilt index.db in {} ms ({} unreadable files skipped)",
+        report.took_ms, report.unreadable_files
+    );
+    print_index(&report.index);
+}
+
+fn print_index(index: &IndexReport) {
+    println!(
+        "index    {} facts, {} entities, {} links, {} names, {} vectors ({})",
+        index.facts,
+        index.entities,
+        index.links,
+        index.names,
+        index.vectors,
+        index.model.as_deref().unwrap_or("no embedder")
+    );
 }

@@ -2,6 +2,10 @@
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 git fetch --quiet origin main
+graph=.agents/skills/neomem-control/feature-graph.yaml
+proven_here=$(git show HEAD:$graph | awk '/^- id:/{id=$3} /^  status: proven/{print id}' | sort)
+proven_on_main=$(git show origin/main:$graph | awk '/^- id:/{id=$3} /^  status: proven/{print id}' | sort)
+reprove=$(comm -23 <(echo "$proven_here") <(echo "$proven_on_main") | tr '\n' ' ')
 if git merge --no-edit origin/main; then
   exit 0
 fi
@@ -16,3 +20,6 @@ if [ -n "$remaining" ]; then
 fi
 git commit --quiet --no-edit
 echo "merge-main: proofs and the feature graph took main's side; run cargo xtask ci to re-prove before pushing"
+if [ -n "${reprove// }" ]; then
+  echo "merge-main: also re-prove what this branch had proven: neomemctl prove <id> for: $reprove"
+fi
