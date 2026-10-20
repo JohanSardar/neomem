@@ -7,18 +7,17 @@ use std::sync::Arc;
 use std::thread;
 
 use anyhow::Context;
-use neomem_engine::Engine;
 use neomem_proto::{FrameError, IncomingEnvelope, read_frame, write_frame};
 
-use crate::dispatch::{dispatch, finish_if_shutting_down};
+use crate::dispatch::{Dispatcher, finish_if_shutting_down};
 
-pub fn serve(engine: &Arc<Engine>, socket_path: &Path) -> anyhow::Result<()> {
+pub fn serve(dispatcher: &Arc<Dispatcher>, socket_path: &Path) -> anyhow::Result<()> {
     let listener = bind(socket_path)?;
     for connection in listener.incoming() {
         match connection {
             Ok(stream) => {
-                let engine = Arc::clone(engine);
-                thread::spawn(move || serve_connection(&engine, stream));
+                let dispatcher = Arc::clone(dispatcher);
+                thread::spawn(move || serve_connection(&dispatcher, stream));
             }
             Err(error) => tracing::warn!("accepting a socket connection failed: {error}"),
         }
@@ -41,7 +40,7 @@ fn bind(socket_path: &Path) -> anyhow::Result<UnixListener> {
     Ok(listener)
 }
 
-fn serve_connection(engine: &Engine, mut stream: UnixStream) {
+fn serve_connection(dispatcher: &Dispatcher, mut stream: UnixStream) {
     loop {
         let incoming: IncomingEnvelope = match read_frame(&mut stream) {
             Ok(incoming) => incoming,
@@ -51,7 +50,7 @@ fn serve_connection(engine: &Engine, mut stream: UnixStream) {
                 return;
             }
         };
-        let response = dispatch(engine, incoming);
+        let response = dispatcher.dispatch(incoming);
         if let Err(error) = write_frame(&mut stream, &response) {
             tracing::warn!("replying on the socket failed: {error}");
             return;

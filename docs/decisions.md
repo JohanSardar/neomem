@@ -18,3 +18,6 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - §13.4 LLM roles without a `timeout` get 120 s.
 - §13.4 Chat Completions sends `max_tokens` (what OpenAI-compatible servers accept) and effort as `reasoning_effort`, or `reasoning.effort` when the base URL is OpenRouter; OpenAI itself is reached with `api = "responses"`. A server that ignores `stream` and answers with one JSON body is read as such.
 - §13.4 Anthropic effort goes to `output_config.effort` and thinking stays at the model's default (adaptive on current models); the system prompt carries `cache_control: ephemeral`; a request without a limit asks for 16,000 output tokens; thinking blocks never reach the text.
+- §9.4 / §6.3 The nightly jobs run at `[schedule] nightly_at` (default 03:00, local time via `jiff`); `croner` is not needed for one fixed daily time.
+- §17.2 `neomemctl set clock=…` works only on daemons started with `[dev] settable_clock = true` (written by neomemctl for isolated homes); the real daemon refuses it.
+- §9.4 The drift check repairs by re-indexing the differing files, and rebuilds when an indexed memory has lost its file, so the index always follows the files.

@@ -1,7 +1,7 @@
 use std::fs;
 
 use anyhow::Context;
-use neomem_engine::CommitPolicy;
+use neomem_engine::{CommitPolicy, NightlyAt};
 use neomem_models::{ModelsConfig, parse_duration};
 use neomem_proto::Home;
 use serde::Deserialize;
@@ -15,6 +15,9 @@ port = 47391
 [vault]
 commit_every = "30s"
 commit_after_changes = 50
+
+[schedule]
+nightly_at = "03:00"
 "#;
 
 #[derive(Debug, Clone, Deserialize)]
@@ -23,6 +26,10 @@ pub struct DaemonConfig {
     pub http: HttpConfig,
     #[serde(default)]
     pub vault: VaultConfig,
+    #[serde(default)]
+    pub schedule: ScheduleConfig,
+    #[serde(default)]
+    pub dev: DevConfig,
     #[serde(flatten)]
     pub models: ModelsConfig,
 }
@@ -33,6 +40,35 @@ pub struct HttpConfig {
     pub enabled: bool,
     #[serde(default = "default_port")]
     pub port: u16,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct DevConfig {
+    #[serde(default)]
+    pub settable_clock: bool,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ScheduleConfig {
+    #[serde(default = "default_nightly_at")]
+    pub nightly_at: String,
+}
+
+impl Default for ScheduleConfig {
+    fn default() -> Self {
+        Self { nightly_at: default_nightly_at() }
+    }
+}
+
+fn default_nightly_at() -> String {
+    "03:00".to_owned()
+}
+
+impl ScheduleConfig {
+    pub fn nightly_at(&self) -> anyhow::Result<NightlyAt> {
+        NightlyAt::parse(&self.nightly_at)
+            .ok_or_else(|| anyhow::anyhow!("[schedule] nightly_at `{}` is not HH:MM", self.nightly_at))
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
