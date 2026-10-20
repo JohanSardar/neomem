@@ -1,0 +1,6 @@
+2026-10-20T21:16:53.135823Z  INFO neomemd::http: HTTP listening on 127.0.0.1:33133
+2026-10-20T21:16:53.136145Z  INFO neomemd: neomemd serving /tmp/neomemctl-sdkIVI
+2026-10-20T21:16:54.397280Z  INFO neomem_engine::maintenance: committed 4 vault changes
+2026-10-20T21:16:57.165526Z  INFO neomem_engine::maintenance: committed 1 vault changes
+2026-10-20T21:16:58.778039Z  WARN neomem_engine::notice: vault file fct_01M5AAAAAAAAAAAAAAAAAAAAAA is malformed and was not indexed
+2026-10-20T21:16:59.938716Z  INFO neomem_engine::maintenance: committed 1 vault changes
