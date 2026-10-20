@@ -1,9 +1,11 @@
+use neomem_core::{EpochMs, IntakeId};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "reply", content = "body", rename_all = "snake_case")]
 pub enum Response {
     Status(StatusReport),
+    Added(AddReceipt),
     ShuttingDown,
     VersionMismatch { daemon: u32, client: u32 },
     Failed(Failure),
@@ -16,6 +18,12 @@ pub struct StatusReport {
     pub home: String,
     pub pid: u32,
     pub uptime_ms: i64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AddReceipt {
+    pub id: IntakeId,
+    pub recorded_at: EpochMs,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
