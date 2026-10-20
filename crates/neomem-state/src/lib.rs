@@ -2,7 +2,9 @@ mod connection;
 mod errors;
 mod intake;
 mod jobs;
+mod raw;
 mod schema;
 
 pub use connection::{StateDb, StateError};
 pub use jobs::{BatchKey, ExtractionJob};
+pub use raw::RawSearch;

@@ -36,6 +36,7 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
     let request = match &cli.command {
         Command::Status => Request::Status,
         Command::Add(arguments) => Request::Add(intake_record::from_arguments(arguments)?),
+        Command::Raw(arguments) => Request::Raw(intake_record::raw_query(arguments)?),
         Command::Models(arguments) => match &arguments.action {
             None => Request::Models,
             Some(ModelsAction::Test { role }) => Request::ModelsTest { role: role.model_role() },

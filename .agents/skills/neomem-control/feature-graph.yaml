@@ -28,8 +28,8 @@
   module: neomem-state (raw)
   depends_on: [intake]
   proof: raw
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/raw/2026-10-20T210213Z
 - id: correct
   does: marks an intake record as logged incorrectly, hides facts drawn only from it and queues them for re-checking
   reached_via: [neomem correct]
