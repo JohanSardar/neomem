@@ -25,14 +25,20 @@ fn print_human(response: &Response) {
             }
         }
         Response::ModelTested(report) => {
+            let first_text = report
+                .first_text_ms
+                .map(|first| format!(", first text after {first:.1} ms"))
+                .unwrap_or_default();
             println!(
-                "{} {} answered in {:.1} ms: {}",
+                "{} {} answered in {:.1} ms{first_text}: {}",
                 report.role.name(),
                 report.model,
                 report.latency_ms,
                 report.answer
             );
         }
+        Response::LoginOpened { url, .. } => println!("{url}"),
+        Response::LoggedIn { provider, account } => println!("signed in to {provider} as {account}"),
         Response::VersionMismatch { daemon, client } => {
             eprintln!("neomemd speaks protocol {daemon}, this neomem speaks {client}");
         }

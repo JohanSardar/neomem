@@ -8,6 +8,8 @@ pub enum Response {
     Added(AddReceipt),
     ModelRoster(Vec<RoleAssignment>),
     ModelTested(ModelTestReport),
+    LoginOpened { provider: String, url: String },
+    LoggedIn { provider: String, account: String },
     ShuttingDown,
     VersionMismatch { daemon: u32, client: u32 },
     Failed(Failure),
@@ -33,6 +35,8 @@ pub struct ModelTestReport {
     pub role: ModelRole,
     pub model: String,
     pub latency_ms: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub first_text_ms: Option<f64>,
     pub answer: String,
 }
 

@@ -27,6 +27,11 @@ impl DaemonConnection {
         Ok(Self { home: home.clone(), client })
     }
 
+    pub fn waiting_up_to(self, timeout: Duration) -> anyhow::Result<Self> {
+        self.client.set_timeout(timeout)?;
+        Ok(self)
+    }
+
     pub fn call(mut self, request: Request) -> anyhow::Result<Response> {
         let response = self.client.call(request.clone())?;
         if let Response::VersionMismatch { .. } = response {

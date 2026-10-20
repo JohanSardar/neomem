@@ -1,12 +1,14 @@
 mod args;
 mod connection;
 mod intake_record;
+mod login;
 mod render;
 mod time_argument;
 
 use std::process::ExitCode;
 
 use clap::Parser;
+use neomem_core::Source;
 use neomem_proto::{Home, Request, Response};
 
 use crate::args::{Cli, Command, ModelsAction};
@@ -30,8 +32,13 @@ fn run(cli: &Cli) -> anyhow::Result<Response> {
         Command::Add(arguments) => Request::Add(intake_record::from_arguments(arguments)?),
         Command::Models(arguments) => match &arguments.action {
             None => Request::Models,
-            Some(ModelsAction::Test { role }) => Request::ModelsTest { role: role.model_role() },
+            Some(ModelsAction::Test { role, source, structured }) => Request::ModelsTest {
+                role: role.model_role(),
+                source: source.as_deref().map(Source::new).transpose()?,
+                structured: *structured,
+            },
         },
+        Command::Login(arguments) => return login::run(&home, arguments),
     };
     DaemonConnection::open(&home)?.call(request)
 }

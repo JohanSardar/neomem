@@ -1,4 +1,4 @@
-use neomem_core::{IntakeRecord, ModelRole};
+use neomem_core::{IntakeRecord, ModelRole, Source};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -8,5 +8,17 @@ pub enum Request {
     Shutdown,
     Add(IntakeRecord),
     Models,
-    ModelsTest { role: ModelRole },
+    ModelsTest {
+        role: ModelRole,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        source: Option<Source>,
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        structured: bool,
+    },
+    Login {
+        provider: String,
+    },
+    LoginFinish {
+        provider: String,
+    },
 }

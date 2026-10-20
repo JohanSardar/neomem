@@ -9,3 +9,5 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - §13.2 Any crate may use `neomem-testkit` as a dev-dependency; runtime dependencies follow the §13.2 table, enforced by `cargo xtask check`.
 - §17.4 Clippy pedantic runs without `missing_errors_doc`, `missing_panics_doc` and `must_use_candidate`: the first two demand doc comments, which the no-comments rule bans, and the third asks for an attribute on nearly every getter.
 - §13.3 `Embedder::embed` takes a `Purpose` (query or document), because retrieval embedders such as EmbeddingGemma and Qwen3-Embedding use different prompts for each.
+- §13.4 `neomem models test <role>` also takes `--source <name>` (checks a `[models.extractor_by_source]` override) and `--structured` (checks structured output), and reports when the first streamed text arrived.
+- §13.4 `neomem login chatgpt` runs the sign-in in the daemon: the daemon binds the localhost callback, does PKCE, exchanges the code and writes `secrets.env`; the thin CLI only prints the address, opens the browser (`--no-browser` skips it) and waits up to 5 minutes, so it needs no HTTP client.

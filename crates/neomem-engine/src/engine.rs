@@ -6,6 +6,7 @@ use neomem_proto::{Request, Response};
 use neomem_state::StateDb;
 
 use crate::ids::IdMint;
+use crate::models::ModelProbe;
 
 #[derive(Debug)]
 pub struct EngineParts {
@@ -56,7 +57,11 @@ impl Engine {
             }
             Request::Add(record) => self.add(record),
             Request::Models => self.model_roster(),
-            Request::ModelsTest { role } => self.test_model(role),
+            Request::ModelsTest { role, source, structured } => {
+                self.test_model(ModelProbe { role, source: source.as_ref(), structured })
+            }
+            Request::Login { provider } => self.start_login(provider),
+            Request::LoginFinish { provider } => self.finish_login(provider),
         }
     }
 
