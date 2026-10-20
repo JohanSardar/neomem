@@ -3,6 +3,7 @@ mod daemon;
 mod entity;
 mod index;
 mod intake;
+mod models_embed;
 mod models_llm;
 mod raw;
 mod spool;
@@ -28,6 +29,7 @@ pub const ALL: &[Scenario] = &[
     Scenario { name: "correct", run: correct::prove },
     Scenario { name: "entity", run: entity::prove },
     Scenario { name: "models-llm", run: models_llm::prove },
+    Scenario { name: "models-embed", run: models_embed::prove },
 ];
 
 pub fn find(name: &str) -> Option<Scenario> {
