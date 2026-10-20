@@ -11,3 +11,4 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - §13.3 `Embedder::embed` takes a `Purpose` (query or document), because retrieval embedders such as EmbeddingGemma and Qwen3-Embedding use different prompts for each.
 - §13.1 Spool files are removed once the daemon has handled them, and unreadable ones move to `spool/rejected/`; the spool is a transient queue, not memory. A crash between logging and removal can log a spooled add twice, which §2.4 already allows (no dedupe keys).
 - §13.1 A write (`neomem add`) never starts the daemon: if neomemd is down it is spooled at once and drained on the next start; reads start the daemon and wait up to 2 s.
+- §13.5 Proof scenarios run debug builds while other work shares the machine, so their timing claims are sanity bounds; the §13.5 budgets themselves are checked by `neomemctl bench` on release builds.
