@@ -173,6 +173,10 @@ impl IsolatedNeomem {
         command
     }
 
+    pub fn set_clock(&self, now: neomem_core::EpochMs) -> anyhow::Result<bool> {
+        Ok(matches!(self.client()?.call(Request::SetClock { now })?, Response::ClockSet { .. }))
+    }
+
     pub fn http_address(&self) -> anyhow::Result<String> {
         Ok(fs::read_to_string(self.home.http_address_path())?.trim().to_owned())
     }
