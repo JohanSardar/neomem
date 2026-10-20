@@ -3,7 +3,9 @@ use std::process::ExitCode;
 
 use crate::time_argument;
 
-use neomem_proto::{EntityView, IndexReport, RawHit, RebuildReport, Response, ShownMemory, StatusReport};
+use neomem_proto::{
+    EntityView, IndexReport, RawHit, RebuildReport, Response, SearchResults, ShownMemory, StatusReport,
+};
 
 pub fn print(response: &Response, json: bool) -> ExitCode {
     if json {
@@ -34,6 +36,7 @@ fn print_human(response: &Response) {
         Response::RawHits(hits) => print_raw_hits(hits),
         Response::Corrected(receipt) => println!("{} is marked as logged incorrectly", receipt.intake),
         Response::Rebuilt(report) => print_rebuilt(report),
+        Response::SearchResults(results) => print_search(results),
         Response::DriftChecked(report) => println!(
             "drift check: {} differences ({} added, {} changed, {} files missing, {} unreadable) in {} ms",
             report.differences,
@@ -153,6 +156,38 @@ fn print_shown(shown: &ShownMemory) {
                 println!("source {} ({}){corrected}: {}", source.id, record.source, record.content);
             }
             None => println!("source {} is not in the intake log", source.id),
+        }
+    }
+}
+
+fn print_search(results: &SearchResults) {
+    if results.hits.is_empty() {
+        println!("no memories match");
+    }
+    for (rank, hit) in results.hits.iter().enumerate() {
+        let fact = &hit.fact;
+        let conflict = if hit.conflict { "  [conflict]" } else { "" };
+        let ended = fact
+            .invalid_at()
+            .map(|ended| format!(", invalid since {}", time_argument::display(ended)))
+            .unwrap_or_default();
+        println!("{}. {}{conflict}", rank + 1, fact.content());
+        println!(
+            "   {}  valid since {}{ended}  score {:.3}",
+            fact.id(),
+            time_argument::display(fact.valid_at()),
+            hit.score
+        );
+        if !hit.replaced.is_empty() {
+            let replaced: Vec<String> = hit.replaced.iter().map(ToString::to_string).collect();
+            println!("   replaces {}", replaced.join(", "));
+        }
+        if !hit.entities.is_empty() {
+            let names: Vec<&str> = hit.entities.iter().map(|entity| entity.name.as_str()).collect();
+            println!("   about {}", names.join(", "));
+        }
+        for linked in &hit.linked {
+            println!("   {} {}  ({})", linked.kind, linked.fact.content(), linked.fact.id());
         }
     }
 }

@@ -4,7 +4,7 @@ use std::thread;
 use std::time::Duration;
 
 use serde_json::Value;
-use tiny_http::{Header, Request, Response};
+use tiny_http::Request;
 
 #[derive(Debug)]
 pub struct Incoming {
@@ -91,21 +91,36 @@ impl Reply {
     pub fn send(self, request: Request) {
         match self {
             Self::Json(status, body) => {
-                let mut response = Response::from_string(body.to_string()).with_status_code(status);
-                if let Ok(header) = Header::from_bytes("content-type", "application/json") {
-                    response = response.with_header(header);
-                }
-                let _ = request.respond(response);
+                let body = body.to_string();
+                let head = format!(
+                    "HTTP/1.1 {status} {}\r\ncontent-type: application/json\r\ncontent-length: {}\r\n\r\n",
+                    reason(status),
+                    body.len()
+                );
+                send_in_one_write(request, &[head.as_bytes(), body.as_bytes()].concat());
             }
             Self::Events(events) => stream(request, events),
             Self::Redirect(location) => {
-                let mut response = Response::empty(302);
-                if let Ok(header) = Header::from_bytes("location", location.as_bytes()) {
-                    response = response.with_header(header);
-                }
-                let _ = request.respond(response);
+                let head = format!("HTTP/1.1 302 Found\r\nlocation: {location}\r\ncontent-length: 0\r\n\r\n");
+                send_in_one_write(request, head.as_bytes());
             }
         }
+    }
+}
+
+fn send_in_one_write(request: Request, bytes: &[u8]) {
+    let mut writer = request.into_writer();
+    let _ = writer.write_all(bytes).and_then(|()| writer.flush());
+}
+
+fn reason(status: u16) -> &'static str {
+    match status {
+        200 => "OK",
+        401 => "Unauthorized",
+        404 => "Not Found",
+        429 => "Too Many Requests",
+        _ if status >= 500 => "Server Error",
+        _ => "Bad Request",
     }
 }
 
