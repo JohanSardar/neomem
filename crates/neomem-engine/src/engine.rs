@@ -64,6 +64,7 @@ impl Engine {
             }
             Request::Add(record) => self.add(record),
             Request::Raw(query) => self.raw(&query),
+            Request::Correct { intake, reason } => self.correct(intake, &reason),
             Request::Models => self.model_roster(),
             Request::ModelsTest { role } => self.test_model(role),
         }

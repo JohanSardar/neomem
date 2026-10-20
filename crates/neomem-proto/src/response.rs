@@ -7,6 +7,7 @@ pub enum Response {
     Status(StatusReport),
     Added(AddReceipt),
     RawHits(Vec<RawHit>),
+    Corrected(CorrectionReceipt),
     ModelRoster(Vec<RoleAssignment>),
     ModelTested(ModelTestReport),
     ShuttingDown,
@@ -26,6 +27,12 @@ pub struct StatusReport {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AddReceipt {
     pub id: IntakeId,
+    pub recorded_at: EpochMs,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CorrectionReceipt {
+    pub intake: IntakeId,
     pub recorded_at: EpochMs,
 }
 

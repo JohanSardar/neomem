@@ -11,4 +11,6 @@ pub use envelope::{Envelope, IncomingEnvelope, PROTOCOL_VERSION};
 pub use frame::{FrameError, read_frame, write_frame};
 pub use home::Home;
 pub use request::{RawQuery, Request};
-pub use response::{AddReceipt, Failure, FailureKind, ModelTestReport, RawHit, Response, StatusReport};
+pub use response::{
+    AddReceipt, CorrectionReceipt, Failure, FailureKind, ModelTestReport, RawHit, Response, StatusReport,
+};
