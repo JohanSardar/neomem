@@ -1,5 +1,7 @@
 mod engine;
+mod entity;
 mod ids;
+mod indexing;
 mod intake;
 mod maintenance;
 mod models;

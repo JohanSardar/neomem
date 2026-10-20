@@ -13,6 +13,8 @@ use crate::openai_embeddings::OpenAiEmbedder;
 use crate::query_cache::{QUERY_CACHE_ENTRIES, QueryCache};
 use crate::{Secrets, duration};
 
+mod llm_roles;
+
 const LLAMA_CPP: &str = "llama.cpp";
 
 #[derive(Debug)]
@@ -27,6 +29,7 @@ pub struct ModelHost {
 struct ReadyModels {
     embedder: Option<Arc<dyn Embedder>>,
     judges: HashMap<JudgeRole, Arc<dyn Judge>>,
+    llms: HashMap<(LlmRole, Option<String>), Arc<dyn Llm>>,
 }
 
 impl ModelHost {
@@ -149,8 +152,16 @@ impl ModelRoles for ModelHost {
         Ok(judge)
     }
 
-    fn llm(&self, role: LlmRole, _source: Option<&Source>) -> Result<Arc<dyn Llm>, ModelError> {
-        Err(ModelError::NotConfigured(format!("{role:?}: no LLM provider kind is wired yet")))
+    fn llm(&self, role: LlmRole, source: Option<&Source>) -> Result<Arc<dyn Llm>, ModelError> {
+        let (override_source, role_config) = self.llm_role(role, source)?;
+        let key = (role, override_source);
+        let mut ready = self.ready.lock().unwrap_or_else(PoisonError::into_inner);
+        if let Some(llm) = ready.llms.get(&key) {
+            return Ok(Arc::clone(llm));
+        }
+        let llm = self.build_llm(&format!("{role:?}").to_lowercase(), role_config)?;
+        ready.llms.insert(key, Arc::clone(&llm));
+        Ok(llm)
     }
 
     fn describe(&self) -> Vec<RoleAssignment> {

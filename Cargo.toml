@@ -15,6 +15,7 @@ neomem-proto = { path = "crates/neomem-proto" }
 neomem-engine = { path = "crates/neomem-engine" }
 neomem-state = { path = "crates/neomem-state" }
 neomem-vault = { path = "crates/neomem-vault" }
+neomem-index = { path = "crates/neomem-index" }
 neomem-models = { path = "crates/neomem-models" }
 neomem-testkit = { path = "crates/neomem-testkit" }
 axum = "=0.8.9"
@@ -23,10 +24,12 @@ tokio = { version = "=1.54.0", features = ["rt-multi-thread", "net", "signal", "
 toml = "=1.1.8"
 tracing = "=0.1.44"
 tracing-subscriber = { version = "=0.3.23", features = ["env-filter"] }
+usearch = "=2.26.5"
 ureq = { version = "=3.4.2", features = ["json"] }
 sha2 = "=0.11.1"
 llama-cpp-2 = { version = "=0.1.160", default-features = false }
 anyhow = "=1.0.104"
+arc-swap = "=1.9.3"
 cargo_metadata = "=0.23.1"
 clap = { version = "=4.6.7", features = ["derive"] }
 notify = "=8.2.0"
@@ -36,10 +39,12 @@ serde_json = "=1.0.154"
 syn = { version = "=3.0.9", default-features = false, features = ["full", "parsing", "visit"] }
 tempfile = "=3.27.0"
 tiny_http = "=0.12.0"
+half = "=2.7.1"
 humantime = "=2.4.0"
 serde-saphyr = "=2.0.0"
 ra_ap_rustc_lexer = { package = "ra-ap-rustc_lexer", version = "=0.178.0" }
 walkdir = "=2.5.0"
+form_urlencoded = "=1.2.2"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

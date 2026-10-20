@@ -5,4 +5,5 @@ mod paths;
 mod vault;
 
 pub use format::{parse, render};
-pub use vault::{ChangeOrigin, CommitPolicy, Memory, Vault, VaultError};
+pub use neomem_core::Memory;
+pub use vault::{ChangeOrigin, CommitPolicy, Vault, VaultError};

@@ -1,10 +1,13 @@
 mod correct;
 mod daemon;
+mod entity;
+mod index;
 mod intake;
 mod models_embed;
 mod models_llm;
 mod raw;
 mod spool;
+pub mod support;
 mod vault;
 
 use crate::binaries::Binaries;
@@ -22,7 +25,9 @@ pub const ALL: &[Scenario] = &[
     Scenario { name: "vault", run: vault::prove },
     Scenario { name: "spool", run: spool::prove },
     Scenario { name: "raw", run: raw::prove },
+    Scenario { name: "index", run: index::prove },
     Scenario { name: "correct", run: correct::prove },
+    Scenario { name: "entity", run: entity::prove },
     Scenario { name: "models-llm", run: models_llm::prove },
     Scenario { name: "models-embed", run: models_embed::prove },
 ];
