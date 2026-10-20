@@ -1,4 +1,0 @@
-{"request":{"protocol":1,"request":{"command":"status"}},"response":{"body":{"daemon_version":"0.1.0","home":"/tmp/neomemctl-7sdQsB","pid":2518718,"protocol":1,"uptime_ms":19},"reply":"status"},"elapsed_ms":0.15987600000000002}
-{"request":{"protocol":2,"request":{"command":"status"}},"response":{"body":{"client":2,"daemon":1},"reply":"version_mismatch"},"elapsed_ms":0.21661599999999998}
-{"request":{"protocol":1,"request":{"command":"status"}},"response":{"body":{"daemon_version":"0.1.0","home":"/tmp/neomemctl-7sdQsB","pid":2518718,"protocol":1,"uptime_ms":60},"reply":"status"},"elapsed_ms":0.211764}
-{"request":{"protocol":1,"request":{"command":"status"}},"response":{"body":{"daemon_version":"0.1.0","home":"/tmp/neomemctl-long-b75E9e/a-very-long-directory-name-for-the-socket-testa-very-long-directory-name-for-the-socket-testa-very-long-directory-name-for-the-socket-test","pid":2518797,"protocol":1,"uptime_ms":19},"reply":"status"},"elapsed_ms":0.38733300000000004}
