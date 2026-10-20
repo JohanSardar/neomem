@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use neomem_core::{Embedder, ModelError, ModelId, Vector};
+use neomem_core::{Embedder, ModelError, ModelId, Purpose, Vector};
 use serde::{Deserialize, Serialize};
 
 use crate::http;
@@ -64,7 +64,7 @@ impl OpenAiEmbedder {
 }
 
 impl Embedder for OpenAiEmbedder {
-    fn embed(&self, texts: &[&str]) -> Result<Vec<Vector>, ModelError> {
+    fn embed(&self, texts: &[&str], _purpose: Purpose) -> Result<Vec<Vector>, ModelError> {
         if texts.is_empty() {
             return Ok(Vec::new());
         }

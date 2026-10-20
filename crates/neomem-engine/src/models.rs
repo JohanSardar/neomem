@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use neomem_core::{Choice, JudgeRole, LlmMessage, LlmRequest, LlmRole, ModelError, ModelRole};
+use neomem_core::{Choice, JudgeRole, LlmMessage, LlmRequest, LlmRole, ModelError, ModelRole, Purpose};
 use neomem_proto::{FailureKind, ModelTestReport, Response};
 
 use crate::Engine;
@@ -35,7 +35,7 @@ impl Engine {
 
     fn test_embedder(&self) -> Result<(String, String), ModelError> {
         let embedder = self.models.embedder()?;
-        let vectors = embedder.embed(&["neomem model test"])?;
+        let vectors = embedder.embed(&["neomem model test"], Purpose::Query)?;
         let dims = vectors.first().map_or(0, neomem_core::Vector::dims);
         Ok((embedder.model_id().to_string(), format!("{dims} dimensions")))
     }

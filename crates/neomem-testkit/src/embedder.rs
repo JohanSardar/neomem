@@ -1,6 +1,6 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
-use neomem_core::{Embedder, ModelError, ModelId, Vector};
+use neomem_core::{Embedder, ModelError, ModelId, Purpose, Vector};
 
 pub const HASH_DIMS: usize = 256;
 
@@ -34,7 +34,7 @@ fn bucket(value: &impl Hash) -> usize {
 }
 
 impl Embedder for HashEmbedder {
-    fn embed(&self, texts: &[&str]) -> Result<Vec<Vector>, ModelError> {
+    fn embed(&self, texts: &[&str], _purpose: Purpose) -> Result<Vec<Vector>, ModelError> {
         Ok(texts.iter().map(|text| Self::vector(text)).collect())
     }
 
