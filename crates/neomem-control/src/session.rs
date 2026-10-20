@@ -5,7 +5,7 @@ use anyhow::Context;
 use neomem_proto::{Client, Home, Request};
 
 use crate::binaries::Binaries;
-use crate::isolated::IsolatedNeomem;
+use crate::isolated::{self, IsolatedNeomem};
 use crate::repo;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
@@ -37,6 +37,7 @@ pub fn down(home: Option<&Path>) -> anyhow::Result<bool> {
         }
         Err(_) => println!("neomemctl: no daemon is serving {}", home.root().display()),
     }
+    stop_fake_models(&home);
     Ok(true)
 }
 
@@ -68,4 +69,9 @@ fn remember_current_home(root: &Path, home: &Path) -> anyhow::Result<()> {
 
 fn current_home_file(root: &Path) -> PathBuf {
     root.join("target/neomemctl/current-home")
+}
+
+fn stop_fake_models(home: &Home) {
+    let Ok(pid) = fs::read_to_string(isolated::fake_models_pid_path(home)) else { return };
+    let _ = std::process::Command::new("kill").arg(pid.trim()).status();
 }

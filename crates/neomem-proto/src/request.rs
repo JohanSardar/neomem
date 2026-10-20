@@ -1,4 +1,4 @@
-use neomem_core::IntakeRecord;
+use neomem_core::{IntakeRecord, ModelRole};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -7,4 +7,6 @@ pub enum Request {
     Status,
     Shutdown,
     Add(IntakeRecord),
+    Models,
+    ModelsTest { role: ModelRole },
 }

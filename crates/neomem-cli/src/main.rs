@@ -9,7 +9,7 @@ use std::process::ExitCode;
 use clap::Parser;
 use neomem_proto::{Home, Request, Response};
 
-use crate::args::{Cli, Command};
+use crate::args::{Cli, Command, ModelsAction};
 use crate::connection::DaemonConnection;
 
 fn main() -> ExitCode {
@@ -28,6 +28,10 @@ fn run(cli: &Cli) -> anyhow::Result<Response> {
     let request = match &cli.command {
         Command::Status => Request::Status,
         Command::Add(arguments) => Request::Add(intake_record::from_arguments(arguments)?),
+        Command::Models(arguments) => match &arguments.action {
+            None => Request::Models,
+            Some(ModelsAction::Test { role }) => Request::ModelsTest { role: role.model_role() },
+        },
     };
     DaemonConnection::open(&home)?.call(request)
 }

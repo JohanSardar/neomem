@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use neomem_core::{Clock, EpochMs};
+use neomem_core::{Clock, EpochMs, ModelRoles};
 use neomem_proto::{Request, Response};
 use neomem_state::StateDb;
 
@@ -12,6 +12,7 @@ pub struct EngineParts {
     pub home: PathBuf,
     pub state_db: PathBuf,
     pub clock: Arc<dyn Clock>,
+    pub models: Arc<dyn ModelRoles>,
     pub daemon_version: String,
 }
 
@@ -23,6 +24,7 @@ pub struct Engine {
     pub(crate) started_at: EpochMs,
     pub(crate) state: StateDb,
     pub(crate) ids: IdMint,
+    pub(crate) models: Arc<dyn ModelRoles>,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -41,6 +43,7 @@ impl Engine {
             daemon_version: parts.daemon_version,
             started_at,
             ids: IdMint::new(),
+            models: parts.models,
         })
     }
 
@@ -52,6 +55,8 @@ impl Engine {
                 Response::ShuttingDown
             }
             Request::Add(record) => self.add(record),
+            Request::Models => self.model_roster(),
+            Request::ModelsTest { role } => self.test_model(role),
         }
     }
 

@@ -1,4 +1,4 @@
-use neomem_core::{EpochMs, IntakeId};
+use neomem_core::{EpochMs, IntakeId, ModelRole, RoleAssignment};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 pub enum Response {
     Status(StatusReport),
     Added(AddReceipt),
+    ModelRoster(Vec<RoleAssignment>),
+    ModelTested(ModelTestReport),
     ShuttingDown,
     VersionMismatch { daemon: u32, client: u32 },
     Failed(Failure),
@@ -24,6 +26,14 @@ pub struct StatusReport {
 pub struct AddReceipt {
     pub id: IntakeId,
     pub recorded_at: EpochMs,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ModelTestReport {
+    pub role: ModelRole,
+    pub model: String,
+    pub latency_ms: f64,
+    pub answer: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

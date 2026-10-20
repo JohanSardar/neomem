@@ -6,21 +6,24 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, bail};
+use std::os::unix::fs::PermissionsExt;
+
 use neomem_proto::{Client, Envelope, Home, Request, Response};
+use neomem_testkit::{FakeRules, RecordedCall};
 
 use crate::binaries::Binaries;
+use crate::fake_models;
 use crate::proof::{Exchange, ProofRun};
 
 const START_WAIT: Duration = Duration::from_secs(10);
 const CALL_TIMEOUT: Duration = Duration::from_secs(60);
-
-const ISOLATED_CONFIG: &str = "[http]\nenabled = true\nport = 0\n";
 
 #[derive(Debug)]
 pub struct IsolatedNeomem {
     home: Home,
     binaries: Binaries,
     daemon: Option<Child>,
+    fake_models: Option<Child>,
     keep_running: bool,
     temporary_dir: Option<tempfile::TempDir>,
 }
@@ -42,18 +45,35 @@ impl IsolatedNeomem {
 
     fn prepare(root: &Path, binaries: &Binaries) -> anyhow::Result<Self> {
         refuse_the_real_home(root)?;
-        fs::create_dir_all(root.join("run"))?;
-        let config = root.join("config.toml");
-        if !config.exists() {
-            fs::write(&config, ISOLATED_CONFIG)?;
+        let home = Home::at(root);
+        fs::create_dir_all(home.run_dir())?;
+        let fake_models = start_fake_models(&home)?;
+        let address = fs::read_to_string(fake_models_address_path(&home))?;
+        if !home.config_path().exists() {
+            fs::write(home.config_path(), fake_models::config_toml(address.trim()))?;
         }
+        fs::write(home.secrets_path(), "NEOMEM_FAKE_JEV_KEY=fake-key\n")?;
+        fs::set_permissions(home.secrets_path(), fs::Permissions::from_mode(0o600))?;
         Ok(Self {
-            home: Home::at(root),
+            home,
             binaries: binaries.clone(),
             daemon: None,
+            fake_models: Some(fake_models),
             keep_running: false,
             temporary_dir: None,
         })
+    }
+
+    pub fn fake_models_address(&self) -> anyhow::Result<String> {
+        Ok(fs::read_to_string(fake_models_address_path(&self.home))?.trim().to_owned())
+    }
+
+    pub fn add_fake_rules(&self, rules: &FakeRules) -> anyhow::Result<()> {
+        fake_models::add_rules(&self.fake_models_address()?, rules)
+    }
+
+    pub fn fake_model_calls(&self) -> anyhow::Result<Vec<RecordedCall>> {
+        fake_models::calls(&self.fake_models_address()?)
     }
 
     pub fn home(&self) -> &Home {
@@ -153,8 +173,44 @@ impl Drop for IsolatedNeomem {
     fn drop(&mut self) {
         if !self.keep_running {
             let _ = self.stop_daemon();
+            if let Some(mut fake_models) = self.fake_models.take() {
+                let _ = fake_models.kill();
+                let _ = fake_models.wait();
+            }
         }
     }
+}
+
+pub fn fake_models_pid_path(home: &Home) -> PathBuf {
+    home.run_dir().join("fake-models.pid")
+}
+
+fn fake_models_address_path(home: &Home) -> PathBuf {
+    home.run_dir().join("fake-models.addr")
+}
+
+fn start_fake_models(home: &Home) -> anyhow::Result<Child> {
+    let address_file = fake_models_address_path(home);
+    let _ = fs::remove_file(&address_file);
+    let child = Command::new(std::env::current_exe()?)
+        .arg("fake-models")
+        .arg("--address-file")
+        .arg(&address_file)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .process_group(0)
+        .spawn()
+        .context("starting the fake model server")?;
+    fs::write(fake_models_pid_path(home), child.id().to_string())?;
+    let deadline = Instant::now() + START_WAIT;
+    while !address_file.exists() {
+        if Instant::now() > deadline {
+            bail!("the fake model server did not start");
+        }
+        thread::sleep(Duration::from_millis(5));
+    }
+    Ok(child)
 }
 
 fn refuse_the_real_home(root: &Path) -> anyhow::Result<()> {

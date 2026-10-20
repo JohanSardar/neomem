@@ -10,4 +10,4 @@ pub use envelope::{Envelope, IncomingEnvelope, PROTOCOL_VERSION};
 pub use frame::{FrameError, read_frame, write_frame};
 pub use home::Home;
 pub use request::Request;
-pub use response::{AddReceipt, Failure, FailureKind, Response, StatusReport};
+pub use response::{AddReceipt, Failure, FailureKind, ModelTestReport, Response, StatusReport};

@@ -3,7 +3,7 @@ use std::process::ExitCode;
 use clap::{Args, Parser, Subcommand};
 use std::path::PathBuf;
 
-use neomem_control::{map, prove, session};
+use neomem_control::{fake_models, map, prove, session};
 
 #[derive(Debug, Parser)]
 #[command(name = "neomemctl", about = "Control an isolated neomem and prove its features")]
@@ -19,6 +19,11 @@ enum Command {
     Logs(HomeArgs),
     Prove(ProveArgs),
     Map(MapArgs),
+    #[command(hide = true)]
+    FakeModels {
+        #[arg(long)]
+        address_file: PathBuf,
+    },
 }
 
 #[derive(Debug, Args)]
@@ -64,6 +69,7 @@ fn main() -> ExitCode {
         Command::Logs(args) => session::logs(args.home.as_deref()),
         Command::Prove(args) => prove::run(&selection_from(args)),
         Command::Map(args) => map::run(map_view(&args)),
+        Command::FakeModels { address_file } => fake_models::serve(&address_file),
     };
     match outcome {
         Ok(true) => ExitCode::SUCCESS,

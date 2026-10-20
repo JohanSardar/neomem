@@ -19,6 +19,20 @@ fn print_human(response: &Response) {
         Response::Status(report) => print_status(report),
         Response::ShuttingDown => println!("neomemd is shutting down"),
         Response::Added(receipt) => println!("{}", receipt.id),
+        Response::ModelRoster(roster) => {
+            for assignment in roster {
+                println!("{:<13} {}", assignment.role.name(), assignment.assignment);
+            }
+        }
+        Response::ModelTested(report) => {
+            println!(
+                "{} {} answered in {:.1} ms: {}",
+                report.role.name(),
+                report.model,
+                report.latency_ms,
+                report.answer
+            );
+        }
         Response::VersionMismatch { daemon, client } => {
             eprintln!("neomemd speaks protocol {daemon}, this neomem speaks {client}");
         }
