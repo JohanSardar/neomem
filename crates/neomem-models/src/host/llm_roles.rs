@@ -4,6 +4,7 @@ use neomem_core::{Llm, LlmRole, ModelError, Source};
 
 use super::ModelHost;
 use crate::anthropic::{self, AnthropicLlm};
+use crate::codex::CodexLlm;
 use crate::command::CommandLlm;
 use crate::config::{ProviderKind, RoleConfig};
 use crate::duration;
@@ -62,6 +63,7 @@ impl ModelHost {
                 let base = base_url.unwrap_or(anthropic::DEFAULT_BASE_URL);
                 Ok(Arc::new(Provider(AnthropicLlm::new(base, key, &settings)?)))
             }
+            ProviderKind::Codex => Ok(Arc::new(Provider(CodexLlm::new(provider.cmd.as_deref(), &settings)))),
             ProviderKind::Command => {
                 let program = provider.cmd.as_deref().unwrap_or_default();
                 Ok(Arc::new(Provider(CommandLlm::new(program, &settings)?)))
