@@ -163,6 +163,7 @@ impl DaemonConfig {
 #[derive(Debug, Clone, Deserialize)]
 pub struct CaptureConfig {
     pub claude_dir: Option<std::path::PathBuf>,
+    pub codex_dir: Option<std::path::PathBuf>,
     #[serde(default = "default_capture_sweep")]
     pub sweep_every: String,
 }
@@ -173,17 +174,23 @@ fn default_capture_sweep() -> String {
 
 impl Default for CaptureConfig {
     fn default() -> Self {
-        Self { claude_dir: None, sweep_every: default_capture_sweep() }
+        Self { claude_dir: None, codex_dir: None, sweep_every: default_capture_sweep() }
     }
 }
 
 impl CaptureConfig {
     pub fn sources(&self) -> Vec<neomem_engine::CaptureSource> {
         let home = std::env::var_os("HOME").map(std::path::PathBuf::from).unwrap_or_default();
-        vec![neomem_engine::CaptureSource {
-            root: self.claude_dir.clone().unwrap_or_else(|| home.join(".claude")).join("projects"),
-            adapter: std::sync::Arc::new(neomem_capture::ClaudeCode),
-        }]
+        vec![
+            neomem_engine::CaptureSource {
+                root: self.claude_dir.clone().unwrap_or_else(|| home.join(".claude")).join("projects"),
+                adapter: std::sync::Arc::new(neomem_capture::ClaudeCode),
+            },
+            neomem_engine::CaptureSource {
+                root: self.codex_dir.clone().unwrap_or_else(|| home.join(".codex")).join("sessions"),
+                adapter: std::sync::Arc::new(neomem_capture::Codex),
+            },
+        ]
     }
 
     pub fn every(&self) -> anyhow::Result<std::time::Duration> {

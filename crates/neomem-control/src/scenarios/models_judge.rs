@@ -35,7 +35,7 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     if live.has_live_key("JEV_API_KEY") {
         the_live_jev_api_answers(proof, &live)?;
     } else {
-        eprintln!("models.judge: no JEV_API_KEY in ~/.neomem/secrets.env; the live Jev claim needs the user");
+        eprintln!("models.judge: no JEV_API_KEY in the environment; the live Jev claim needs the user");
     }
     proof.attach_logs(&live.logs());
     Ok(())

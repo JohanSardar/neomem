@@ -2,26 +2,44 @@
   "feature": "capture.cc",
   "scenario": "capture-cc",
   "passed": true,
+<<<<<<<< HEAD:proofs/capture.cc/2026-10-21T001707Z/proof.json
   "started_at": "2026-10-21T001707Z",
   "duration_ms": 2114,
   "code_version": "089377fb8691-dirty",
+========
+  "started_at": "2026-10-21T000906Z",
+  "duration_ms": 2075,
+  "code_version": "9741e05402b8-dirty",
+>>>>>>>> origin/main:proofs/capture.cc/2026-10-21T000906Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "hook with stalled stdin still exits zero silently within 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.cc/2026-10-21T001707Z/proof.json
       "detail": "28.338 ms"
+========
+      "detail": "33.840 ms"
+>>>>>>>> origin/main:proofs/capture.cc/2026-10-21T000906Z/proof.json
     },
     {
       "claim": "large hook payload is spooled silently within 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.cc/2026-10-21T001707Z/proof.json
       "detail": "21.070 ms"
+========
+      "detail": "11.934 ms"
+>>>>>>>> origin/main:proofs/capture.cc/2026-10-21T000906Z/proof.json
     },
     {
       "claim": "offline hook exits zero silently within 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.cc/2026-10-21T001707Z/proof.json
       "detail": "5.295 ms"
+========
+      "detail": "8.621 ms"
+>>>>>>>> origin/main:proofs/capture.cc/2026-10-21T000906Z/proof.json
     },
     {
       "claim": "offline signal is spooled",
@@ -66,7 +84,11 @@
     {
       "claim": "online hook p95 stays below 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.cc/2026-10-21T001707Z/proof.json
       "detail": "p95 8.128 ms"
+========
+      "detail": "p95 8.029 ms"
+>>>>>>>> origin/main:proofs/capture.cc/2026-10-21T000906Z/proof.json
     },
     {
       "claim": "path aliases cannot duplicate captured turns",

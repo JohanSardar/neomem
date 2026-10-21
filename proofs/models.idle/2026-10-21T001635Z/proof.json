@@ -2,9 +2,15 @@
   "feature": "models.idle",
   "scenario": "models-idle",
   "passed": true,
+<<<<<<<< HEAD:proofs/models.idle/2026-10-21T001635Z/proof.json
   "started_at": "2026-10-21T001635Z",
   "duration_ms": 5473,
   "code_version": "089377fb8691-dirty",
+========
+  "started_at": "2026-10-21T000856Z",
+  "duration_ms": 8412,
+  "code_version": "9741e05402b8-dirty",
+>>>>>>>> origin/main:proofs/models.idle/2026-10-21T000856Z/proof.json
   "models": "real llama.cpp models",
   "failure": null,
   "checks": [
@@ -41,7 +47,11 @@
     {
       "claim": "the next query transparently reloads and preserves its answer; reload latency recorded",
       "passed": true,
+<<<<<<<< HEAD:proofs/models.idle/2026-10-21T001635Z/proof.json
       "detail": "reload 917.40 ms; Some([0.7864978])"
+========
+      "detail": "reload 2032.50 ms; Some([0.7864978])"
+>>>>>>>> origin/main:proofs/models.idle/2026-10-21T000856Z/proof.json
     }
   ]
 }

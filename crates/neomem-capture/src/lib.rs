@@ -1,4 +1,8 @@
+mod codex;
+pub use codex::Codex;
+
 use std::fs;
+use std::io::{BufRead, BufReader, Seek, SeekFrom};
 use std::path::Path;
 
 use neomem_core::{
@@ -21,25 +25,14 @@ impl AgentAdapter for ClaudeCode {
 }
 
 fn read(file: &Path, position: u64, agent: CaptureAgent) -> Result<Captured, CaptureError> {
-    let bytes = fs::read(file).map_err(|error| CaptureError(error.to_string()))?;
-    let complete = bytes.iter().rposition(|byte| *byte == b'\n').map_or(0, |index| index + 1);
-    if (complete as u64) < position {
+    let mut reader = BufReader::new(fs::File::open(file).map_err(|error| CaptureError(error.to_string()))?);
+    let length = reader.get_ref().metadata().map_err(|error| CaptureError(error.to_string()))?.len();
+    if length < position {
         return Err(CaptureError("transcript shrank below its committed position".to_owned()));
     }
-    let mut entries = Vec::new();
-    let mut offset = 0_u64;
-    for line in bytes[..complete].split_inclusive(|byte| *byte == b'\n') {
-        if !line.iter().all(u8::is_ascii_whitespace) {
-            let value: Value =
-                serde_json::from_slice(line).map_err(|error| CaptureError(error.to_string()))?;
-            entries.push((offset, value));
-        }
-        offset += line.len() as u64;
-    }
-    let session = entries
-        .iter()
-        .find_map(|(_, entry)| session_id(entry, agent))
-        .ok_or_else(|| CaptureError("transcript has no session ID".to_owned()))?;
+    let session = read_session(&mut reader, agent)?;
+    reader.seek(SeekFrom::Start(position)).map_err(|error| CaptureError(error.to_string()))?;
+    let (entries, complete) = read_entries(&mut reader, position)?;
     let mut records = Vec::new();
     for (offset, entry) in entries.iter().filter(|(offset, _)| *offset >= position) {
         if let Some(content) = content(entry, agent).filter(|text| !text.trim().is_empty()) {
@@ -59,7 +52,46 @@ fn read(file: &Path, position: u64, agent: CaptureAgent) -> Result<Captured, Cap
             });
         }
     }
-    Ok(Captured { session, position: complete as u64, records })
+    Ok(Captured { session, position: complete, records })
+}
+
+type Entries = Vec<(u64, Value)>;
+
+fn read_session(reader: &mut BufReader<fs::File>, agent: CaptureAgent) -> Result<String, CaptureError> {
+    loop {
+        let mut line = Vec::new();
+        reader.read_until(b'\n', &mut line).map_err(|error| CaptureError(error.to_string()))?;
+        if line.last() != Some(&b'\n') {
+            return Err(CaptureError("transcript has no complete session header".to_owned()));
+        }
+        if line.iter().all(u8::is_ascii_whitespace) {
+            continue;
+        }
+        let entry: Value = serde_json::from_slice(&line).map_err(|error| CaptureError(error.to_string()))?;
+        if let Some(session) = session_id(&entry, agent) {
+            return Ok(session);
+        }
+    }
+}
+
+fn read_entries(reader: &mut BufReader<fs::File>, start: u64) -> Result<(Entries, u64), CaptureError> {
+    let mut entries = Vec::new();
+    let mut position = start;
+    loop {
+        let mut line = Vec::new();
+        reader.read_until(b'\n', &mut line).map_err(|error| CaptureError(error.to_string()))?;
+        if line.last() != Some(&b'\n') {
+            break;
+        }
+        if !line.iter().all(u8::is_ascii_whitespace) {
+            entries.push((
+                position,
+                serde_json::from_slice(&line).map_err(|error| CaptureError(error.to_string()))?,
+            ));
+        }
+        position += line.len() as u64;
+    }
+    Ok((entries, position))
 }
 
 fn session_id(entry: &Value, agent: CaptureAgent) -> Option<String> {
@@ -80,6 +112,7 @@ fn content(entry: &Value, agent: CaptureAgent) -> Option<String> {
         CaptureAgent::Cc if matches!(entry["type"].as_str(), Some("user" | "assistant")) => {
             message(&entry["message"])
         }
+        CaptureAgent::Codex => codex::content(entry),
         _ => None,
     }
 }
@@ -117,6 +150,7 @@ fn action(name: &str, arguments: &Value) -> String {
         .iter()
         .find_map(|key| arguments[*key].as_str())
         .unwrap_or_default();
+    let detail: String = detail.chars().take(512).collect();
     format!("action {name}: {detail}")
 }
 
@@ -129,5 +163,34 @@ mod tests {
         let fixture = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../.agents/skills/neomem-control/fixtures/transcripts/cc/session.jsonl");
         neomem_testkit::agent_contract(&ClaudeCode, &fixture).unwrap();
+    }
+    #[test]
+    fn committed_history_is_not_reparsed() {
+        use std::io::Write;
+        let fixture = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../.agents/skills/neomem-control/fixtures/transcripts/cc");
+        let directory = tempfile::tempdir().unwrap();
+        let file = directory.path().join("session.jsonl");
+        let mut bytes = fs::read(fixture.join("session.jsonl")).unwrap();
+        fs::write(&file, &bytes).unwrap();
+        let first = ClaudeCode.read_new(&file, 0).unwrap();
+        let second_line = bytes.iter().position(|byte| *byte == b'\n').unwrap() + 1;
+        bytes[second_line] = b'!';
+        fs::write(&file, bytes).unwrap();
+        fs::OpenOptions::new()
+            .append(true)
+            .open(&file)
+            .unwrap()
+            .write_all(&fs::read(fixture.join("tail.json")).unwrap())
+            .unwrap();
+        let next = ClaudeCode.read_new(&file, first.position).unwrap();
+        assert_eq!(next.records.len(), 1);
+        assert!(next.records[0].content.contains("Completed after crash"));
+    }
+    #[test]
+    fn codex_passes_the_agent_contract() {
+        let fixture = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../.agents/skills/neomem-control/fixtures/transcripts/codex/session.jsonl");
+        neomem_testkit::agent_contract(&Codex, &fixture).unwrap();
     }
 }
