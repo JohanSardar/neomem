@@ -1,0 +1,42 @@
+{
+  "feature": "eval",
+  "scenario": "eval",
+  "passed": true,
+  "started_at": "2026-10-21T201704Z",
+  "duration_ms": 5647,
+  "code_version": "5547e0b22db9-dirty",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "the fixture runs through isolated daemons over the protocol",
+      "passed": true,
+      "detail": "abstain_abs abstention\nupdate knowledge-update\nmiss multi-session\nhit single-session-user\n"
+    },
+    {
+      "claim": "extracted evidence is a retrieval hit and absent evidence is a miss",
+      "passed": true,
+      "detail": "source-session coverage"
+    },
+    {
+      "claim": "knowledge updates retrieve the newer fact first",
+      "passed": true,
+      "detail": "{\"about\":[\"ent_01M5G1RGDJ08FQQX1A0XZXG0XX\"],\"content\":\"user: The Osprey bicycle is now blue.\",\"durability\":\"ordinary\",\"evidence\":[],\"id\":\"fct_01M5G1RGE9AN060C88VFPS7AYN\",\"importance\":5,\"invalid_at\":null,\"links\":[{\"to\":\"fct_01M5G1RGDJ08FQQX1A0XZXG0XY\",\"type\":\"updates\"}],\"recorded_at\":1792613827017,\"sources\":[\"int_01M5G1RF9AACP2QGDZ8647FP00\"],\"tags\":[],\"updated_at\":1792613827017,\"valid_at\":1780401600000}"
+    },
+    {
+      "claim": "all histories use Add, Search and Dream with temporary homes",
+      "passed": true,
+      "detail": "protocol exchanges recorded per question"
+    },
+    {
+      "claim": "reports per-type metrics, abstention accuracy and model settings",
+      "passed": true,
+      "detail": "report.json"
+    },
+    {
+      "claim": "report can be regenerated from saved results",
+      "passed": true,
+      "detail": "exit status: 0"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+2026-10-21T20:16:40.672885Z  INFO neomemd::http: HTTP listening on 127.0.0.1:38417
+2026-10-21T20:16:40.674173Z  INFO neomemd: neomemd serving /tmp/neomemctl-viMQwd
+2026-10-21T20:16:40.675635Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-21T20:16:40.709875Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.714982Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.718848Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.724869Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.729775Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.733467Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.736851Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.740234Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.746471Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.749667Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.753046Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.756491Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.760001Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.763304Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.766226Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.772155Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.775046Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.778738Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.784775Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.787691Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:41.190397Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T20:16:41.190571Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T20:16:41.231607Z  INFO neomemd::http: HTTP listening on 127.0.0.1:40031
+2026-10-21T20:16:41.233077Z  INFO neomemd: neomemd serving /tmp/neomemctl-viMQwd
+2026-10-21T20:16:41.233178Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-viMQwd/run/neomemd.sock
+2026-10-21T20:16:41.651394Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:42.051915Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T20:16:42.051969Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T20:16:42.069782Z  INFO neomemd::http: HTTP listening on 127.0.0.1:39113
+2026-10-21T20:16:42.070375Z  INFO neomemd: neomemd serving /tmp/neomemctl-viMQwd
+2026-10-21T20:16:42.070420Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-viMQwd/run/neomemd.sock
+2026-10-21T20:16:42.082124Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:42.384361Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T20:16:42.384576Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T20:16:42.417649Z  INFO neomemd::http: HTTP listening on 127.0.0.1:46707
+2026-10-21T20:16:42.418854Z  INFO neomemd: neomemd serving /tmp/neomemctl-viMQwd
+2026-10-21T20:16:42.418904Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-viMQwd/run/neomemd.sock
+2026-10-21T20:16:42.473315Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T20:16:42.473412Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T20:16:42.512121Z  INFO neomemd::http: HTTP listening on 127.0.0.1:46123
+2026-10-21T20:16:42.513244Z  INFO neomemd: neomemd serving /tmp/neomemctl-viMQwd
+2026-10-21T20:16:42.513297Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-viMQwd/run/neomemd.sock
