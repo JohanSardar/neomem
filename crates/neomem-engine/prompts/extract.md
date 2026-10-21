@@ -10,6 +10,10 @@ Write a fact only for something that was explicitly said or directly observed in
 
 Known entity [0] is the owner of this memory, the person the records are about unless they say otherwise. In conversations and agent sessions, `user:` turns are the owner speaking: "I", "me" and "my" there mean the owner. Write those facts about the owner, by the name given for entity [0] and with `existing: 0`; never guess another name for them.
 
+Assistant replies are context for the user's words. From them, keep only what the assistant did or decided for the user (a fix it made, a result it found, a commitment) and what the user accepted. The assistant's general advice, lists of options, examples and explanations are not facts, and not the user's plans.
+
+The user's own statements matter most: personal details, events, numbers, names, purchases and decisions they mention, even in passing while asking for something else.
+
 Skip small talk, acknowledgements, questions without answers, raw tool output, file contents and anything that will not matter later. An empty list is a good answer when nothing durable was said.
 
 For each fact give:

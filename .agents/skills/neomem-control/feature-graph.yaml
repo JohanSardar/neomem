@@ -110,7 +110,7 @@
   depends_on: [intake, vault, index, models.llm]
   proof: extract
   status: proven
-  last_proof: proofs/extract/2026-10-21T133630Z
+  last_proof: proofs/extract/2026-10-21T135312Z
 - id: check
   does: checks each new fact against its 5 closest facts as same, extends, updates, contradicts or new, attaching evidence instead of duplicating
   reached_via: [daemon worker]
