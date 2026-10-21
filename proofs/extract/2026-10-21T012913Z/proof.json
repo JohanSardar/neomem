@@ -2,15 +2,9 @@
   "feature": "extract",
   "scenario": "extract",
   "passed": true,
-<<<<<<<< HEAD:proofs/extract/2026-10-21T011033Z/proof.json
-  "started_at": "2026-10-21T011033Z",
-  "duration_ms": 12194,
-  "code_version": "1efe50ecaa14-dirty",
-========
-  "started_at": "2026-10-21T010211Z",
-  "duration_ms": 12163,
-  "code_version": "9b0a4922ac15-dirty",
->>>>>>>> origin/main:proofs/extract/2026-10-21T010211Z/proof.json
+  "started_at": "2026-10-21T012913Z",
+  "duration_ms": 12320,
+  "code_version": "c00e97d4cc57-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
