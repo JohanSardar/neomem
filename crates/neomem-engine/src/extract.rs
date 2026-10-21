@@ -156,6 +156,7 @@ impl Engine {
             facts,
             tags: self.state.tags()?,
             today: self.clock.now(),
+            owner: self.worker.owner.clone(),
         })
     }
 

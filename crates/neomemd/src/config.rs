@@ -57,6 +57,7 @@ pub struct WorkerSection {
     pub batch_every: Option<String>,
     pub batch_size: Option<usize>,
     pub lease: Option<String>,
+    pub owner: Option<String>,
 }
 
 impl WorkerSection {
@@ -73,6 +74,12 @@ impl WorkerSection {
             batch_every: duration(&self.batch_every, defaults.batch_every, "batch_every")?,
             batch_size: self.batch_size.unwrap_or(defaults.batch_size),
             lease: duration(&self.lease, defaults.lease, "lease")?,
+            owner: self
+                .owner
+                .as_deref()
+                .map(str::trim)
+                .filter(|owner| !owner.is_empty())
+                .map_or(defaults.owner, str::to_owned),
         })
     }
 }
@@ -244,5 +251,17 @@ impl CaptureConfig {
         parse_duration(&self.sweep_every)
             .filter(|every| !every.is_zero())
             .ok_or_else(|| anyhow::anyhow!("capture.sweep_every must be a positive duration"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_owner_defaults_to_the_user_and_can_be_named() {
+        assert_eq!(WorkerSection::default().config().unwrap().owner, "the user");
+        let named = WorkerSection { owner: Some(" Johan ".to_owned()), ..WorkerSection::default() };
+        assert_eq!(named.config().unwrap().owner, "Johan");
     }
 }

@@ -15,6 +15,7 @@ pub(crate) struct ExtractionInput {
     pub(crate) facts: Vec<Arc<Fact>>,
     pub(crate) tags: Vec<Tag>,
     pub(crate) today: EpochMs,
+    pub(crate) owner: String,
 }
 
 impl ExtractionInput {
@@ -40,6 +41,11 @@ impl ExtractionInput {
             }
         }
         text.push_str("\nKnown entities:\n");
+        let _ = writeln!(
+            text,
+            "[0] {owner} (person): the owner of this memory; \"I\", \"me\" and \"my\" in user turns mean {owner}",
+            owner = self.owner
+        );
         for (number, entity) in self.entities.iter().enumerate() {
             let aliases = if entity.aliases().is_empty() {
                 String::new()
