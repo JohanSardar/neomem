@@ -6,6 +6,7 @@ use serde::Deserialize;
 use crate::extraction_prompt::ExtractionInput;
 
 const OWNER_NUMBER: i64 = 0;
+const OWNER_WORDS: &[&str] = &["i", "me", "my", "myself", "user", "the user", "owner", "the owner"];
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct ExtractionOutput {
@@ -75,16 +76,26 @@ impl ExtractionOutput {
     }
 }
 
+fn owner(input: &ExtractionInput) -> EntityTarget {
+    EntityTarget::Named {
+        name: input.owner.clone(),
+        kind: Label::new("person").unwrap_or_else(|_| Label::thing()),
+        aliases: Vec::new(),
+    }
+}
+
+fn names_the_owner(name: &str, input: &ExtractionInput) -> bool {
+    let name = name.trim().to_lowercase();
+    name.is_empty() || name == input.owner.to_lowercase() || OWNER_WORDS.contains(&name.as_str())
+}
+
 fn target_for(entity: OutputEntity, input: &ExtractionInput) -> EntityTarget {
-    if entity.existing == Some(OWNER_NUMBER) {
-        return EntityTarget::Named {
-            name: input.owner.clone(),
-            kind: Label::new("person").unwrap_or_else(|_| Label::thing()),
-            aliases: Vec::new(),
-        };
+    if entity.existing == Some(OWNER_NUMBER) && names_the_owner(&entity.name, input) {
+        return owner(input);
     }
     let known = entity
         .existing
+        .filter(|number| *number != OWNER_NUMBER)
         .and_then(|number| usize::try_from(number).ok())
         .and_then(|number| number.checked_sub(1))
         .and_then(|index| input.entities.get(index));
@@ -110,13 +121,16 @@ fn resolve_fact(
         .filter_map(|number| usize::try_from(*number).ok()?.checked_sub(1))
         .filter_map(|index| input.records.get(index).map(|logged| logged.id))
         .collect();
-    let about: Vec<EntityTarget> = fact
+    let mut about: Vec<EntityTarget> = fact
         .about
         .iter()
         .filter_map(|reference| targets.get(reference).cloned())
         .filter(|target| !matches!(target, EntityTarget::Named { name, .. } if name.is_empty()))
         .collect();
-    if content.is_empty() || sources.is_empty() || about.is_empty() {
+    if about.is_empty() {
+        about.push(owner(input));
+    }
+    if content.is_empty() || sources.is_empty() {
         return None;
     }
     let importance =

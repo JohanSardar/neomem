@@ -1,0 +1,14 @@
+2026-10-21T18:55:32.371293Z  INFO neomemd::http: HTTP listening on 127.0.0.1:45193
+2026-10-21T18:55:32.372040Z  INFO neomemd: neomemd serving /tmp/neomemctl-raaG9k
+2026-10-21T18:55:32.372530Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-21T18:55:32.699280Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T18:55:32.699342Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T18:55:32.732751Z  INFO neomemd::http: HTTP listening on 127.0.0.1:40973
+2026-10-21T18:55:32.733465Z  INFO neomemd: neomemd serving /tmp/neomemctl-raaG9k
+2026-10-21T18:55:32.733493Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-raaG9k/run/neomemd.sock
+2026-10-21T18:55:32.741292Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T18:55:32.741453Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T18:55:32.778987Z  INFO neomemd::http: HTTP listening on 127.0.0.1:35609
+2026-10-21T18:55:32.780121Z  INFO neomemd: neomemd serving /tmp/neomemctl-raaG9k
+2026-10-21T18:55:32.780192Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-raaG9k/run/neomemd.sock
+2026-10-21T18:55:32.791099Z  INFO neomem_engine::indexing: index rebuilt from the files: 3 facts, 2 entities

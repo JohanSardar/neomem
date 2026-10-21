@@ -41,6 +41,7 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     reextraction_adds_no_duplicates(proof, &neomem)?;
     the_run_log_names_the_model_and_counts(proof, &neomem)?;
     the_owner_speaks_in_user_turns(proof, &neomem)?;
+    loose_entity_references_do_not_lose_facts(proof, &neomem)?;
     proof.attach_logs(&neomem.logs());
     Ok(())
 }
@@ -284,6 +285,55 @@ fn the_owner_speaks_in_user_turns(proof: &mut ProofRun, neomem: &IsolatedNeomem)
         "the extractor is told who speaks in user turns, and a fact it gives to the owner lands on the owner entity",
         introduced && owner,
         format!("introduced {introduced}, on the owner {owner}"),
+    );
+    Ok(())
+}
+
+fn facts_about(neomem: &IsolatedNeomem, proof: &mut ProofRun, name: &str) -> anyhow::Result<Vec<String>> {
+    Ok(match neomem.call(proof, Request::Entity { name: name.to_owned() })? {
+        Response::Entity(view) => view.facts.iter().map(|fact| fact.content().to_owned()).collect(),
+        _ => Vec::new(),
+    })
+}
+
+fn loose_entity_references_do_not_lose_facts(
+    proof: &mut ProofRun,
+    neomem: &IsolatedNeomem,
+) -> anyhow::Result<()> {
+    let forgotten = r#"{"facts":[{"content":"The Edge build passes its nightly checks.","sources":[1],"about":["E9"],"valid_from":null,"importance":4,"durability":"ordinary","tags":[]}],"entities":[]}"#;
+    let misnumbered = r#"{"facts":[{"content":"The Codex gate passes its storage proofs.","sources":[1],"about":["E1"],"valid_from":null,"importance":4,"durability":"ordinary","tags":[]}],"entities":[{"ref":"E1","name":"Codex","kind":"project","aliases":[],"existing":0}]}"#;
+    let rule = |marker: &str, reply: &str| LlmRule {
+        system_contains: Some(EXTRACTOR.to_owned()),
+        user_contains: Some(marker.to_owned()),
+        reply: reply.to_owned(),
+        ..LlmRule::default()
+    };
+    neomem.add_fake_rules(&FakeRules {
+        llm: vec![rule("nightly checks", forgotten), rule("storage proofs", misnumbered)],
+        ..FakeRules::default()
+    })?;
+    add(
+        neomem,
+        "claude-code",
+        Some("loose-one"),
+        "assistant: the Edge build passes its nightly checks",
+        &[],
+    )?;
+    add(neomem, "codex", Some("loose-two"), "assistant: the Codex gate passes its storage proofs", &[])?;
+    neomem.set_clock(now().plus_millis(320 * 60_000))?;
+    thread::sleep(Duration::from_secs(3));
+    let on_the_owner = facts_about(neomem, proof, "the user")?;
+    let on_codex = facts_about(neomem, proof, "Codex")?;
+    proof.claim(
+        "a fact whose entity the extractor left out is kept on the owner instead of being dropped",
+        on_the_owner.iter().any(|fact| fact.contains("nightly checks")),
+        "",
+    );
+    proof.claim(
+        "an entity the extractor marks as the owner under another name becomes its own entity",
+        on_codex.iter().any(|fact| fact.contains("storage proofs"))
+            && !on_the_owner.iter().any(|fact| fact.contains("storage proofs")),
+        "",
     );
     Ok(())
 }
