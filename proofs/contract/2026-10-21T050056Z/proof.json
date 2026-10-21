@@ -1,0 +1,107 @@
+{
+  "feature": "contract",
+  "scenario": "contract",
+  "passed": true,
+  "started_at": "2026-10-21T050056Z",
+  "duration_ms": 580,
+  "code_version": "1dbccc5e9d76",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "tags lists the starting registry",
+      "passed": true,
+      "detail": "{\"reply\":\"tags\",\"body\":[\"agent-session\",\"calendar\",\"code\",\"conversation\",\"health\",\"media\",\"money\",\"place\",\"purchase\",\"raw\",\"school\",\"sleep\",\"social\",\"system\",\"travel\",\"work-session\"]}\n "
+    },
+    {
+      "claim": "healthcare resolves to health without creating a duplicate",
+      "passed": true,
+      "detail": "{\"reply\":\"tags\",\"body\":[\"health\"]}\n"
+    },
+    {
+      "claim": "a new tag is created once and listed",
+      "passed": true,
+      "detail": "{\"reply\":\"tags\",\"body\":[\"agent-session\",\"astronomy\",\"calendar\",\"code\",\"conversation\",\"health\",\"media\",\"money\",\"place\",\"purchase\",\"raw\",\"school\",\"sleep\",\"social\",\"system\",\"travel\",\"work-session\"]}\n"
+    },
+    {
+      "claim": "the semantic duplicate creates no registry entry",
+      "passed": true,
+      "detail": "{\"reply\":\"tags\",\"body\":[\"agent-session\",\"astronomy\",\"calendar\",\"code\",\"conversation\",\"health\",\"media\",\"money\",\"place\",\"purchase\",\"raw\",\"school\",\"sleep\",\"social\",\"system\",\"travel\",\"work-session\"]}\n"
+    },
+    {
+      "claim": "new meanings use one numbered judge choice and exact repeats skip it",
+      "passed": true,
+      "detail": "2 tag decisions"
+    },
+    {
+      "claim": "external references can target facts idempotently",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "claim": "linking a merged ID lands on its survivor",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "entity lists mentioned in 1 item in episodes with its reference",
+      "passed": true,
+      "detail": "mentioned in 1 item in episodes\n  ext:episodes/epi_123\nent_01M56PGSJG83SYHRJXJG7DJ13N  Edge (project)\nalso     Edge app\nabout    Johan's app.\n  fct_01M59NY2N09AC5V7E9Z0C1HT0H  Edge's ship date is November 1, 2026.  (valid since 2026-10-19T08:53:20Z)\n  owns Johan  ent_01M56PH3B01C00K6AGV0VFCXEC\n"
+    },
+    {
+      "claim": "the external reference survives rebuild",
+      "passed": true,
+      "detail": "mentioned in 1 item in episodes\n  ext:episodes/epi_123\nent_01M56PGSJG83SYHRJXJG7DJ13N  Edge (project)\nalso     Edge app\nabout    Johan's app.\n  fct_01M59NY2N09AC5V7E9Z0C1HT0H  Edge's ship date is November 1, 2026.  (valid since 2026-10-19T08:53:20Z)\n  owns Johan  ent_01M56PH3B01C00K6AGV0VFCXEC\n"
+    },
+    {
+      "claim": "external storage contains the reference, survivor and kind",
+      "passed": true,
+      "detail": "state.db: (\"ext:episodes/epi_123\", \"ent_01M56PGSJG83SYHRJXJG7DJ13N\", \"mentions\")"
+    },
+    {
+      "claim": "external registry has no external content column",
+      "passed": true,
+      "detail": "[\"external\", \"target\", \"kind\", \"recorded_at\"]"
+    },
+    {
+      "claim": "external storage contains the reference, survivor and kind",
+      "passed": true,
+      "detail": "index.db: (\"ext:episodes/epi_123\", \"ent_01M56PGSJG83SYHRJXJG7DJ13N\", \"mentions\")"
+    },
+    {
+      "claim": "invalid external references, kinds and targets are clearly rejected",
+      "passed": true,
+      "detail": "neomem: `episodes/epi_123` is not an external reference: expected ext:<system>/<id>\n"
+    },
+    {
+      "claim": "invalid external references, kinds and targets are clearly rejected",
+      "passed": true,
+      "detail": "neomem: unknown external link type `unknown`: expected mentions\n"
+    },
+    {
+      "claim": "invalid external references, kinds and targets are clearly rejected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "an item linked to both entities is counted once after their merge",
+      "passed": true,
+      "detail": "[ExternalLink { external: ExternalRef(\"ext:books/item_1\"), to: Entity(EntityId(Ulid(2166757806941897581352129600845055093))), kind: Mentions, recorded_at: EpochMs(1792558856690) }]"
+    },
+    {
+      "claim": "extractor proposals use the same semantic registry and remain searchable by tag",
+      "passed": true,
+      "detail": "SearchResults(SearchResults { hits: [SearchHit { fact: Fact { id: FactId(Ulid(2167072933854943415856496748523288253)), content: \"Johan grows basil on the balcony.\", tags: [Tag(\"health\"), Tag(\"horticulture\")], about: [EntityId(Ulid(2166757819030900993426614200611272140))], recorded_at: EpochMs(1792560716873), updated_at: EpochMs(1792560716873), valid_at: EpochMs(1792558856701), invalid_at: None, importance: Importance(3), durability: Ordinary, sources: [IntakeId(Ulid(2167070685045014564229256047870953194))], links: [], evidence: [] }, score: 0.7013002, similarity: 0.43396306, decay: 1.454433, replaced: [], conflict: false, linked: [], entities: [EntityRef { id: EntityId(Ulid(2166757819030900993426614200611272140)), name: \"Johan\", kind: Label(\"person\") }] }], model: \"openai:hash-256\", trace: None })"
+    },
+    {
+      "claim": "extractor tags enter the registry without semantic duplicates",
+      "passed": true,
+      "detail": "Tags([Tag(\"agent-session\"), Tag(\"astronomy\"), Tag(\"calendar\"), Tag(\"code\"), Tag(\"conversation\"), Tag(\"health\"), Tag(\"horticulture\"), Tag(\"media\"), Tag(\"money\"), Tag(\"place\"), Tag(\"purchase\"), Tag(\"raw\"), Tag(\"school\"), Tag(\"sleep\"), Tag(\"social\"), Tag(\"system\"), Tag(\"travel\"), Tag(\"work-session\")])"
+    },
+    {
+      "claim": "the JSON Schema matches the real protocol types",
+      "passed": true,
+      "detail": "generated from Request and Response"
+    }
+  ]
+}

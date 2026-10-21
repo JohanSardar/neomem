@@ -18,16 +18,7 @@ impl Engine {
             Ok(found) => Response::RawHits(
                 found
                     .into_iter()
-                    .map(|record| (record.logged, record.corrected))
-                    .map(|(logged, corrected)| RawHit {
-                        id: logged.id,
-                        source: logged.record.source,
-                        occurred: logged.record.occurred,
-                        recorded_at: logged.recorded_at,
-                        tags: logged.record.tags,
-                        content: logged.record.content,
-                        corrected,
-                    })
+                    .map(|record| RawHit::from_logged(record.logged, record.corrected))
                     .collect(),
             ),
             Err(error) => failed(FailureKind::Internal, format!("raw search failed: {error}")),

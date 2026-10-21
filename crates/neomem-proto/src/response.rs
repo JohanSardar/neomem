@@ -1,6 +1,6 @@
 use neomem_core::{
-    Direction, Entity, EntityId, EpochMs, Fact, FactId, IntakeId, IntakeRecord, Label, LinkKind, MemoryId,
-    ModelRole, RoleAssignment, Source, Span, Tag,
+    Direction, Entity, EntityId, EpochMs, Fact, FactId, IntakeId, IntakeRecord, Label, LinkKind,
+    LoggedIntake, MemoryId, ModelRole, RoleAssignment, Source, Span, Tag,
 };
 use serde::{Deserialize, Serialize};
 
@@ -86,6 +86,20 @@ pub struct RawHit {
     pub tags: Vec<Tag>,
     pub content: String,
     pub corrected: bool,
+}
+
+impl RawHit {
+    pub fn from_logged(logged: LoggedIntake, corrected: bool) -> Self {
+        Self {
+            id: logged.id,
+            source: logged.record.source,
+            occurred: logged.record.occurred,
+            recorded_at: logged.recorded_at,
+            tags: logged.record.tags,
+            content: logged.record.content,
+            corrected,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
