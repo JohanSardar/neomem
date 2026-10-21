@@ -36,6 +36,12 @@ fn print_human(response: &Response) {
                 println!("{}  {}", memory.id, memory.content);
             }
         }
+        Response::Tags(tags) => {
+            for tag in tags {
+                println!("{tag}");
+            }
+        }
+        Response::Linked(link) => println!("{} {} {}", link.external, link.kind.name(), link.to),
         Response::Captured => {}
         Response::Status(report) => print_status(report),
         Response::ShuttingDown => println!("neomemd is shutting down"),
@@ -139,6 +145,18 @@ fn print_index(index: &IndexReport) {
 }
 
 fn print_entity(view: &EntityView) {
+    let mut systems = std::collections::BTreeMap::<&str, Vec<&neomem_core::ExternalLink>>::new();
+    for link in &view.external {
+        systems.entry(link.external.system()).or_default().push(link);
+    }
+    for (system, links) in systems {
+        let count = links.len();
+        let items = if count == 1 { "item" } else { "items" };
+        println!("mentioned in {count} {items} in {system}");
+        for link in links {
+            println!("  {}", link.external);
+        }
+    }
     let entity = &view.entity;
     println!("{}  {} ({})", entity.id(), entity.name(), entity.kind());
     if !entity.aliases().is_empty() {

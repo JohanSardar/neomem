@@ -46,6 +46,12 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
     let request = match &cli.command {
         Command::Recall(arguments) => return recall::run(&home, arguments).map(Outcome::Answered),
         Command::Hook { .. } => return Ok(Outcome::Answered(Response::Captured)),
+        Command::Tags { new } => Request::Tags { new: new.clone() },
+        Command::Link { external, to, kind } => Request::Link {
+            external: external.parse()?,
+            to: to.parse()?,
+            kind: kind.parse().map_err(anyhow::Error::msg)?,
+        },
         Command::Status => Request::Status,
         Command::Add(arguments) => Request::Add(intake_record::from_arguments(arguments)?),
         Command::Raw(arguments) => Request::Raw(intake_record::raw_query(arguments)?),

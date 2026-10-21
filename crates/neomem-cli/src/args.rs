@@ -11,6 +11,17 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
+    Tags {
+        #[arg(long)]
+        new: Option<String>,
+    },
+    Link {
+        external: String,
+        #[arg(long)]
+        to: String,
+        #[arg(long = "type")]
+        kind: String,
+    },
     Status,
     Recall(RecallArgs),
     Hook {
