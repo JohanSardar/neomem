@@ -1,0 +1,62 @@
+{
+  "feature": "models.swap",
+  "scenario": "models-swap",
+  "passed": true,
+  "started_at": "2026-10-21T044414Z",
+  "duration_ms": 2079,
+  "code_version": "d1647e36d77a",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "swapping the planner changes its very next call",
+      "passed": true,
+      "detail": "ModelTested(ModelTestReport { role: Planner, model: \"openai:new-planner\", latency_ms: 1.831772, first_text_ms: Some(1.766851), answer: \"OK\", scores: [] })"
+    },
+    {
+      "claim": "models use persists the new embedder assignment",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "background re-embedding keeps complete old vectors alongside a partial new set",
+      "passed": true,
+      "detail": "Some(VectorState { active: \"openai:hash-256\", old: 100, new: 32, new_dims: 384 })"
+    },
+    {
+      "claim": "search keeps answering while re-embedding",
+      "passed": true,
+      "detail": "openai:hash-256; 1 hits; found ship date true"
+    },
+    {
+      "claim": "a restart mid-swap retains the active old model and staged vectors",
+      "passed": true,
+      "detail": "VectorState { active: \"openai:hash-256\", old: 100, new: 32, new_dims: 384 }"
+    },
+    {
+      "claim": "search answers throughout the remaining rebuild and the complete set activates in one step",
+      "passed": true,
+      "detail": "VectorState { active: \"openai:hash-384\", old: 0, new: 100, new_dims: 384 }; atomic true, answered true"
+    },
+    {
+      "claim": "every fact and entity has only a vector for the new model after the switch",
+      "passed": true,
+      "detail": "VectorState { active: \"openai:hash-384\", old: 0, new: 100, new_dims: 384 }"
+    },
+    {
+      "claim": "a query worded like a stored fact still finds it after the switch",
+      "passed": true,
+      "detail": "openai:hash-384; 1 hits; found ship date true"
+    },
+    {
+      "claim": "models shows the new assignment",
+      "passed": true,
+      "detail": "ModelRoster([RoleAssignment { role: Embedder, assignment: \"fake hash-384\" }, RoleAssignment { role: Judge, assignment: \"unloaded fake_jev (fallback llama.cpp qwen3-reranker-0.6b-Q8_0.gguf)\" }, RoleAssignment { role: Checker, assignment: \"unloaded fake_jev (fallback llama.cpp qwen3-reranker-0.6b-Q8_0.gguf)\" }, RoleAssignment { role: Planner, assignment: \"fake new-planner effort low\" }, RoleAssignment { role: Extractor, assignment: \"fake fake-extractor\" }, RoleAssignment { role: Consolidator, assignment: \"fake fake-consolidator\" }])"
+    },
+    {
+      "claim": "a direct config edit also reloads a role on its next call",
+      "passed": true,
+      "detail": "ModelTested(ModelTestReport { role: Planner, model: \"openai:edited-planner\", latency_ms: 5.430389, first_text_ms: Some(5.349859), answer: \"OK\", scores: [] })"
+    }
+  ]
+}

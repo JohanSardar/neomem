@@ -1,3 +1,0 @@
-2026-10-21T04:42:39.235326Z  INFO neomemd::http: HTTP listening on 127.0.0.1:42203
-2026-10-21T04:42:39.236115Z  INFO neomemd: neomemd serving /tmp/neomemctl-VLZpqs
-2026-10-21T04:42:39.259940Z  INFO neomem_engine::indexing: index rebuilt from the files: 13 facts, 7 entities
