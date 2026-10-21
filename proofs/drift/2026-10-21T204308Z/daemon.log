@@ -1,0 +1,9 @@
+2026-10-21T20:43:09.002019Z  INFO neomemd::http: HTTP listening on 127.0.0.1:43417
+2026-10-21T20:43:09.002418Z  INFO neomemd: neomemd serving /tmp/neomemctl-dbPoXO
+2026-10-21T20:43:09.008464Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
+2026-10-21T20:43:09.106713Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T20:43:09.106808Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T20:43:09.142755Z  INFO neomemd::http: HTTP listening on 127.0.0.1:33175
+2026-10-21T20:43:09.143268Z  INFO neomemd: neomemd serving /tmp/neomemctl-dbPoXO
+2026-10-21T20:43:09.143285Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-dbPoXO/run/neomemd.sock
+2026-10-21T20:43:09.404931Z  INFO neomem_engine::maintenance: nightly drift check: 3 differences repaired
