@@ -1,0 +1,4 @@
+2026-10-21T04:59:56.103254Z  INFO neomemd::http: HTTP listening on 127.0.0.1:35939
+2026-10-21T04:59:56.103856Z  INFO neomemd: neomemd serving /tmp/neomemctl-MOPOEr
+2026-10-21T04:59:56.108087Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
+2026-10-21T04:59:58.390445Z  INFO neomem_engine::maintenance: committed 21 vault changes
