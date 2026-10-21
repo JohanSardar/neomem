@@ -50,7 +50,9 @@ impl<T> LocalSlot<T> {
         if self.used.swap(false, Ordering::SeqCst) {
             self.last_used.store(now.as_millis(), Ordering::SeqCst);
         }
-        if idle_for(now, &self.last_read, timeout) && idle_for(now, &self.last_used, BACKGROUND_GRACE) {
+        if idle_for(now, &self.last_read, timeout)
+            && idle_for(now, &self.last_used, BACKGROUND_GRACE.min(timeout))
+        {
             state.loaded = None;
         }
     }
