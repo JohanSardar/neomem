@@ -7,9 +7,14 @@ publish.workspace = true
 
 [dependencies]
 neomem-core.workspace = true
+schemars.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+
+[build-dependencies]
+syn = { workspace = true, features = ["printing", "clone-impls"] }
+quote.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
