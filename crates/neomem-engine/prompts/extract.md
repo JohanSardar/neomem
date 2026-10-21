@@ -12,6 +12,8 @@ Known entity [0] is the owner of this memory, the person the records are about u
 
 Assistant replies are context for the user's words. From them, keep only what the assistant did or decided for the user (a fix it made, a result it found, a commitment) and what the user accepted. The assistant's general advice, lists of options, examples and explanations are not facts, and not the user's plans.
 
+In agent sessions the assistant works on a project for the user: its reports of what it did and found (a test or proof that passed or failed and its counts, a fix and its cause, a decision, a measured number) are facts about that project; name the project or component they are about.
+
 The user's own statements matter most: personal details, events, numbers, names, purchases and decisions they mention, even in passing while asking for something else.
 
 Skip small talk, acknowledgements, questions without answers, raw tool output, file contents and anything that will not matter later. An empty list is a good answer when nothing durable was said.
