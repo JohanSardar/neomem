@@ -128,7 +128,7 @@ impl Engine {
                 let fact = &candidate.fact;
                 let decay = decay_for(fact, versions, now);
                 let score =
-                    rank_score(candidate.similarity, decay, fact.importance(), fact.invalid_at().is_some());
+                    rank_score(candidate.similarity, decay, fact.importance(), invalid_for(fact, versions));
                 SearchHit {
                     fact: Fact::clone(fact),
                     score,
@@ -204,6 +204,13 @@ fn versions_for(query: &SearchQuery) -> Versions {
     }
 }
 
+fn invalid_for(fact: &Fact, versions: Versions) -> bool {
+    match versions {
+        Versions::AsOf(moment) => !fact.is_valid_at(moment),
+        Versions::Latest | Versions::Everything => fact.invalid_at().is_some(),
+    }
+}
+
 fn decay_for(fact: &Fact, versions: Versions, now: EpochMs) -> f32 {
     if versions == Versions::Latest {
         decay_factor(fact.evidence(), now, fact.durability(), fact.importance())
@@ -267,16 +274,11 @@ fn choose_versions(snapshot: &Snapshot, seeds: &[(FactId, f32)], versions: Versi
 }
 
 fn version_valid_at(snapshot: &Snapshot, seed: FactId, moment: EpochMs) -> Option<FactId> {
-    let mut current = snapshot.latest(seed);
-    let mut visited = HashSet::new();
-    while visited.insert(current) {
-        let fact = snapshot.fact(current)?;
-        if fact.is_valid_at(moment) {
-            return Some(current);
-        }
-        current = fact.links().iter().find(|link| link.kind == FactLinkKind::Updates).map(|link| link.to)?;
-    }
-    None
+    snapshot.chain(seed).into_iter().rev().find(|id| {
+        snapshot.fact(*id).is_some_and(|fact| {
+            fact.valid_at() <= moment && fact.invalid_at().is_none_or(|ended| moment < ended)
+        })
+    })
 }
 
 fn entity_refs(snapshot: &Snapshot, fact: &Fact) -> Vec<EntityRef> {
