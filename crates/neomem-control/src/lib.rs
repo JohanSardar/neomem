@@ -1,5 +1,6 @@
 pub mod bench;
 pub mod binaries;
+pub mod capture;
 pub mod changes;
 pub mod fake_models;
 pub mod gpu_build;

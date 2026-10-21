@@ -2,9 +2,15 @@
   "feature": "raw",
   "scenario": "raw",
   "passed": true,
+<<<<<<<< HEAD:proofs/raw/2026-10-21T000259Z/proof.json
   "started_at": "2026-10-21T000259Z",
   "duration_ms": 62426,
   "code_version": "70c9204c7d82-dirty",
+========
+  "started_at": "2026-10-20T235637Z",
+  "duration_ms": 64892,
+  "code_version": "6885eef50c57-dirty",
+>>>>>>>> origin/main:proofs/raw/2026-10-20T235637Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
@@ -36,12 +42,20 @@
     {
       "claim": "neomem raw prints matching records with their source and time",
       "passed": true,
+<<<<<<<< HEAD:proofs/raw/2026-10-21T000259Z/proof.json
       "detail": "2026-10-20T00:00:00Z  claude-code  int_01M5DW9BX38JBJP5S26J8EDQ3H\n  Renamed the paywall component in Edge"
+========
+      "detail": "2026-10-20T00:00:00Z  claude-code  int_01M5DVXQB91J2XMJTXSE7K65HS\n  Renamed the paywall component in Edge"
+>>>>>>>> origin/main:proofs/raw/2026-10-20T235637Z/proof.json
     },
     {
       "claim": "raw search over 5,000+ records answers under 30 ms at p95",
       "passed": true,
+<<<<<<<< HEAD:proofs/raw/2026-10-21T000259Z/proof.json
       "detail": "p50 5.566 ms, p95 11.469 ms, max 15.475 ms"
+========
+      "detail": "p50 5.948 ms, p95 8.326 ms, max 9.123 ms"
+>>>>>>>> origin/main:proofs/raw/2026-10-20T235637Z/proof.json
     }
   ]
 }

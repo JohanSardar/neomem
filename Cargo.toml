@@ -10,6 +10,7 @@ repository = "https://github.com/JohanSardar/neomem"
 publish = false
 
 [workspace.dependencies]
+neomem-capture = { path = "crates/neomem-capture" }
 neomem-core = { path = "crates/neomem-core" }
 neomem-proto = { path = "crates/neomem-proto" }
 neomem-engine = { path = "crates/neomem-engine" }

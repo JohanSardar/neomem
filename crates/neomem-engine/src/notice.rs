@@ -13,6 +13,9 @@ impl Engine {
     pub fn notice(&self, notice: Notice) {
         match notice {
             Notice::FileChanged(path) if self.vault.is_memory_file(&path) => self.vault_file_changed(&path),
+            Notice::FileChanged(path) if path.extension().is_some_and(|extension| extension == "jsonl") => {
+                self.transcript_changed(&path);
+            }
             Notice::FileChanged(_) => {}
         }
     }

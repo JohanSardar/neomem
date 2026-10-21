@@ -27,6 +27,7 @@ impl Engine {
                 if ticks.is_multiple_of(SPOOL_EVERY_TICKS) {
                     engine.drain_spool();
                 }
+                engine.sweep_transcripts();
                 engine.maintain();
                 if engine.clock.now() >= next_nightly {
                     engine.run_nightly();

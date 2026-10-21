@@ -40,11 +40,17 @@ fn run() -> anyhow::Result<()> {
     let config = DaemonConfig::load_or_create(&home)?;
     let clock = Arc::new(DaemonClock::new(config.dev.settable_clock));
     let engine = Arc::new(open_engine(&home, &config, Arc::clone(&clock))?);
+    let sources = config.capture.sources();
+    let mut directories = vec![home.root().join("facts"), home.root().join("entities")];
+    for source in &sources {
+        std::fs::create_dir_all(&source.root)?;
+    }
+    directories.extend(sources.iter().map(|source| source.root.clone()));
+    engine.configure_capture(sources, config.capture.every()?);
     let dispatcher = Arc::new(Dispatcher::new(Arc::clone(&engine), clock));
     http::start(Arc::clone(&dispatcher), &config.http, &home)?;
     engine.run()?;
-    let _watcher =
-        watcher::watch(Arc::clone(&engine), &[home.root().join("facts"), home.root().join("entities")])?;
+    let _watcher = watcher::watch(Arc::clone(&engine), &directories)?;
     tracing::info!("neomemd serving {}", home.root().display());
     socket::serve(&dispatcher, &home.socket_path())?;
     drop(lock);

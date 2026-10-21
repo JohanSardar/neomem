@@ -1,5 +1,8 @@
 #![allow(clippy::expect_used, clippy::unwrap_used, clippy::panic)]
 
+mod agent;
+pub use agent::{RecordedAgent, agent_contract};
+
 mod contract;
 mod embedder;
 mod extractor;

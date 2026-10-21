@@ -5,7 +5,7 @@
   depends_on: []
   proof: daemon
   status: proven
-  last_proof: proofs/daemon/2026-10-21T000257Z
+  last_proof: proofs/daemon/2026-10-20T235636Z
 - id: intake
   does: copies every intake record into the intake log with an int_ ID before any processing and queues its extraction job
   reached_via: [neomem add]
@@ -13,7 +13,7 @@
   depends_on: [daemon]
   proof: intake
   status: proven
-  last_proof: proofs/intake/2026-10-21T000258Z
+  last_proof: proofs/intake/2026-10-20T235636Z
 - id: spool
   does: writes capture signals and adds to spool/ while the daemon is down and drains them when it is back
   reached_via: [neomem add]
@@ -21,7 +21,7 @@
   depends_on: [intake]
   proof: spool
   status: proven
-  last_proof: proofs/spool/2026-10-21T000258Z
+  last_proof: proofs/spool/2026-10-20T235637Z
 - id: raw
   does: keyword and date search over the raw intake log, without decay
   reached_via: [neomem raw]
@@ -29,7 +29,7 @@
   depends_on: [intake]
   proof: raw
   status: proven
-  last_proof: proofs/raw/2026-10-21T000259Z
+  last_proof: proofs/raw/2026-10-20T235637Z
 - id: correct
   does: marks an intake record as logged incorrectly, hides facts drawn only from it and queues them for re-checking
   reached_via: [neomem correct]
@@ -37,7 +37,7 @@
   depends_on: [intake]
   proof: correct
   status: proven
-  last_proof: proofs/correct/2026-10-21T000401Z
+  last_proof: proofs/correct/2026-10-20T235742Z
 - id: vault
   does: keeps every fact and entity as a Markdown file with a YAML header, written atomically and committed to a local git repository with no remote
   reached_via: [daemon writer, daemon vault watcher]
@@ -45,7 +45,7 @@
   depends_on: [daemon]
   proof: vault
   status: proven
-  last_proof: proofs/vault/2026-10-21T000401Z
+  last_proof: proofs/vault/2026-10-20T235742Z
 - id: index
   does: keeps index.db and the in-memory snapshot (vectors, links, latest map, names) in step with the files and rebuilds them on demand
   reached_via: [neomem rebuild]
@@ -53,7 +53,7 @@
   depends_on: [vault]
   proof: index
   status: proven
-  last_proof: proofs/index/2026-10-21T000408Z
+  last_proof: proofs/index/2026-10-20T235749Z
 - id: drift
   does: the nightly drift check finds differences between the files and index.db and repairs them
   reached_via: [daemon nightly drift check]
@@ -61,7 +61,7 @@
   depends_on: [index]
   proof: drift
   status: proven
-  last_proof: proofs/drift/2026-10-21T000409Z
+  last_proof: proofs/drift/2026-10-20T235750Z
 - id: models.embed
   does: embeds text locally with llama.cpp (Vulkan, CUDA, CPU or Metal) or any OpenAI-compatible embeddings endpoint, with a small query cache
   reached_via: [neomem models, neomem models test]
@@ -69,7 +69,7 @@
   depends_on: [daemon]
   proof: models-embed
   status: proven
-  last_proof: proofs/models.embed/2026-10-21T000410Z
+  last_proof: proofs/models.embed/2026-10-20T235751Z
 - id: models.judge
   does: typed decisions with probabilities from Jev, falling back to a local llama.cpp reranker when Jev is missing, slow or down
   reached_via: [neomem models test]
@@ -77,7 +77,7 @@
   depends_on: [daemon]
   proof: models-judge
   status: proven
-  last_proof: proofs/models.judge/2026-10-21T000417Z
+  last_proof: proofs/models.judge/2026-10-20T235759Z
 - id: models.llm
   does: structured completions from every provider kind (openai, anthropic, chatgpt, codex, command) with effort levels and one retry on invalid output
   reached_via: [neomem models test, neomem login]
@@ -85,7 +85,7 @@
   depends_on: [daemon]
   proof: models-llm
   status: proven
-  last_proof: proofs/models.llm/2026-10-21T000426Z
+  last_proof: proofs/models.llm/2026-10-20T235809Z
   blocked: "needs-user: live provider checks need the user: neomem login chatgpt needs a browser sign-in, openai and anthropic need API keys (none on this machine), and codex needs Codex's own login, which neomem must not use; every kind is proven against fakes"
 - id: models.swap
   does: swapping the embedder re-embeds every memory into a second vector set in the background and switches search over in one step
@@ -102,23 +102,23 @@
   depends_on: [models.embed]
   proof: models-idle
   status: proven
-  last_proof: proofs/models.idle/2026-10-21T000429Z
+  last_proof: proofs/models.idle/2026-10-20T235813Z
 - id: extract
   does: the worker batches intake (5 minutes of session silence, compaction or session end), extracts facts and entities with one model call and writes them through the writer
   reached_via: [daemon worker, neomem reextract]
   module: neomem-engine (worker)
   depends_on: [intake, vault, index, models.llm]
   proof: extract
-  status: proven
-  last_proof: proofs/extract/2026-10-21T000433Z
+  status: planned
+  last_proof: null
 - id: check
   does: checks each new fact against its 5 closest facts as same, extends, updates, contradicts or new, attaching evidence instead of duplicating
   reached_via: [daemon worker]
   module: neomem-engine (check)
   depends_on: [extract, models.judge]
   proof: check
-  status: proven
-  last_proof: proofs/check/2026-10-21T000445Z
+  status: planned
+  last_proof: null
 - id: search
   does: the fixed search pipeline from query embedding through vector seeds, latest swap, one hop and ranking, with no model call besides the embedding
   reached_via: [neomem search]
@@ -126,7 +126,7 @@
   depends_on: [index, models.embed]
   proof: search
   status: proven
-  last_proof: proofs/search/2026-10-21T000458Z
+  last_proof: proofs/search/2026-10-20T235818Z
 - id: latest
   does: search only returns the newest version of a fact and puts the newer of two conflicting facts first, flagged
   reached_via: [neomem search]
@@ -158,7 +158,7 @@
   depends_on: [index]
   proof: entity
   status: proven
-  last_proof: proofs/entity/2026-10-21T000459Z
+  last_proof: proofs/entity/2026-10-20T235819Z
 - id: decay
   does: ranks facts by ACT-R activation over evidence events, squashed into 0.3 to 1.5, with per-kind rates and an explicit useful signal
   reached_via: [neomem useful, neomem search]
@@ -185,15 +185,15 @@
   last_proof: null
 - id: capture.cc
   does: reads Claude Code transcripts from their stored position into one intake record per turn after a hook signal (spooled while the daemon is down), folder change or sweep
-  reached_via: [hook cc prompt, hook cc tool, hook cc stop, hook cc subagent-stop, hook cc compact, hook cc end]
+  reached_via: [neomem hook, hook cc prompt, hook cc tool, hook cc stop, hook cc subagent-stop, hook cc compact, hook cc end]
   module: neomem-capture (claude code)
   depends_on: [intake]
   proof: capture-cc
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/capture.cc/2026-10-20T235820Z
 - id: capture.codex
   does: reads Codex rollouts from their stored position, finding the file by session ID when the hook has no transcript path
-  reached_via: [hook codex prompt, hook codex tool, hook codex stop, hook codex compact, hook codex end]
+  reached_via: [hook codex prompt, hook codex tool, hook codex stop, hook codex subagent-stop, hook codex compact, hook codex end]
   module: neomem-capture (codex)
   depends_on: [intake]
   proof: capture-codex
@@ -201,7 +201,7 @@
   last_proof: null
 - id: capture.pi
   does: reads pi session trees along the active branch after the extension's signals
-  reached_via: [pi turn_end, pi agent_end, pi session_shutdown]
+  reached_via: [hook pi prompt, hook pi tool, hook pi stop, hook pi subagent-stop, hook pi compact, hook pi end]
   module: neomem-capture (pi)
   depends_on: [intake]
   proof: capture-pi

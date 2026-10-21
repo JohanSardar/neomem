@@ -34,6 +34,17 @@ enum Command {
         home: Option<PathBuf>,
     },
     FetchModels,
+    Hook {
+        agent: String,
+        event: String,
+        #[arg(long)]
+        payload: Option<PathBuf>,
+    },
+    Replay {
+        transcript: PathBuf,
+        #[arg(long)]
+        agent: Option<String>,
+    },
     #[command(hide = true)]
     FakeModels {
         #[arg(long)]
@@ -96,6 +107,12 @@ fn main() -> ExitCode {
         Command::Trace { text, home, .. } => session::trace_search(&text, home.as_deref()),
         Command::Bench(args) if args.kind == "models" => bench::models(),
         Command::Bench(args) => bench::run(args.save_baseline),
+        Command::Hook { agent, event, payload } => {
+            neomem_control::capture::hook(&agent, &event, payload.as_deref())
+        }
+        Command::Replay { transcript, agent } => {
+            neomem_control::capture::replay(&transcript, agent.as_deref())
+        }
         Command::FetchModels => model_files::fetch_all(),
         Command::FakeModels { address_file } => fake_models::serve(&address_file),
     };

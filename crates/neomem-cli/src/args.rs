@@ -12,6 +12,10 @@ pub struct Cli {
 #[derive(Debug, Subcommand)]
 pub enum Command {
     Status,
+    Hook {
+        agent: String,
+        event: String,
+    },
     Add(AddArgs),
     Raw(RawArgs),
     Correct(CorrectArgs),

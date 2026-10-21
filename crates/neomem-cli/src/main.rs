@@ -1,5 +1,6 @@
 mod args;
 mod connection;
+mod hook;
 mod intake_record;
 mod login;
 mod render;
@@ -17,6 +18,12 @@ use crate::args::{Cli, Command, ModelsAction};
 use crate::connection::DaemonConnection;
 
 fn main() -> ExitCode {
+    let arguments: Vec<String> = std::env::args().skip(1).collect();
+    let command_at = usize::from(arguments.first().is_some_and(|argument| argument == "--json"));
+    if arguments.get(command_at).is_some_and(|argument| argument == "hook") {
+        hook::run(&arguments[command_at + 1..]);
+        return ExitCode::SUCCESS;
+    }
     let cli = Cli::parse();
     match run(&cli) {
         Ok(Outcome::Answered(response)) => render::print(&response, cli.json),
@@ -36,6 +43,7 @@ enum Outcome {
 fn run(cli: &Cli) -> anyhow::Result<Outcome> {
     let home = Home::from_env().ok_or_else(|| anyhow::anyhow!("neither NEOMEM_HOME nor HOME is set"))?;
     let request = match &cli.command {
+        Command::Hook { .. } => return Ok(Outcome::Answered(Response::Captured)),
         Command::Status => Request::Status,
         Command::Add(arguments) => Request::Add(intake_record::from_arguments(arguments)?),
         Command::Raw(arguments) => Request::Raw(intake_record::raw_query(arguments)?),

@@ -1,0 +1,38 @@
+2026-10-20T23:58:09.842877Z  INFO neomemd::http: HTTP listening on 127.0.0.1:41145
+2026-10-20T23:58:09.845005Z  INFO neomemd: neomemd serving /tmp/neomemctl-Wa3Jio
+2026-10-20T23:58:09.847089Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-20T23:58:09.918530Z  INFO neomem_engine::engine: engine flushed
+2026-10-20T23:58:09.918601Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-20T23:58:09.972109Z  INFO neomemd::http: HTTP listening on 127.0.0.1:41455
+2026-10-20T23:58:09.977607Z  INFO neomemd: neomemd serving /tmp/neomemctl-Wa3Jio
+2026-10-20T23:58:09.977666Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-Wa3Jio/run/neomemd.sock
+2026-10-20T23:58:10.692726Z  INFO neomem_engine::engine: engine flushed
+2026-10-20T23:58:10.692783Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-20T23:58:10.731596Z  INFO neomemd::http: HTTP listening on 127.0.0.1:40519
+2026-10-20T23:58:10.736479Z  INFO neomemd: neomemd serving /tmp/neomemctl-Wa3Jio
+2026-10-20T23:58:10.736545Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-Wa3Jio/run/neomemd.sock
+2026-10-20T23:58:11.383543Z  INFO neomem_engine::engine: engine flushed
+2026-10-20T23:58:11.383605Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-20T23:58:11.431553Z  INFO neomemd::http: HTTP listening on 127.0.0.1:39509
+2026-10-20T23:58:11.435534Z  INFO neomemd: neomemd serving /tmp/neomemctl-Wa3Jio
+2026-10-20T23:58:11.435577Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-Wa3Jio/run/neomemd.sock
+2026-10-20T23:58:12.093517Z  INFO neomem_engine::engine: engine flushed
+2026-10-20T23:58:12.093576Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-20T23:58:12.138546Z  INFO neomemd::http: HTTP listening on 127.0.0.1:44409
+2026-10-20T23:58:12.143468Z  INFO neomemd: neomemd serving /tmp/neomemctl-Wa3Jio
+2026-10-20T23:58:12.143532Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-Wa3Jio/run/neomemd.sock
+2026-10-20T23:58:12.819510Z  INFO neomem_engine::engine: engine flushed
+2026-10-20T23:58:12.819570Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-20T23:58:12.870881Z  INFO neomemd::http: HTTP listening on 127.0.0.1:33191
+2026-10-20T23:58:12.873844Z  INFO neomemd: neomemd serving /tmp/neomemctl-Wa3Jio
+2026-10-20T23:58:12.873932Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-Wa3Jio/run/neomemd.sock
+2026-10-20T23:58:13.536502Z  INFO neomem_engine::engine: engine flushed
+2026-10-20T23:58:13.536576Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-20T23:58:13.583631Z  INFO neomemd::http: HTTP listening on 127.0.0.1:42581
+2026-10-20T23:58:13.586444Z  INFO neomemd: neomemd serving /tmp/neomemctl-Wa3Jio
+2026-10-20T23:58:13.586496Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-Wa3Jio/run/neomemd.sock
+2026-10-20T23:58:13.724480Z  INFO neomem_engine::engine: engine flushed
+2026-10-20T23:58:13.724545Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-20T23:58:13.762754Z  INFO neomemd::http: HTTP listening on 127.0.0.1:44279
+2026-10-20T23:58:13.767452Z  INFO neomemd: neomemd serving /tmp/neomemctl-Wa3Jio
+2026-10-20T23:58:13.767506Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-Wa3Jio/run/neomemd.sock

@@ -10,34 +10,7 @@ impl StateDb {
     pub fn log_intake(&self, logged: &LoggedIntake, job: &ExtractionJob) -> Result<(), StateError> {
         let mut writer = self.writer()?;
         let transaction = writer.transaction()?;
-        let record = &logged.record;
-        transaction.execute(
-            &format!(
-                "INSERT INTO intake ({INTAKE_COLUMNS}) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)"
-            ),
-            params![
-                logged.id.to_string(),
-                logged.recorded_at.as_millis(),
-                record.source.as_str(),
-                record.occurred.start.as_millis(),
-                record.occurred.end.as_millis(),
-                to_json(&record.tags)?,
-                record.content,
-                to_json(&record.entity_hints)?,
-                record.source_ref,
-                record.session,
-            ],
-        )?;
-        transaction.execute(
-            "INSERT INTO jobs (kind, batch_key, intake_id, state, not_before, created_at)
-             VALUES ('extract', ?1, ?2, 'pending', ?3, ?4)",
-            params![
-                job.batch.as_str(),
-                logged.id.to_string(),
-                job.not_before.as_millis(),
-                logged.recorded_at.as_millis()
-            ],
-        )?;
+        insert_intake(&transaction, logged, job)?;
         transaction.commit()?;
         Ok(())
     }
@@ -80,6 +53,40 @@ impl StateDb {
             Ok(turns)
         })
     }
+}
+
+pub(crate) fn insert_intake(
+    transaction: &rusqlite::Transaction<'_>,
+    logged: &LoggedIntake,
+    job: &ExtractionJob,
+) -> Result<(), StateError> {
+    let record = &logged.record;
+    transaction.execute(
+        &format!("INSERT INTO intake ({INTAKE_COLUMNS}) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)"),
+        params![
+            logged.id.to_string(),
+            logged.recorded_at.as_millis(),
+            record.source.as_str(),
+            record.occurred.start.as_millis(),
+            record.occurred.end.as_millis(),
+            to_json(&record.tags)?,
+            record.content,
+            to_json(&record.entity_hints)?,
+            record.source_ref,
+            record.session,
+        ],
+    )?;
+    transaction.execute(
+        "INSERT INTO jobs (kind, batch_key, intake_id, state, not_before, created_at)
+             VALUES ('extract', ?1, ?2, 'pending', ?3, ?4)",
+        params![
+            job.batch.as_str(),
+            logged.id.to_string(),
+            job.not_before.as_millis(),
+            logged.recorded_at.as_millis()
+        ],
+    )?;
+    Ok(())
 }
 
 pub(crate) fn logged_from(row: &Row<'_>) -> Result<LoggedIntake, StateError> {

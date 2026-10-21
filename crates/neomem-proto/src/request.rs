@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "command", content = "arguments", rename_all = "snake_case")]
 pub enum Request {
     Status,
+    Capture(neomem_core::CaptureSignal),
     Shutdown,
     Add(IntakeRecord),
     Raw(RawQuery),
@@ -93,6 +94,6 @@ fn default_raw_limit() -> usize {
 
 impl Request {
     pub fn waits_in_spool_when_the_daemon_is_down(&self) -> bool {
-        matches!(self, Self::Add(_))
+        matches!(self, Self::Add(_) | Self::Capture(_))
     }
 }
