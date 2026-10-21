@@ -1,4 +1,4 @@
-mod capture;
+pub(crate) mod capture;
 mod capture_cc;
 mod capture_codex;
 mod capture_pi;
