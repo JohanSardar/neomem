@@ -19,6 +19,7 @@ neomem-vault = { path = "crates/neomem-vault" }
 neomem-index = { path = "crates/neomem-index" }
 neomem-models = { path = "crates/neomem-models" }
 neomem-testkit = { path = "crates/neomem-testkit" }
+rmcp = { version = "=3.6.0", default-features = false, features = ["server", "transport-streamable-http-server"] }
 axum = "=0.8.9"
 thiserror = "=2.0.21"
 tokio = { version = "=1.54.0", features = ["rt-multi-thread", "net", "signal", "sync", "macros", "time"] }
