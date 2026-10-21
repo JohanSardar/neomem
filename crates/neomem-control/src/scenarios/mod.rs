@@ -10,6 +10,7 @@ mod entity;
 mod extract;
 mod index;
 mod intake;
+mod latest;
 pub(crate) mod models_embed;
 mod models_idle;
 mod models_judge;
@@ -51,6 +52,7 @@ pub const ALL: &[Scenario] = &[
     Scenario { name: "search", run: search::prove },
     Scenario { name: "extract", run: extract::prove },
     Scenario { name: "check", run: check::prove },
+    Scenario { name: "latest", run: latest::prove },
 ];
 
 pub fn find(name: &str) -> Option<Scenario> {
