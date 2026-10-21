@@ -1,7 +1,7 @@
 use std::hash::{BuildHasher, RandomState};
 use std::sync::Mutex;
 
-use neomem_core::{EpochMs, IntakeId};
+use neomem_core::{EntityId, EpochMs, FactId, IntakeId};
 
 #[derive(Debug)]
 pub struct IdMint {
@@ -26,6 +26,16 @@ impl IdMint {
     pub fn intake(&self, now: EpochMs) -> IntakeId {
         let (millis, randomness) = self.next(now);
         IntakeId::from_parts(millis, randomness)
+    }
+
+    pub fn fact(&self, now: EpochMs) -> FactId {
+        let (millis, randomness) = self.next(now);
+        FactId::from_parts(millis, randomness)
+    }
+
+    pub fn entity(&self, now: EpochMs) -> EntityId {
+        let (millis, randomness) = self.next(now);
+        EntityId::from_parts(millis, randomness)
     }
 
     fn next(&self, now: EpochMs) -> (EpochMs, u128) {

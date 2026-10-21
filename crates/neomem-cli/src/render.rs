@@ -36,6 +36,7 @@ fn print_human(response: &Response) {
         Response::RawHits(hits) => print_raw_hits(hits),
         Response::Corrected(receipt) => println!("{} is marked as logged incorrectly", receipt.intake),
         Response::Rebuilt(report) => print_rebuilt(report),
+        Response::Reextracting { queued } => println!("queued {queued} intake records for extraction"),
         Response::SearchResults(results) => print_search(results),
         Response::DriftChecked(report) => println!(
             "drift check: {} differences ({} added, {} changed, {} files missing, {} unreadable) in {} ms",
