@@ -1,3 +1,4 @@
+mod backend_environment;
 mod config;
 mod daemon_clock;
 mod dispatch;
@@ -22,6 +23,9 @@ use crate::instance::InstanceLock;
 
 fn main() -> ExitCode {
     init_logging();
+    if let Err(error) = backend_environment::apply() {
+        tracing::warn!("running without the llama.cpp backend environment: {error}");
+    }
     match run() {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {

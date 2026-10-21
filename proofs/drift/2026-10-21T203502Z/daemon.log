@@ -1,0 +1,9 @@
+2026-10-21T20:35:02.344761Z  INFO neomemd::http: HTTP listening on 127.0.0.1:43519
+2026-10-21T20:35:02.345270Z  INFO neomemd: neomemd serving /tmp/neomemctl-PIpSd6
+2026-10-21T20:35:02.353510Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
+2026-10-21T20:35:02.455027Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T20:35:02.455192Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T20:35:02.492953Z  INFO neomemd::http: HTTP listening on 127.0.0.1:35493
+2026-10-21T20:35:02.493730Z  INFO neomemd: neomemd serving /tmp/neomemctl-PIpSd6
+2026-10-21T20:35:02.493760Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-PIpSd6/run/neomemd.sock
+2026-10-21T20:35:02.513222Z  INFO neomem_engine::maintenance: nightly drift check: 3 differences repaired
