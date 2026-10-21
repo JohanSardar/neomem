@@ -3,6 +3,7 @@ use std::fs;
 use std::path::Path;
 
 use anyhow::Context;
+use syn::parse::Parser;
 use syn::visit::Visit;
 
 const SURFACE_KINDS: &[&str] = &["neomem", "http", "hook", "mcp", "pi"];
@@ -13,6 +14,7 @@ pub fn in_code(root: &Path) -> anyhow::Result<BTreeSet<String>> {
     if surfaces.contains("neomem hook") {
         surfaces.extend(hook_surfaces(&root.join("crates/neomem-core/src/capture.rs"))?);
     }
+    surfaces.extend(mcp_tools(&root.join("crates/neomemd/src/mcp/tools.rs"))?);
     surfaces.extend(http_routes(&root.join("crates/neomemd/src"))?);
     Ok(surfaces)
 }
@@ -81,6 +83,48 @@ fn hook_surfaces(path: &Path) -> anyhow::Result<Vec<String>> {
         .collect())
 }
 
+fn mcp_tools(path: &Path) -> anyhow::Result<Vec<String>> {
+    let Some(file) = parse(path)? else { return Ok(Vec::new()) };
+    let mut finder = ToolFinder::default();
+    finder.visit_file(&file);
+    Ok(finder.tools)
+}
+
+#[derive(Default)]
+struct ToolFinder {
+    tools: Vec<String>,
+}
+
+impl<'ast> Visit<'ast> for ToolFinder {
+    fn visit_expr_macro(&mut self, expression: &'ast syn::ExprMacro) {
+        if expression.mac.path.is_ident("vec")
+            && let Ok(entries) = syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated
+                .parse2(expression.mac.tokens.clone())
+        {
+            let mut nested = ToolFinder::default();
+            for entry in &entries {
+                nested.visit_expr(entry);
+            }
+            self.tools.extend(nested.tools);
+        }
+    }
+
+    fn visit_expr_struct(&mut self, expression: &'ast syn::ExprStruct) {
+        if expression.path.is_ident("ToolEntry") {
+            for field in &expression.fields {
+                if let syn::Member::Named(name) = &field.member
+                    && name == "name"
+                    && let syn::Expr::Lit(value) = &field.expr
+                    && let syn::Lit::Str(name) = &value.lit
+                {
+                    self.tools.push(format!("mcp {}", name.value()));
+                }
+            }
+        }
+        syn::visit::visit_expr_struct(self, expression);
+    }
+}
+
 fn http_routes(source_dir: &Path) -> anyhow::Result<Vec<String>> {
     let mut finder = RouteFinder::default();
     for entry in fs::read_dir(source_dir)? {
@@ -101,6 +145,12 @@ struct RouteFinder {
 
 impl<'ast> Visit<'ast> for RouteFinder {
     fn visit_expr_method_call(&mut self, call: &'ast syn::ExprMethodCall) {
+        if call.method == "nest_service"
+            && let Some(syn::Expr::Lit(path)) = call.args.first()
+            && let syn::Lit::Str(path) = &path.lit
+        {
+            self.routes.push(format!("http {}", path.value()));
+        }
         if call.method == "route"
             && let (Some(syn::Expr::Lit(path)), Some(syn::Expr::Call(handler))) =
                 (call.args.first(), call.args.get(1))
@@ -128,6 +178,21 @@ fn kebab_case(identifier: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn mcp_tools_are_discovered_inside_the_catalog_vector() {
+        let file = syn::parse_file(
+            r#"
+            fn table() {
+                vec![ToolEntry { name: "search" }, ToolEntry { name: "add" }]
+            }
+        "#,
+        )
+        .unwrap();
+        let mut finder = ToolFinder::default();
+        finder.visit_file(&file);
+        assert_eq!(finder.tools, ["mcp search", "mcp add"]);
+    }
 
     #[test]
     fn nested_cli_surfaces_match_their_top_level_command() {

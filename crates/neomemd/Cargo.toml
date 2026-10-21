@@ -13,6 +13,7 @@ neomem-core.workspace = true
 neomem-engine.workspace = true
 neomem-models.workspace = true
 neomem-proto.workspace = true
+rmcp.workspace = true
 notify.workspace = true
 serde.workspace = true
 serde_json.workspace = true

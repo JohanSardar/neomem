@@ -11,6 +11,7 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
+    Mcp,
     Tags {
         #[arg(long)]
         new: Option<String>,
