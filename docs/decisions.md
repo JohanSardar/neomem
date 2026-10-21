@@ -64,3 +64,4 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - Eval replaces only capture paths, HTTP binding and intake debounce (one second, large batch) inside temporary daemon configs; it waits for zero pending/claimed jobs, rejects failed jobs, then awaits serialized manual consolidation before searching.
 - recall.hooks: empty recall slices use the adapter’s last 16 active-branch transcript turns, located through the daemon’s capture cursor (at most 16,000 characters); pi ships plain JavaScript and uses the same TOML switch precedence and framed socket/spool envelopes as the CLI.
 - The pi smoke proof follows npm’s installed global bin/pi entrypoint instead of hardcoding either pi package name.
+- pi has no built-in MCP (its docs say so), so install gives pi the skill and the neomem-pi extension (capture and recall) but no MCP server; Claude Code and Codex get MCP through the plugin's .mcp.json.
