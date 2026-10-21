@@ -55,3 +55,6 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - The neomem skill lives in integrations/skills/neomem, outside the agents plugin, so each agent loads it once: ~/.agents/skills for Codex and pi, ~/.claude/skills for Claude Code (§10.1); the plugin carries only hooks and MCP.
 - MCP uses stateless JSON HTTP responses, the daemon's enabled loopback HTTP listener for the blocking stdio relay, and epoch-millisecond tool time arguments; add defaults its occurrence to the daemon clock.
 - External references accept only `mentions` initially; systems use lowercase ASCII kebab names (1–48 characters) and opaque ASCII alphanumeric, underscore, hyphen or period IDs (1–256 characters, excluding `.` and `..`).
+- JSON Schema generation reads the real core and proto wire definitions at build time, preserving core’s serde/thiserror-only dependency boundary.
+- Tag proposals compare the eight nearest registry tags in one numbered judge choice; exact existing names bypass the models.
+- Submitted intake tags stay intact in the log and are canonicalized with extractor proposals when writing facts, keeping capture off the model path.

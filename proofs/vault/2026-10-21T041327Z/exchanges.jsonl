@@ -1,1 +1,0 @@
-{"request":{"protocol":1,"request":{"command":"status"}},"response":{"body":{"daemon_version":"0.1.0","home":"/tmp/neomemctl-8IkHqK","index":{"entities":2,"facts":2,"links":4,"model":"openai:hash-256","names":3,"vectors":4},"pid":451396,"protocol":1,"uptime_ms":7094},"reply":"status"},"elapsed_ms":0.537799}

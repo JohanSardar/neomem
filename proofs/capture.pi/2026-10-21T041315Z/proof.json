@@ -1,0 +1,122 @@
+{
+  "feature": "capture.pi",
+  "scenario": "capture-pi",
+  "passed": true,
+  "started_at": "2026-10-21T041315Z",
+  "duration_ms": 2083,
+  "code_version": "9f8808b2e418",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "hook with stalled stdin still exits zero silently within 50 ms",
+      "passed": true,
+      "detail": "22.079 ms"
+    },
+    {
+      "claim": "large hook payload is spooled silently within 50 ms",
+      "passed": true,
+      "detail": "4.196 ms"
+    },
+    {
+      "claim": "offline hook exits zero silently within 50 ms",
+      "passed": true,
+      "detail": "2.065 ms"
+    },
+    {
+      "claim": "offline signal is spooled",
+      "passed": true,
+      "detail": "signal pending"
+    },
+    {
+      "claim": "recorded user, assistant and action reach intake",
+      "passed": true,
+      "detail": "user: Remember the capture orchard OPENAI_API_KEY=[redacted]\nassistant: The orchard is ready\naction bash: cargo test\naction bash tool1 completed"
+    },
+    {
+      "claim": "raw tool output and inactive pi branches never reach intake",
+      "passed": true,
+      "detail": "user: Remember the capture orchard OPENAI_API_KEY=[redacted]\nassistant: The orchard is ready\naction bash: cargo test\naction bash tool1 completed"
+    },
+    {
+      "claim": "secrets are removed before intake",
+      "passed": true,
+      "detail": "key redacted"
+    },
+    {
+      "claim": "spooled signal drains after daemon startup",
+      "passed": true,
+      "detail": "0 files pending"
+    },
+    {
+      "claim": "session extraction waits five minutes after the last message",
+      "passed": true,
+      "detail": "3/3 jobs delayed"
+    },
+    {
+      "claim": "turns retain source, session and agent-session tag",
+      "passed": true,
+      "detail": "3/3 records"
+    },
+    {
+      "claim": "every recorded turn is captured",
+      "passed": true,
+      "detail": "3/3"
+    },
+    {
+      "claim": "online hook p95 stays below 50 ms",
+      "passed": true,
+      "detail": "p95 1.992 ms"
+    },
+    {
+      "claim": "path aliases cannot duplicate captured turns",
+      "passed": true,
+      "detail": "3 original records"
+    },
+    {
+      "claim": "hook storm and restart capture each turn exactly once",
+      "passed": true,
+      "detail": "3 records"
+    },
+    {
+      "claim": "crash mid-line leaves the incomplete turn unread",
+      "passed": true,
+      "detail": "partial line retained"
+    },
+    {
+      "claim": "sweep captures a completed partial line without a hook",
+      "passed": true,
+      "detail": "user: Remember the capture orchard OPENAI_API_KEY=[redacted]\nassistant: The orchard is ready\naction bash: cargo test\naction bash tool1 completed\nassistant: Completed after crash"
+    },
+    {
+      "claim": "captured turns follow the worker session-silence configuration",
+      "passed": true,
+      "detail": "1 configured jobs"
+    },
+    {
+      "claim": "end without transcript path locates session and expedites extraction",
+      "passed": true,
+      "detail": "0 delayed jobs"
+    },
+    {
+      "claim": "a session with no hook is discovered",
+      "passed": true,
+      "detail": "user: Remember the capture orchard OPENAI_API_KEY=[redacted]\nassistant: The orchard is ready\naction bash: cargo test\naction bash tool1 completed\nassistant: Completed after crash\nuser: Unsignaled capture orchard\nassistant: The orchard is ready\naction bash: cargo test\naction bash tool1 completed"
+    },
+    {
+      "claim": "byte positions persist in state.db",
+      "passed": true,
+      "detail": "2 transcripts"
+    },
+    {
+      "claim": "reactivating an older pi branch captures its previously skipped ancestor once",
+      "passed": true,
+      "detail": "user: Remember the capture orchard OPENAI_API_KEY=[redacted]\nassistant: The orchard is ready\naction bash: cargo test\naction bash tool1 completed\nassistant: Completed after crash\nuser: Unsignaled capture orchard\nassistant: The orchard is ready\naction bash: cargo test\naction bash tool1 completed\nassistant: ABANDONED_BRANCH_SENTINEL\nassistant: Selected the alternate branch"
+    },
+    {
+      "claim": "pi ancestry checkpoints survive restart without duplicates",
+      "passed": true,
+      "detail": "user: Remember the capture orchard OPENAI_API_KEY=[redacted]\nassistant: The orchard is ready\naction bash: cargo test\naction bash tool1 completed\nassistant: Completed after crash\nuser: Unsignaled capture orchard\nassistant: The orchard is ready\naction bash: cargo test\naction bash tool1 completed\nassistant: ABANDONED_BRANCH_SENTINEL\nassistant: Selected the alternate branch"
+    }
+  ]
+}

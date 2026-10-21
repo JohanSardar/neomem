@@ -1,0 +1,2384 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ContractSchema",
+  "anyOf": [
+    {
+      "$ref": "#/$defs/Envelope"
+    },
+    {
+      "$ref": "#/$defs/Response"
+    }
+  ],
+  "$defs": {
+    "AddReceipt": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/IntakeId"
+        },
+        "recorded_at": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "id",
+        "recorded_at"
+      ]
+    },
+    "CaptureAgent": {
+      "type": "string",
+      "enum": [
+        "cc",
+        "codex",
+        "pi"
+      ]
+    },
+    "CaptureEvent": {
+      "type": "string",
+      "enum": [
+        "prompt",
+        "tool",
+        "stop",
+        "subagent-stop",
+        "compact",
+        "end"
+      ]
+    },
+    "CaptureSignal": {
+      "type": "object",
+      "properties": {
+        "agent": {
+          "$ref": "#/$defs/CaptureAgent"
+        },
+        "event": {
+          "$ref": "#/$defs/CaptureEvent"
+        },
+        "session": {
+          "type": "string"
+        },
+        "transcript_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "agent",
+        "session",
+        "event"
+      ]
+    },
+    "CorrectionReceipt": {
+      "type": "object",
+      "properties": {
+        "intake": {
+          "$ref": "#/$defs/IntakeId"
+        },
+        "recorded_at": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "intake",
+        "recorded_at"
+      ]
+    },
+    "Direction": {
+      "type": "string",
+      "enum": [
+        "outgoing",
+        "incoming"
+      ]
+    },
+    "DreamReport": {
+      "type": "object",
+      "properties": {
+        "entity_keeper": {
+          "$ref": "#/$defs/SpecialistReport"
+        },
+        "reconciler": {
+          "$ref": "#/$defs/SpecialistReport"
+        },
+        "took_ms": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "trigger": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "trigger",
+        "reconciler",
+        "entity_keeper",
+        "took_ms"
+      ]
+    },
+    "DriftReport": {
+      "type": "object",
+      "properties": {
+        "added": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "changed": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "differences": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "missing_files": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "took_ms": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "unreadable": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "differences",
+        "added",
+        "changed",
+        "missing_files",
+        "unreadable",
+        "took_ms"
+      ]
+    },
+    "Durability": {
+      "type": "string",
+      "enum": [
+        "stable",
+        "preference",
+        "ordinary"
+      ]
+    },
+    "Entity": {
+      "type": "object",
+      "properties": {
+        "aliases": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        },
+        "id": {
+          "$ref": "#/$defs/EntityId"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "links": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EntityLink"
+          }
+        },
+        "merged_from": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EntityId"
+          }
+        },
+        "merged_into": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EntityId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "name": {
+          "type": "string"
+        },
+        "recorded_at": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "relations": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Relation"
+          }
+        },
+        "updated_at": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "recorded_at",
+        "updated_at"
+      ]
+    },
+    "EntityId": {
+      "type": "string",
+      "pattern": "^ent_[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$"
+    },
+    "EntityLink": {
+      "type": "object",
+      "properties": {
+        "to": {
+          "$ref": "#/$defs/EntityId"
+        },
+        "type": {
+          "$ref": "#/$defs/EntityLinkKind"
+        }
+      },
+      "required": [
+        "type",
+        "to"
+      ]
+    },
+    "EntityLinkKind": {
+      "type": "string",
+      "enum": [
+        "part_of",
+        "possibly_same"
+      ]
+    },
+    "EntityRef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/EntityId"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind"
+      ]
+    },
+    "EntityView": {
+      "type": "object",
+      "properties": {
+        "entity": {
+          "$ref": "#/$defs/Entity"
+        },
+        "external": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ExternalLink"
+          }
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Fact"
+          }
+        },
+        "linked": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LinkedEntity"
+          }
+        }
+      },
+      "required": [
+        "entity",
+        "facts",
+        "linked"
+      ]
+    },
+    "Envelope": {
+      "type": "object",
+      "properties": {
+        "protocol": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "request": {
+          "$ref": "#/$defs/Request"
+        }
+      },
+      "required": [
+        "protocol",
+        "request"
+      ]
+    },
+    "ExternalLink": {
+      "type": "object",
+      "properties": {
+        "external": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ExternalLinkKind"
+        },
+        "recorded_at": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "to": {
+          "$ref": "#/$defs/MemoryId"
+        }
+      },
+      "required": [
+        "external",
+        "to",
+        "kind",
+        "recorded_at"
+      ]
+    },
+    "ExternalLinkKind": {
+      "type": "string",
+      "enum": [
+        "mentions"
+      ]
+    },
+    "Fact": {
+      "type": "object",
+      "properties": {
+        "about": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EntityId"
+          }
+        },
+        "content": {
+          "type": "string"
+        },
+        "durability": {
+          "$ref": "#/$defs/Durability"
+        },
+        "evidence": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "id": {
+          "$ref": "#/$defs/FactId"
+        },
+        "importance": {
+          "type": "integer",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0
+        },
+        "invalid_at": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int64"
+        },
+        "links": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FactLink"
+          }
+        },
+        "recorded_at": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IntakeId"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "updated_at": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "valid_at": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "id",
+        "content",
+        "tags",
+        "about",
+        "recorded_at",
+        "updated_at",
+        "valid_at",
+        "importance",
+        "durability",
+        "sources"
+      ]
+    },
+    "FactId": {
+      "type": "string",
+      "pattern": "^fct_[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$"
+    },
+    "FactLink": {
+      "type": "object",
+      "properties": {
+        "to": {
+          "$ref": "#/$defs/FactId"
+        },
+        "type": {
+          "$ref": "#/$defs/FactLinkKind"
+        }
+      },
+      "required": [
+        "type",
+        "to"
+      ]
+    },
+    "FactLinkKind": {
+      "type": "string",
+      "enum": [
+        "updates",
+        "extends",
+        "contradicts",
+        "part_of"
+      ]
+    },
+    "Failure": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/FailureKind"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "message"
+      ]
+    },
+    "FailureKind": {
+      "type": "string",
+      "enum": [
+        "bad_request",
+        "not_found",
+        "unavailable",
+        "internal"
+      ]
+    },
+    "HistoryView": {
+      "type": "object",
+      "properties": {
+        "current": {
+          "$ref": "#/$defs/FactId"
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Fact"
+          }
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Fact"
+          }
+        }
+      },
+      "required": [
+        "versions",
+        "current",
+        "extensions"
+      ]
+    },
+    "IndexReport": {
+      "type": "object",
+      "properties": {
+        "entities": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "facts": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "links": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "names": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "vectors": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "facts",
+        "entities",
+        "links",
+        "names",
+        "vectors"
+      ]
+    },
+    "IntakeId": {
+      "type": "string",
+      "pattern": "^int_[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$"
+    },
+    "IntakeRecord": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "entity_hints": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "occurred": {
+          "$ref": "#/$defs/Span"
+        },
+        "session": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "source": {
+          "type": "string"
+        },
+        "source_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "tags": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "source",
+        "occurred",
+        "content"
+      ]
+    },
+    "LinkKind": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "updates",
+            "extends",
+            "contradicts",
+            "part_of",
+            "derived_from",
+            "about",
+            "possibly_same",
+            "corrects"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "relation": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "relation"
+          ]
+        }
+      ]
+    },
+    "LinkedEntity": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "$ref": "#/$defs/Direction"
+        },
+        "entity": {
+          "$ref": "#/$defs/Entity"
+        },
+        "kind": {
+          "$ref": "#/$defs/LinkKind"
+        }
+      },
+      "required": [
+        "kind",
+        "direction",
+        "entity"
+      ]
+    },
+    "LinkedFact": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "$ref": "#/$defs/Direction"
+        },
+        "fact": {
+          "$ref": "#/$defs/Fact"
+        },
+        "kind": {
+          "$ref": "#/$defs/LinkKind"
+        },
+        "usefulness": {
+          "type": "number",
+          "format": "float"
+        }
+      },
+      "required": [
+        "fact",
+        "kind",
+        "direction",
+        "usefulness"
+      ]
+    },
+    "MemoryId": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FactId"
+        },
+        {
+          "$ref": "#/$defs/EntityId"
+        }
+      ]
+    },
+    "ModelRole": {
+      "type": "string",
+      "enum": [
+        "embedder",
+        "judge",
+        "checker",
+        "planner",
+        "extractor",
+        "consolidator"
+      ]
+    },
+    "ModelTestReport": {
+      "type": "object",
+      "properties": {
+        "answer": {
+          "type": "string"
+        },
+        "first_text_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "latency_ms": {
+          "type": "number",
+          "format": "double"
+        },
+        "model": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/ModelRole"
+        },
+        "scores": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "required": [
+        "role",
+        "model",
+        "latency_ms",
+        "answer"
+      ]
+    },
+    "RawHit": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "corrected": {
+          "type": "boolean"
+        },
+        "id": {
+          "$ref": "#/$defs/IntakeId"
+        },
+        "occurred": {
+          "$ref": "#/$defs/Span"
+        },
+        "recorded_at": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "source": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "occurred",
+        "recorded_at",
+        "tags",
+        "content",
+        "corrected"
+      ]
+    },
+    "RawQuery": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int64",
+          "default": null
+        },
+        "limit": {
+          "type": "integer",
+          "format": "uint",
+          "default": 20,
+          "minimum": 0
+        },
+        "source": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "text": {
+          "type": "string"
+        },
+        "to": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int64",
+          "default": null
+        }
+      },
+      "required": [
+        "text"
+      ]
+    },
+    "RebuildReport": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/IndexReport"
+        },
+        "took_ms": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "unreadable_files": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "index",
+        "unreadable_files",
+        "took_ms"
+      ]
+    },
+    "RecallMemory": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "id": {
+          "$ref": "#/$defs/FactId"
+        }
+      },
+      "required": [
+        "id",
+        "content"
+      ]
+    },
+    "RecallQuery": {
+      "type": "object",
+      "properties": {
+        "agent": {
+          "type": "string"
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "message": {
+          "type": "string"
+        },
+        "project": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "session": {
+          "type": "string"
+        },
+        "slice": {
+          "type": "string",
+          "default": ""
+        },
+        "turn": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "agent",
+        "session",
+        "message"
+      ]
+    },
+    "RecallTurn": {
+      "type": "object",
+      "properties": {
+        "agent": {
+          "type": "string"
+        },
+        "session": {
+          "type": "string"
+        },
+        "turn": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "agent",
+        "session",
+        "turn"
+      ]
+    },
+    "Relation": {
+      "type": "object",
+      "properties": {
+        "invalid_at": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int64"
+        },
+        "label": {
+          "type": "string"
+        },
+        "to": {
+          "$ref": "#/$defs/EntityId"
+        },
+        "valid_at": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "label",
+        "to",
+        "valid_at"
+      ]
+    },
+    "Request": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "new": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "command": {
+              "type": "string",
+              "const": "tags"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "external": {
+                  "type": "string"
+                },
+                "kind": {
+                  "$ref": "#/$defs/ExternalLinkKind"
+                },
+                "to": {
+                  "$ref": "#/$defs/MemoryId"
+                }
+              },
+              "required": [
+                "external",
+                "to",
+                "kind"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "link"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "const": "status"
+            }
+          },
+          "required": [
+            "command"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/RecallQuery"
+            },
+            "command": {
+              "type": "string",
+              "const": "recall"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/CaptureSignal"
+            },
+            "command": {
+              "type": "string",
+              "const": "capture"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "const": "shutdown"
+            }
+          },
+          "required": [
+            "command"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/IntakeRecord"
+            },
+            "command": {
+              "type": "string",
+              "const": "add"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/RawQuery"
+            },
+            "command": {
+              "type": "string",
+              "const": "raw"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "intake": {
+                  "$ref": "#/$defs/IntakeId"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "intake",
+                "reason"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "correct"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "const": "rebuild"
+            }
+          },
+          "required": [
+            "command"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int64",
+                  "default": null
+                },
+                "source": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null
+                }
+              }
+            },
+            "command": {
+              "type": "string",
+              "const": "reextract"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "const": "check_drift"
+            }
+          },
+          "required": [
+            "command"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "const": "dream"
+            }
+          },
+          "required": [
+            "command"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/SearchQuery"
+            },
+            "command": {
+              "type": "string",
+              "const": "search"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "now": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "required": [
+                "now"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "set_clock"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "resolve"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "entity"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/MemoryId"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "show"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/FactId"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "history"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/FactId"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "useful"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "const": "models"
+            }
+          },
+          "required": [
+            "command"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "model": {
+                  "type": "string"
+                },
+                "role": {
+                  "$ref": "#/$defs/ModelRole"
+                }
+              },
+              "required": [
+                "role",
+                "model"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "models_use"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "inputs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "role": {
+                  "$ref": "#/$defs/ModelRole"
+                },
+                "source": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "structured": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "models_test"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "provider"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "login"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "provider"
+              ]
+            },
+            "command": {
+              "type": "string",
+              "const": "login_finish"
+            }
+          },
+          "required": [
+            "command",
+            "arguments"
+          ]
+        }
+      ]
+    },
+    "ResolvedEntity": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/EntityId"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind"
+      ]
+    },
+    "Response": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "reply": {
+              "type": "string",
+              "const": "tags"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/ExternalLink"
+            },
+            "reply": {
+              "type": "string",
+              "const": "linked"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/StatusReport"
+            },
+            "reply": {
+              "type": "string",
+              "const": "status"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RecallMemory"
+              }
+            },
+            "reply": {
+              "type": "string",
+              "const": "recalled"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "reply": {
+              "type": "string",
+              "const": "captured"
+            }
+          },
+          "required": [
+            "reply"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/AddReceipt"
+            },
+            "reply": {
+              "type": "string",
+              "const": "added"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RawHit"
+              }
+            },
+            "reply": {
+              "type": "string",
+              "const": "raw_hits"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/CorrectionReceipt"
+            },
+            "reply": {
+              "type": "string",
+              "const": "corrected"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/RebuildReport"
+            },
+            "reply": {
+              "type": "string",
+              "const": "rebuilt"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "object",
+              "properties": {
+                "queued": {
+                  "type": "integer",
+                  "format": "uint",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "queued"
+              ]
+            },
+            "reply": {
+              "type": "string",
+              "const": "reextracting"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/DriftReport"
+            },
+            "reply": {
+              "type": "string",
+              "const": "drift_checked"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/DreamReport"
+            },
+            "reply": {
+              "type": "string",
+              "const": "dreamed"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/SearchResults"
+            },
+            "reply": {
+              "type": "string",
+              "const": "search_results"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "object",
+              "properties": {
+                "now": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "required": [
+                "now"
+              ]
+            },
+            "reply": {
+              "type": "string",
+              "const": "clock_set"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ResolvedEntity"
+              }
+            },
+            "reply": {
+              "type": "string",
+              "const": "resolved"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/EntityView"
+            },
+            "reply": {
+              "type": "string",
+              "const": "entity"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/ShownMemory"
+            },
+            "reply": {
+              "type": "string",
+              "const": "shown"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/HistoryView"
+            },
+            "reply": {
+              "type": "string",
+              "const": "history"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "object",
+              "properties": {
+                "evidence": {
+                  "type": "integer",
+                  "format": "uint",
+                  "minimum": 0
+                },
+                "id": {
+                  "$ref": "#/$defs/FactId"
+                }
+              },
+              "required": [
+                "id",
+                "evidence"
+              ]
+            },
+            "reply": {
+              "type": "string",
+              "const": "marked_useful"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RoleAssignment"
+              }
+            },
+            "reply": {
+              "type": "string",
+              "const": "model_roster"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/ModelTestReport"
+            },
+            "reply": {
+              "type": "string",
+              "const": "model_tested"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "provider",
+                "url"
+              ]
+            },
+            "reply": {
+              "type": "string",
+              "const": "login_opened"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "provider": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "provider",
+                "account"
+              ]
+            },
+            "reply": {
+              "type": "string",
+              "const": "logged_in"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "reply": {
+              "type": "string",
+              "const": "shutting_down"
+            }
+          },
+          "required": [
+            "reply"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "object",
+              "properties": {
+                "client": {
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0
+                },
+                "daemon": {
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "daemon",
+                "client"
+              ]
+            },
+            "reply": {
+              "type": "string",
+              "const": "version_mismatch"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/Failure"
+            },
+            "reply": {
+              "type": "string",
+              "const": "failed"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        }
+      ]
+    },
+    "RoleAssignment": {
+      "type": "object",
+      "properties": {
+        "assignment": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/ModelRole"
+        }
+      },
+      "required": [
+        "role",
+        "assignment"
+      ]
+    },
+    "SearchHit": {
+      "type": "object",
+      "properties": {
+        "conflict": {
+          "type": "boolean"
+        },
+        "decay": {
+          "type": "number",
+          "format": "float"
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EntityRef"
+          }
+        },
+        "fact": {
+          "$ref": "#/$defs/Fact"
+        },
+        "linked": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LinkedFact"
+          }
+        },
+        "replaced": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactId"
+          }
+        },
+        "score": {
+          "type": "number",
+          "format": "float"
+        },
+        "similarity": {
+          "type": "number",
+          "format": "float"
+        }
+      },
+      "required": [
+        "fact",
+        "score",
+        "similarity",
+        "decay",
+        "replaced",
+        "conflict",
+        "linked",
+        "entities"
+      ]
+    },
+    "SearchQuery": {
+      "type": "object",
+      "properties": {
+        "as_of": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int64",
+          "default": null
+        },
+        "entities": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "from": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int64",
+          "default": null
+        },
+        "include_hidden": {
+          "type": "boolean",
+          "default": false
+        },
+        "include_invalid": {
+          "type": "boolean",
+          "default": false
+        },
+        "k": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint",
+          "default": null,
+          "minimum": 0
+        },
+        "recall_turn": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecallTurn"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tags": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "text": {
+          "type": "string"
+        },
+        "to": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int64",
+          "default": null
+        },
+        "trace": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "text"
+      ]
+    },
+    "SearchResults": {
+      "type": "object",
+      "properties": {
+        "hits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SearchHit"
+          }
+        },
+        "model": {
+          "type": "string"
+        },
+        "trace": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SearchTrace"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "hits",
+        "model"
+      ]
+    },
+    "SearchTrace": {
+      "type": "object",
+      "properties": {
+        "after_latest": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "embed_ms": {
+          "type": "number",
+          "format": "double"
+        },
+        "latest_ms": {
+          "type": "number",
+          "format": "double"
+        },
+        "linked_kept": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "links_ms": {
+          "type": "number",
+          "format": "double"
+        },
+        "rank_ms": {
+          "type": "number",
+          "format": "double"
+        },
+        "seeds": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "seeds_ms": {
+          "type": "number",
+          "format": "double"
+        },
+        "total_ms": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "embed_ms",
+        "seeds_ms",
+        "latest_ms",
+        "links_ms",
+        "rank_ms",
+        "total_ms",
+        "seeds",
+        "after_latest",
+        "linked_kept"
+      ]
+    },
+    "ShownMemory": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/MemoryId"
+        },
+        "path": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SourceView"
+          }
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "text",
+        "sources"
+      ]
+    },
+    "SourceView": {
+      "type": "object",
+      "properties": {
+        "corrected": {
+          "type": "boolean"
+        },
+        "id": {
+          "$ref": "#/$defs/IntakeId"
+        },
+        "record": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IntakeRecord"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "corrected"
+      ]
+    },
+    "Span": {
+      "type": "object",
+      "properties": {
+        "end": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ]
+    },
+    "SpecialistReport": {
+      "type": "object",
+      "properties": {
+        "focus": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "rejected": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "rounds": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "writes": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "focus",
+        "rounds",
+        "writes",
+        "rejected"
+      ]
+    },
+    "StatusReport": {
+      "type": "object",
+      "properties": {
+        "daemon_version": {
+          "type": "string"
+        },
+        "home": {
+          "type": "string"
+        },
+        "index": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IndexReport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pid": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "protocol": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "uptime_ms": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "daemon_version",
+        "protocol",
+        "home",
+        "pid",
+        "uptime_ms"
+      ]
+    }
+  }
+}

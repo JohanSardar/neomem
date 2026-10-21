@@ -1,4 +1,4 @@
-use std::fs;
+use std::{collections::HashSet, fs};
 
 use neomem_core::{Entity, EntityId, Fact, MemoryId};
 use neomem_index::Snapshot;
@@ -34,6 +34,7 @@ impl Engine {
         let Some(entity) = resolved_ids(&snapshot, name).first().and_then(|id| snapshot.entity(*id)) else {
             return failed(FailureKind::NotFound, format!("no entity is called {name}"));
         };
+        let mut seen_external = HashSet::new();
         Response::Entity(Box::new(EntityView {
             entity: Entity::clone(entity),
             facts: current_facts_about(&snapshot, entity.id()),
@@ -44,6 +45,11 @@ impl Engine {
                     .filter(|link| match link.to {
                         MemoryId::Entity(id) => snapshot.survivor(id) == entity.id(),
                         MemoryId::Fact(_) => false,
+                    })
+                    .filter(|link| seen_external.insert(link.external.clone()))
+                    .map(|mut link| {
+                        link.to = MemoryId::Entity(entity.id());
+                        link
                     })
                     .collect(),
                 Err(error) => return failed(FailureKind::Internal, error.to_string()),
