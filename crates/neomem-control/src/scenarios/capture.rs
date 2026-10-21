@@ -25,6 +25,12 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries, agent: &str) -> anyhow::
     let text = fs::read_to_string(fixture.join("session.jsonl"))?
         .replace("capture orchard", &format!("capture orchard OPENAI_API_KEY={secret}"));
     fs::write(&transcript, text)?;
+    if agent == "codex" {
+        fs::write(
+            sessions.join("000-unrelated.jsonl"),
+            "{\"type\":\"session_meta\",\"payload\":{\"id\":\"unrelated\"}}\n{bad}\n",
+        )?;
+    }
     stalled_stdin(proof, &isolated, agent)?;
     let payload = if agent == "codex" {
         serde_json::from_str(&fs::read_to_string(fixture.join("hook-without-path.json"))?)?
@@ -47,6 +53,13 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries, agent: &str) -> anyhow::
         !initial.contains("RAW_OUTPUT_SENTINEL") && !initial.contains("ABANDONED_BRANCH_SENTINEL"),
         &initial,
     );
+    if agent == "codex" {
+        proof.claim(
+            "hosted web searches are captured without raw results",
+            initial.contains("web_search") && !initial.contains("RAW_OUTPUT_SENTINEL"),
+            &initial,
+        );
+    }
     proof.claim("secrets are removed before intake", !initial.contains(&secret), "key redacted");
     proof.claim(
         "spooled signal drains after daemon startup",
@@ -71,7 +84,7 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries, agent: &str) -> anyhow::
         metadata == count,
         format!("{metadata}/{count} records"),
     );
-    let expected = if agent == "codex" { 4 } else { 3 };
+    let expected = if agent == "codex" { 5 } else { 3 };
     proof.claim("every recorded turn is captured", count == expected, format!("{count}/{expected}"));
     storm_and_restart(proof, &mut isolated, agent, &payload, &transcript, count)?;
     partial_and_sweep(proof, &mut isolated, agent, &payload, &fixture, &transcript, count)
@@ -251,7 +264,7 @@ fn partial_and_sweep(
     wait_for(isolated, "Unsignaled capture orchard")?;
     proof.claim(
         "a session with no hook is discovered",
-        count_intake(isolated)? == count + 1 + if agent == "codex" { 4 } else { 3 },
+        count_intake(isolated)? == count + 1 + if agent == "codex" { 5 } else { 3 },
         contents(isolated)?,
     );
     let positions: i64 =

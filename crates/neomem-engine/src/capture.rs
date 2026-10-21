@@ -44,7 +44,10 @@ impl Engine {
             };
             for path in paths {
                 if let Err(error) = self.capture_transcript(source, &path, Some(&signal.session)) {
-                    return failed(FailureKind::Internal, error);
+                    if signal.transcript_path.is_some() {
+                        return failed(FailureKind::Internal, error);
+                    }
+                    tracing::warn!("skipping an unreadable transcript during session lookup: {error}");
                 }
             }
         }
