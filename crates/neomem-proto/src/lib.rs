@@ -19,3 +19,6 @@ pub use response::{
     ResolvedEntity, Response, SearchHit, SearchResults, SearchTrace, ShownMemory, SourceView,
     SpecialistReport, StatusReport,
 };
+
+mod schema;
+pub use schema::contract_schema;
