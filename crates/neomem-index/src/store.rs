@@ -67,6 +67,18 @@ pub(crate) struct LoadedRow {
 }
 
 impl IndexDb {
+    pub(crate) fn register_external_links(
+        &mut self,
+        links: &[neomem_core::ExternalLink],
+    ) -> Result<(), IndexError> {
+        let transaction = self.connection.transaction()?;
+        for link in links {
+            transaction.execute("INSERT INTO links (from_id, to_id, type, recorded_at) SELECT ?1, ?2, ?3, ?4 WHERE NOT EXISTS (SELECT 1 FROM links WHERE from_id = ?1 AND to_id = ?2 AND type = ?3)", params![link.external.to_string(), link.to.to_string(), link.kind.name(), link.recorded_at.as_millis()])?;
+        }
+        transaction.commit()?;
+        Ok(())
+    }
+
     pub(crate) fn open(path: &Path) -> Result<(Self, bool), IndexError> {
         let connection = Connection::open(path)?;
         connection.busy_timeout(Duration::from_secs(5))?;
