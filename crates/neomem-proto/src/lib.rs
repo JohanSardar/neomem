@@ -15,9 +15,9 @@ pub use home::Home;
 pub use request::{RawQuery, RecallQuery, RecallTurn, Request, SearchQuery};
 pub use response::{
     AddReceipt, CorrectionReceipt, DreamReport, DriftReport, EntityRef, EntityView, Failure, FailureKind,
-    HistoryView, IndexReport, LinkedEntity, LinkedFact, ModelTestReport, RawHit, RebuildReport, RecallMemory,
-    ResolvedEntity, Response, SearchHit, SearchResults, SearchTrace, ShownMemory, SourceView,
-    SpecialistReport, StatusReport,
+    HistoryView, IndexReport, InstallOutcome, InstallReport, InstallStep, LinkedEntity, LinkedFact,
+    ModelTestReport, RawHit, RebuildReport, RecallMemory, ResolvedEntity, Response, SearchHit, SearchResults,
+    SearchTrace, ShownMemory, SourceView, SpecialistReport, StatusReport,
 };
 
 mod schema;

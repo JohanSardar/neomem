@@ -567,6 +567,47 @@
         "vectors"
       ]
     },
+    "InstallOutcome": {
+      "type": "string",
+      "enum": [
+        "done",
+        "skipped",
+        "failed"
+      ]
+    },
+    "InstallReport": {
+      "type": "object",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/InstallStep"
+          }
+        }
+      },
+      "required": [
+        "steps"
+      ]
+    },
+    "InstallStep": {
+      "type": "object",
+      "properties": {
+        "detail": {
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/InstallOutcome"
+        },
+        "part": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "part",
+        "outcome",
+        "detail"
+      ]
+    },
     "IntakeId": {
       "type": "string",
       "pattern": "^int_[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$"
@@ -1709,6 +1750,22 @@
             "reply": {
               "type": "string",
               "const": "dreamed"
+            }
+          },
+          "required": [
+            "reply",
+            "body"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/InstallReport"
+            },
+            "reply": {
+              "type": "string",
+              "const": "installed"
             }
           },
           "required": [

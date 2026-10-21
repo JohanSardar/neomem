@@ -1,12 +1,15 @@
 mod args;
+mod codex_hooks;
 mod connection;
 mod fallback;
 mod hook;
+mod install;
 mod intake_record;
 mod login;
 mod mcp;
 mod recall;
 mod render;
+mod service;
 mod time_argument;
 
 use std::process::ExitCode;
@@ -94,6 +97,7 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
             },
         },
         Command::Login(arguments) => return login::run(&home, arguments).map(Outcome::Answered),
+        Command::Install => return install::run(&home).map(Outcome::Answered),
     };
     if request.waits_in_spool_when_the_daemon_is_down() {
         return match DaemonConnection::existing(&home) {

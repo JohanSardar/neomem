@@ -1,0 +1,10 @@
+{
+  "name": "neomem",
+  "plugins": [
+    {
+      "name": "neomem",
+      "source": "./agents-plugin",
+      "description": "Long-term memory for agents: capture hooks, optional recall and the neomem MCP server"
+    }
+  ]
+}
