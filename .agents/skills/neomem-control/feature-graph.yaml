@@ -278,4 +278,4 @@
   depends_on: [search, extract]
   proof: eval
   status: proven
-  last_proof: proofs/eval/2026-10-21T055242Z
+  last_proof: proofs/eval/2026-10-21T072731Z

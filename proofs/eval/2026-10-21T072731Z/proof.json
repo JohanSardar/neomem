@@ -2,9 +2,9 @@
   "feature": "eval",
   "scenario": "eval",
   "passed": true,
-  "started_at": "2026-10-21T055242Z",
-  "duration_ms": 5644,
-  "code_version": "12ddc4370ca1-dirty",
+  "started_at": "2026-10-21T072731Z",
+  "duration_ms": 5596,
+  "code_version": "9d7f72cc47e6-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
@@ -21,7 +21,7 @@
     {
       "claim": "knowledge updates retrieve the newer fact first",
       "passed": true,
-      "detail": "{\"about\":[\"ent_01M5EG9T0BBFXD6DWBTW5Y9SDK\"],\"content\":\"user: The Osprey bicycle is now blue.\",\"durability\":\"ordinary\",\"evidence\":[],\"id\":\"fct_01M5EG9T0X1CP0GGY6NT3KZHF2\",\"importance\":5,\"invalid_at\":null,\"links\":[{\"to\":\"fct_01M5EG9T0BBFXD6DWBTW5Y9SDM\",\"type\":\"updates\"}],\"recorded_at\":1792561965085,\"sources\":[\"int_01M5EG9RW8FKYSDAKB7PSYVM7T\"],\"tags\":[],\"updated_at\":1792561965085,\"valid_at\":1780401600000}"
+      "detail": "{\"about\":[\"ent_01M5ENQDQT6HHFHY4SHCMXPD5N\"],\"content\":\"user: The Osprey bicycle is now blue.\",\"durability\":\"ordinary\",\"evidence\":[],\"id\":\"fct_01M5ENQDR59DW9YWBT2CB3Y3QW\",\"importance\":5,\"invalid_at\":null,\"links\":[{\"to\":\"fct_01M5ENQDQT6HHFHY4SHCMXPD5P\",\"type\":\"updates\"}],\"recorded_at\":1792567654149,\"sources\":[\"int_01M5ENQCM94ZGMA25ATM4EADXY\"],\"tags\":[],\"updated_at\":1792567654149,\"valid_at\":1780401600000}"
     },
     {
       "claim": "all histories use Add, Search and Dream with temporary homes",
