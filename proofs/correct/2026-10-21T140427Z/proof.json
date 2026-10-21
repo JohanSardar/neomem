@@ -1,0 +1,37 @@
+{
+  "feature": "correct",
+  "scenario": "correct",
+  "passed": true,
+  "started_at": "2026-10-21T140427Z",
+  "duration_ms": 81,
+  "code_version": "e6ae1dcb452c-dirty",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "neomem correct records a correction for the intake record",
+      "passed": true,
+      "detail": "{\"reply\":\"corrected\",\"body\":{\"intake\":\"int_01M5FCE4MHFJQMZ2C774T24SXV\",\"recorded_at\":1792591467157}}"
+    },
+    {
+      "claim": "the intake record is kept exactly as it was logged",
+      "passed": true,
+      "detail": "Some(\"Slept 4h 05m, readiness 41 (this was the wrong night)\")"
+    },
+    {
+      "claim": "raw search still finds the record and marks it corrected",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "claim": "its pending extraction is skipped and a re-check of facts drawn from it is queued",
+      "passed": true,
+      "detail": "extract Some(\"skipped\"), recheck Some(\"pending\")"
+    },
+    {
+      "claim": "correcting an unknown intake ID fails and records nothing",
+      "passed": true,
+      "detail": "neomem: there is no intake record int_00000000010000000000000001"
+    }
+  ]
+}
