@@ -1,0 +1,4 @@
+2026-10-21T05:41:53.131717Z  INFO neomemd::http: HTTP listening on 127.0.0.1:43619
+2026-10-21T05:41:53.132097Z  INFO neomemd: neomemd serving /tmp/neomemctl-uELS7m
+2026-10-21T05:41:53.132266Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-21T05:41:53.397253Z  INFO neomem_engine::maintenance: committed 63 vault changes

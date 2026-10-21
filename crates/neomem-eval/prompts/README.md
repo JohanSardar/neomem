@@ -1,0 +1,1 @@
+`judge.json` contains the category-specific answer-check prompts from [LongMemEval's official evaluator](https://github.com/xiaowu0162/LongMemEval/blob/main/src/evaluation/evaluate_qa.py), with positional placeholders named for this runner. Its MIT license is retained in `LICENSE.LongMemEval`.

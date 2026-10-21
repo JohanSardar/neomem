@@ -1,0 +1,52 @@
+{
+  "feature": "models.idle",
+  "scenario": "models-idle",
+  "passed": true,
+  "started_at": "2026-10-21T054124Z",
+  "duration_ms": 3159,
+  "code_version": "2b2f1e688883-dirty",
+  "models": "real llama.cpp models",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "local models start unloaded",
+      "passed": true,
+      "detail": "embedder:unloaded llama.cpp embeddinggemma-300m-Q8_0.gguf; judge:unloaded llama.cpp qwen3-reranker-0.6b-Q8_0.gguf; checker:unloaded jev (fallback llama.cpp qwen3-reranker-0.6b-Q8_0.gguf); planner:fake fake-planner effort low; extractor:fake fake-extractor; consolidator:fake fake-consolidator"
+    },
+    {
+      "claim": "the local reranker loads on its first decision",
+      "passed": true,
+      "detail": "embedder:loaded llama.cpp embeddinggemma-300m-Q8_0.gguf; judge:loaded llama.cpp qwen3-reranker-0.6b-Q8_0.gguf; checker:loaded jev (fallback llama.cpp qwen3-reranker-0.6b-Q8_0.gguf); planner:fake fake-planner effort low; extractor:fake fake-extractor; consolidator:fake fake-consolidator"
+    },
+    {
+      "claim": "a search loads the local embedder and finds the current ship date",
+      "passed": true,
+      "detail": "embedder:loaded llama.cpp embeddinggemma-300m-Q8_0.gguf; judge:loaded llama.cpp qwen3-reranker-0.6b-Q8_0.gguf; checker:loaded jev (fallback llama.cpp qwen3-reranker-0.6b-Q8_0.gguf); planner:fake fake-planner effort low; extractor:fake fake-extractor; consolidator:fake fake-consolidator"
+    },
+    {
+      "claim": "the default idle timeout exceeds fourteen minutes",
+      "passed": true,
+      "detail": "embedder:loaded llama.cpp embeddinggemma-300m-Q8_0.gguf; judge:loaded llama.cpp qwen3-reranker-0.6b-Q8_0.gguf; checker:loaded jev (fallback llama.cpp qwen3-reranker-0.6b-Q8_0.gguf); planner:fake fake-planner effort low; extractor:fake fake-extractor; consolidator:fake fake-consolidator"
+    },
+    {
+      "claim": "a maintenance tick unloads after the default fifteen minutes",
+      "passed": true,
+      "detail": "embedder:unloaded llama.cpp embeddinggemma-300m-Q8_0.gguf; judge:unloaded llama.cpp qwen3-reranker-0.6b-Q8_0.gguf; checker:unloaded jev (fallback llama.cpp qwen3-reranker-0.6b-Q8_0.gguf); planner:fake fake-planner effort low; extractor:fake fake-extractor; consolidator:fake fake-consolidator"
+    },
+    {
+      "claim": "intake and raw search leave models unloaded",
+      "passed": true,
+      "detail": "embedder:unloaded llama.cpp embeddinggemma-300m-Q8_0.gguf; judge:unloaded llama.cpp qwen3-reranker-0.6b-Q8_0.gguf; checker:unloaded jev (fallback llama.cpp qwen3-reranker-0.6b-Q8_0.gguf); planner:fake fake-planner effort low; extractor:fake fake-extractor; consolidator:fake fake-consolidator"
+    },
+    {
+      "claim": "the next search transparently reloads and preserves its answer; reload latency recorded",
+      "passed": true,
+      "detail": "reload 262.58 ms; Some([\"Edge's ship date is November 1, 2026.\"])"
+    },
+    {
+      "claim": "a configured idle_unload overrides the fifteen-minute default without restarting",
+      "passed": true,
+      "detail": "embedder:unloaded llama.cpp embeddinggemma-300m-Q8_0.gguf; judge:unloaded llama.cpp qwen3-reranker-0.6b-Q8_0.gguf; checker:unloaded jev (fallback llama.cpp qwen3-reranker-0.6b-Q8_0.gguf); planner:fake fake-planner effort low; extractor:fake fake-extractor; consolidator:fake fake-consolidator"
+    }
+  ]
+}

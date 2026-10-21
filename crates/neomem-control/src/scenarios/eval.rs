@@ -93,6 +93,7 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     proof.claim(
         "reports per-type metrics, abstention accuracy and model settings",
         report["by_type"]["abstention"]["accuracy"] == 1.0
+            && report["by_type"]["abstention"]["retrieval_questions"] == 0
             && report["settings"]["models"]["reader"]["model"] == "fake-reader",
         "report.json",
     );

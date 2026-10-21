@@ -36,6 +36,14 @@ model_settings = json.loads((args.models or args.data / 'models.json').read_text
 server = model_settings['reader']['base_url'].removesuffix('/v1')
 with urllib.request.urlopen(server + '/props') as response:
     (args.out / 'server-props.json').write_text(json.dumps(json.load(response), indent=2))
+source_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
+(args.out / 'source.json').write_text(json.dumps({'source_revision_at_freeze': source_revision}, indent=2))
+inputs = [args.data / 'longmemeval_s_cleaned.json', args.data / 'coding-set/questions.json']
+inputs.extend(sorted((args.data / 'coding-set').glob('q*.jsonl')))
+(args.out / 'data-files.json').write_text(json.dumps({
+    str(path.relative_to(args.data)): hashlib.file_digest(path.open('rb'), 'sha256').hexdigest()
+    for path in inputs
+}, indent=2))
 started = time.monotonic()
 for name, dataset, sample in [
     ('longmemeval-s', args.data / 'longmemeval_s_cleaned.json', args.sample),

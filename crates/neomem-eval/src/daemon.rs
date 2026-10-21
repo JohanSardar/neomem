@@ -40,6 +40,7 @@ impl Daemon {
         }
         let child = Command::new(sibling("neomemd")?)
             .env("NEOMEM_HOME", home.root())
+            .env("TZ", "UTC")
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(File::create(home.daemon_log_path())?)

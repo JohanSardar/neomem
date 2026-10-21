@@ -1,0 +1,32 @@
+2026-10-21T05:40:38.979142Z  INFO neomemd::http: HTTP listening on 127.0.0.1:46397
+2026-10-21T05:40:38.979646Z  INFO neomemd: neomemd serving /tmp/neomemctl-M1ZX9z
+2026-10-21T05:40:38.980228Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-21T05:40:39.745325Z  INFO neomem_engine::maintenance: committed 51 vault changes
+2026-10-21T05:40:40.014799Z  INFO neomem_engine::maintenance: committed 104 vault changes
+2026-10-21T05:40:40.280317Z  INFO neomem_engine::maintenance: committed 62 vault changes
+2026-10-21T05:40:40.548504Z  INFO neomem_engine::maintenance: committed 54 vault changes
+2026-10-21T05:40:40.818490Z  INFO neomem_engine::maintenance: committed 60 vault changes
+2026-10-21T05:40:41.084504Z  INFO neomem_engine::maintenance: committed 52 vault changes
+2026-10-21T05:40:41.352151Z  INFO neomem_engine::maintenance: committed 51 vault changes
+2026-10-21T05:40:42.376175Z  INFO neomem_engine::maintenance: committed 105 vault changes
+2026-10-21T05:40:42.644254Z  INFO neomem_engine::maintenance: committed 62 vault changes
+2026-10-21T05:40:42.914853Z  INFO neomem_engine::maintenance: committed 54 vault changes
+2026-10-21T05:40:43.184897Z  INFO neomem_engine::maintenance: committed 56 vault changes
+2026-10-21T05:40:43.456212Z  INFO neomem_engine::maintenance: committed 50 vault changes
+2026-10-21T05:40:43.727762Z  INFO neomem_engine::maintenance: committed 51 vault changes
+2026-10-21T05:40:44.255594Z  INFO neomem_engine::maintenance: committed 93 vault changes
+2026-10-21T05:40:44.783627Z  INFO neomem_engine::maintenance: committed 70 vault changes
+2026-10-21T05:40:45.308670Z  INFO neomem_engine::maintenance: committed 65 vault changes
+2026-10-21T05:40:45.834836Z  INFO neomem_engine::maintenance: committed 59 vault changes
+2026-10-21T05:40:46.368189Z  INFO neomem_engine::maintenance: committed 53 vault changes
+2026-10-21T05:40:47.158063Z  INFO neomem_engine::maintenance: committed 73 vault changes
+2026-10-21T05:40:47.955764Z  INFO neomem_engine::maintenance: committed 56 vault changes
+2026-10-21T05:40:48.744365Z  INFO neomem_engine::maintenance: committed 70 vault changes
+2026-10-21T05:40:49.535711Z  INFO neomem_engine::maintenance: committed 73 vault changes
+2026-10-21T05:40:50.314092Z  INFO neomem_engine::maintenance: committed 74 vault changes
+2026-10-21T05:40:51.103774Z  INFO neomem_engine::maintenance: committed 72 vault changes
+2026-10-21T05:40:51.884214Z  INFO neomem_engine::maintenance: committed 59 vault changes
+2026-10-21T05:40:52.675879Z  INFO neomem_engine::maintenance: committed 65 vault changes
+2026-10-21T05:40:53.711553Z  INFO neomem_engine::maintenance: committed 45 vault changes
+2026-10-21T05:40:56.788952Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T05:40:56.789056Z  INFO neomemd::dispatch: neomemd shutting down on request
