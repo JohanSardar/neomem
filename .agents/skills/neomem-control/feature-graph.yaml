@@ -77,8 +77,7 @@
   depends_on: [daemon]
   proof: models-judge
   status: proven
-  last_proof: proofs/models.judge/2026-10-21T045937Z
-  blocked: "needs-user: live Jev verification requires JEV_API_KEY in the environment; fake Jev and the local fallback are proven"
+  last_proof: proofs/models.judge/2026-10-21T051917Z
 - id: models.llm
   does: structured completions from every provider kind (openai, anthropic, chatgpt, codex, command) with effort levels and one retry on invalid output
   reached_via: [neomem models test, neomem login]
