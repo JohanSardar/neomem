@@ -1533,6 +1533,7 @@ dependencies = [
  "humantime",
  "neomem-core",
  "neomem-proto",
+ "neomem-state",
  "serde",
  "serde_json",
  "toml",
@@ -1582,6 +1583,22 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tracing",
+]
+
+[[package]]
+name = "neomem-eval"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "jiff",
+ "neomem-proto",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "toml",
+ "ureq",
 ]
 
 [[package]]

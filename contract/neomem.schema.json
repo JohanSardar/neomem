@@ -2400,6 +2400,27 @@
         "daemon_version": {
           "type": "string"
         },
+        "extraction": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "default": null,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer",
+              "format": "uint",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "format": "uint",
+              "minimum": 0
+            }
+          ]
+        },
         "home": {
           "type": "string"
         },

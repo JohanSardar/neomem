@@ -47,7 +47,7 @@ fn build(root: &Path, release: bool) -> anyhow::Result<()> {
     let mut build = Command::new("cargo");
     build
         .args(["build", "--quiet", "--bins", "--package", "neomemd", "--package", "neomem-cli"])
-        .args(["--package", "neomem-testkit"])
+        .args(["--package", "neomem-testkit", "--package", "neomem-eval"])
         .current_dir(root);
     if release {
         build.arg("--release");

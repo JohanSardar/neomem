@@ -6,13 +6,22 @@ use anyhow::Context;
 use syn::parse::Parser;
 use syn::visit::Visit;
 
-const SURFACE_KINDS: &[&str] = &["neomem", "http", "hook", "mcp", "pi"];
+const SURFACE_KINDS: &[&str] = &["neomem", "http", "hook", "mcp", "pi", "neomem-eval"];
 
 pub fn in_code(root: &Path) -> anyhow::Result<BTreeSet<String>> {
     let mut surfaces = BTreeSet::new();
-    surfaces.extend(cli_commands(&root.join("crates/neomem-cli/src/args.rs"))?);
+    surfaces.extend(cli_commands(&root.join("crates/neomem-cli/src/args.rs"), "neomem")?);
+    surfaces.extend(cli_commands(&root.join("crates/neomem-eval/src/main.rs"), "neomem-eval")?);
     if surfaces.contains("neomem hook") {
         surfaces.extend(hook_surfaces(&root.join("crates/neomem-core/src/capture.rs"))?);
+    }
+    let pi = root.join("integrations/pi/index.js");
+    if pi.is_file() {
+        let text = fs::read_to_string(pi)?;
+        surfaces.extend(text.lines().filter_map(|line| {
+            let event = line.trim().strip_prefix("pi.on(\"")?.split('"').next()?;
+            Some(format!("pi {event}"))
+        }));
     }
     surfaces.extend(mcp_tools(&root.join("crates/neomemd/src/mcp/tools.rs"))?);
     surfaces.extend(http_routes(&root.join("crates/neomemd/src"))?);
@@ -47,7 +56,7 @@ fn parse(path: &Path) -> anyhow::Result<Option<syn::File>> {
     Ok(Some(syn::parse_file(&source).with_context(|| format!("parsing {}", path.display()))?))
 }
 
-fn cli_commands(args_file: &Path) -> anyhow::Result<Vec<String>> {
+fn cli_commands(args_file: &Path, binary: &str) -> anyhow::Result<Vec<String>> {
     let Some(file) = parse(args_file)? else { return Ok(Vec::new()) };
     let commands = file
         .items
@@ -57,7 +66,7 @@ fn cli_commands(args_file: &Path) -> anyhow::Result<Vec<String>> {
             _ => None,
         })
         .flat_map(|command| command.variants.iter())
-        .map(|variant| format!("neomem {}", kebab_case(&variant.ident.to_string())))
+        .map(|variant| format!("{binary} {}", kebab_case(&variant.ident.to_string())))
         .collect();
     Ok(commands)
 }

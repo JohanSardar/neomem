@@ -54,6 +54,7 @@ impl Engine {
     }
 
     pub(crate) fn dream(&self, trigger: &str) -> Result<DreamReport, ModelError> {
+        let _consolidation = self.consolidation.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
         let started = Instant::now();
         let started_at = self.clock.now();
         let since =

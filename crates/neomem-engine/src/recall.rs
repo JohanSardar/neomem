@@ -68,10 +68,13 @@ impl Engine {
         let budget = self.recall_config.hard_timeout;
         let deadline = started + budget.saturating_sub(Duration::from_millis(10).min(budget / 10));
         let engine = Arc::clone(self);
-        let input = query.clone();
+        let mut input = query.clone();
         let (send, receive) = mpsc::channel();
         let spawned = thread::Builder::new().name("neomem-recall".to_owned()).spawn(move || {
             let active_recall = active;
+            if input.slice.is_empty() {
+                input.slice = engine.captured_recall_slice(&input);
+            }
             let prepared = engine.prepare_recall(&input, deadline, &send);
             drop(active_recall);
             let _ = send.send(Progress::Complete(prepared));
@@ -242,6 +245,26 @@ impl Engine {
         let _ = progress.send(Progress::Log(log.clone()));
         search.candidates.truncate(15);
         search.candidates
+    }
+
+    fn captured_recall_slice(&self, query: &RecallQuery) -> String {
+        let source = match query.agent.as_str() {
+            "cc" => "claude-code",
+            "codex" => "codex",
+            "pi" => "pi",
+            _ => return String::new(),
+        };
+        let Some(adapter) =
+            self.capture_sources().into_iter().find(|entry| entry.adapter.agent().source() == source)
+        else {
+            return String::new();
+        };
+        let paths = self.state.transcript_paths(source, &query.session).unwrap_or_default();
+        let turns = paths.iter().find_map(|path| adapter.adapter.slice(path).ok()).unwrap_or_default();
+        let turns = &turns[turns.len().saturating_sub(16)..];
+        let text = turns.iter().map(|turn| turn.content.as_str()).collect::<Vec<_>>().join("\n");
+        let tail: String = text.chars().rev().take(16_000).collect();
+        neomem_core::redact_secrets(&tail.chars().rev().collect::<String>())
     }
 
     fn start_recall_planner(&self, context: &str, log: &mut RecallLog) -> Option<mpsc::Receiver<Planned>> {

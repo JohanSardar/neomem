@@ -60,7 +60,7 @@ const RULES: &[Rule] = &[
             "neomem-engine",
         ],
     },
-    Rule::on("neomem-eval", &["neomem-core", "neomem-proto"]),
+    Rule::on("neomem-eval", &["neomem-proto"]),
     Rule::on("neomem-control", &["neomem-core", "neomem-proto", TESTKIT]),
     Rule::on("xtask", &[]),
 ];

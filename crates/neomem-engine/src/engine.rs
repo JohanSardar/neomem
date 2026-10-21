@@ -48,6 +48,7 @@ pub struct Engine {
     pub(crate) index: Index,
     pub(crate) health: Mutex<IndexHealth>,
     pub(crate) writer: Mutex<()>,
+    pub(crate) consolidation: Mutex<()>,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -83,6 +84,7 @@ impl Engine {
             index: opened.index,
             health: Mutex::new(health),
             writer: Mutex::new(()),
+            consolidation: Mutex::new(()),
             vault: Vault::open(&parts.home)?,
             home: parts.home,
             state,

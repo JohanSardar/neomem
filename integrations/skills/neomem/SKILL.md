@@ -65,4 +65,4 @@ neomem correct <intake-id> --reason "logged by mistake"
 - Cite the fct_ ID of every memory you rely on.
 - A memory can be out of date. What the user says now and the current code win; when they disagree with a memory, say so.
 - Never store secrets, tokens or passwords.
-- If `neomem` reports that the daemon is not running, tell the user once and continue without memory.
+- If `neomem search` warns that the daemon is not running, its results are keyword matches from the raw history, not facts; treat them as leads and say so.
