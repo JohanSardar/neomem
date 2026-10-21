@@ -5,6 +5,8 @@ use serde::Deserialize;
 
 use crate::extraction_prompt::ExtractionInput;
 
+const OWNER_NUMBER: i64 = 0;
+
 #[derive(Debug, Deserialize)]
 pub(crate) struct ExtractionOutput {
     facts: Vec<OutputFact>,
@@ -74,6 +76,13 @@ impl ExtractionOutput {
 }
 
 fn target_for(entity: OutputEntity, input: &ExtractionInput) -> EntityTarget {
+    if entity.existing == Some(OWNER_NUMBER) {
+        return EntityTarget::Named {
+            name: input.owner.clone(),
+            kind: Label::new("person").unwrap_or_else(|_| Label::thing()),
+            aliases: Vec::new(),
+        };
+    }
     let known = entity
         .existing
         .and_then(|number| usize::try_from(number).ok())
