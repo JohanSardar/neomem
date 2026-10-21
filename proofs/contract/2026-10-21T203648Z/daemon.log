@@ -1,4 +1,0 @@
-2026-10-21T20:36:48.706800Z  INFO neomemd::http: HTTP listening on 127.0.0.1:35741
-2026-10-21T20:36:48.707949Z  INFO neomemd: neomemd serving /tmp/neomemctl-cSpAYo
-2026-10-21T20:36:48.716932Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
-2026-10-21T20:36:48.983913Z  INFO neomem_engine::maintenance: committed 1 vault changes

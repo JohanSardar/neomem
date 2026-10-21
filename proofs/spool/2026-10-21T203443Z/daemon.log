@@ -1,9 +1,0 @@
-2026-10-21T20:34:43.114718Z  INFO neomemd::http: HTTP listening on 127.0.0.1:45337
-2026-10-21T20:34:43.115161Z  INFO neomemd: neomemd serving /tmp/neomemctl-b2a3tX
-2026-10-21T20:34:43.115909Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
-2026-10-21T20:34:43.120223Z  INFO neomem_engine::engine: engine flushed
-2026-10-21T20:34:43.120282Z  INFO neomemd::dispatch: neomemd shutting down on request
-2026-10-21T20:34:43.158121Z  INFO neomemd::http: HTTP listening on 127.0.0.1:44009
-2026-10-21T20:34:43.158832Z  INFO neomemd: neomemd serving /tmp/neomemctl-b2a3tX
-2026-10-21T20:34:43.158868Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-b2a3tX/run/neomemd.sock
-2026-10-21T20:34:43.163670Z  WARN neomem_engine::spool: spool file 0000-corrupt.json is unreadable and was set aside
