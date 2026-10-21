@@ -3,7 +3,7 @@ use std::fs;
 use neomem_core::{Entity, EntityId, Fact, MemoryId};
 use neomem_index::Snapshot;
 use neomem_proto::{
-    EntityView, FailureKind, LinkedEntity, ResolvedEntity, Response, ShownMemory, SourceView,
+    EntityView, FailureKind, HistoryView, LinkedEntity, ResolvedEntity, Response, ShownMemory, SourceView,
 };
 
 use crate::Engine;
@@ -56,6 +56,45 @@ impl Engine {
             MemoryId::Entity(_) => Vec::new(),
         };
         Response::Shown(Box::new(ShownMemory { id, path: path.display().to_string(), text, sources }))
+    }
+
+    pub(crate) fn history(&self, id: neomem_core::FactId) -> Response {
+        let snapshot = self.index.snapshot();
+        if snapshot.fact(id).is_none() {
+            return failed(FailureKind::NotFound, format!("there is no fact {id}"));
+        }
+        let members = snapshot.chain(id);
+        let versions: Vec<Fact> = members
+            .iter()
+            .filter_map(|member| snapshot.fact(*member))
+            .map(|fact| Fact::clone(fact))
+            .collect();
+        let extensions: Vec<Fact> = members
+            .iter()
+            .flat_map(|member| snapshot.neighbors(MemoryId::Fact(*member)).iter())
+            .filter(|neighbor| neighbor.kind == neomem_core::LinkKind::Extends)
+            .filter_map(|neighbor| match neighbor.id {
+                MemoryId::Fact(fact) if !members.contains(&fact) => {
+                    snapshot.fact(fact).map(|found| Fact::clone(found))
+                }
+                _ => None,
+            })
+            .collect();
+        Response::History(Box::new(HistoryView { versions, current: snapshot.latest(id), extensions }))
+    }
+
+    pub(crate) fn mark_useful(&self, id: neomem_core::FactId) -> Response {
+        let writing = self.lock_writer();
+        let Some(fact) = self.index.snapshot().fact(id).map(|fact| Fact::clone(fact)) else {
+            return failed(FailureKind::NotFound, format!("there is no fact {id}"));
+        };
+        let mut fact = fact;
+        fact.mark_useful(self.clock.now());
+        let evidence = fact.evidence().count();
+        match self.write_memories(vec![neomem_core::Memory::Fact(fact)], &writing) {
+            Ok(()) => Response::MarkedUseful { id, evidence },
+            Err(error) => failed(FailureKind::Internal, format!("recording the evidence failed: {error}")),
+        }
     }
 
     fn source_views(&self, fact: &Fact) -> Vec<SourceView> {

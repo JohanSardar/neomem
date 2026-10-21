@@ -2,9 +2,15 @@
   "feature": "entity",
   "scenario": "entity",
   "passed": true,
+<<<<<<<< HEAD:proofs/entity/2026-10-21T011108Z/proof.json
+  "started_at": "2026-10-21T011108Z",
+  "duration_ms": 326,
+  "code_version": "1efe50ecaa14-dirty",
+========
   "started_at": "2026-10-21T010237Z",
   "duration_ms": 285,
   "code_version": "9b0a4922ac15-dirty",
+>>>>>>>> origin/main:proofs/entity/2026-10-21T010237Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
@@ -26,7 +32,7 @@
     {
       "claim": "neomem entity lists the entity's current facts and leaves the replaced version out",
       "passed": true,
-      "detail": "[\"fct_01M59NY2N09AC5V7E9Z0C1HT0K\", \"fct_01M59NY2N09AC5V7E9Z0C1HT0H\"]"
+      "detail": "[\"fct_01M59NY2N09AC5V7E9Z0C1HT0H\", \"fct_01M59NY2N09AC5V7E9Z0C1HT0K\"]"
     },
     {
       "claim": "it lists linked entities with the link's label",
@@ -41,12 +47,16 @@
     {
       "claim": "the command line prints the entity with its facts",
       "passed": true,
-      "detail": "ent_01M56PGSJG83SYHRJXJG7DJ13N  Edge (project) | also     Edge app | about    Johan's app. |   fct_01M59NY2N09AC5V7E9Z0C1HT0K  The Edge launch event is on November 2, 2026.  (valid since 2026-10-19T08:53:20Z) |   fct_01M59NY2N09AC5V7E9Z0C1HT0H  Edge's ship date is November 1, 2026.  (valid since 2026-10-19T08:53:20Z) |   owns Johan  ent_01M56PH3B01C00K6AGV0VFCXEC"
+      "detail": "ent_01M56PGSJG83SYHRJXJG7DJ13N  Edge (project) | also     Edge app | about    Johan's app. |   fct_01M59NY2N09AC5V7E9Z0C1HT0H  Edge's ship date is November 1, 2026.  (valid since 2026-10-19T08:53:20Z) |   fct_01M59NY2N09AC5V7E9Z0C1HT0K  The Edge launch event is on November 2, 2026.  (valid since 2026-10-19T08:53:20Z) |   owns Johan  ent_01M56PH3B01C00K6AGV0VFCXEC"
     },
     {
       "claim": "neomem show returns the memory's file exactly as it is on disk",
       "passed": true,
+<<<<<<<< HEAD:proofs/entity/2026-10-21T011108Z/proof.json
+      "detail": "/tmp/neomemctl-vNUECw/facts/2026/10/fct_01M59NY2N09AC5V7E9Z0C1HT0K_edge-launch-event.md"
+========
       "detail": "/tmp/neomemctl-VbHRWB/facts/2026/10/fct_01M59NY2N09AC5V7E9Z0C1HT0K_edge-launch-event.md"
+>>>>>>>> origin/main:proofs/entity/2026-10-21T010237Z/proof.json
     },
     {
       "claim": "it lists the fact's sources with the logged intake records",

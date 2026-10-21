@@ -34,6 +34,12 @@ pub enum Request {
     Show {
         id: MemoryId,
     },
+    History {
+        id: neomem_core::FactId,
+    },
+    Useful {
+        id: neomem_core::FactId,
+    },
     Models,
     ModelsUse {
         role: ModelRole,

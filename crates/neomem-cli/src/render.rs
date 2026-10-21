@@ -4,7 +4,8 @@ use std::process::ExitCode;
 use crate::time_argument;
 
 use neomem_proto::{
-    EntityView, IndexReport, RawHit, RebuildReport, Response, SearchResults, ShownMemory, StatusReport,
+    EntityView, HistoryView, IndexReport, RawHit, RebuildReport, Response, SearchResults, ShownMemory,
+    StatusReport,
 };
 
 pub fn print(response: &Response, json: bool) -> ExitCode {
@@ -56,6 +57,10 @@ fn print_human(response: &Response) {
         }
         Response::Entity(view) => print_entity(view),
         Response::Shown(shown) => print_shown(shown),
+        Response::History(view) => print_history(view),
+        Response::MarkedUseful { id, evidence } => {
+            println!("{id} marked useful ({evidence} evidence events)");
+        }
         Response::ModelRoster(roster) => {
             for assignment in roster {
                 println!("{:<13} {}", assignment.role.name(), assignment.assignment);
@@ -191,5 +196,22 @@ fn print_search(results: &SearchResults) {
         for linked in &hit.linked {
             println!("   {} {}  ({})", linked.kind, linked.fact.content(), linked.fact.id());
         }
+    }
+}
+
+fn print_history(view: &HistoryView) {
+    for fact in &view.versions {
+        let until = fact.invalid_at().map_or_else(|| "now".to_owned(), time_argument::display);
+        let current = if fact.id() == view.current { "  [current]" } else { "" };
+        println!(
+            "{} → {}  {}  {}{current}",
+            time_argument::display(fact.valid_at()),
+            until,
+            fact.id(),
+            fact.content()
+        );
+    }
+    for fact in &view.extensions {
+        println!("  extended by {}  {}", fact.id(), fact.content());
     }
 }
