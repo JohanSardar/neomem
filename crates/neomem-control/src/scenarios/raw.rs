@@ -10,13 +10,14 @@ const DAY: i64 = 86_400_000;
 const TUESDAY: i64 = 1_792_540_800_000;
 
 pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
-    let neomem = IsolatedNeomem::start(binaries)?;
+    let mut neomem = IsolatedNeomem::start(binaries)?;
     log_history(&neomem)?;
     keywords_find_the_right_record(proof, &neomem)?;
     dates_and_sources_narrow_the_search(proof, &neomem)?;
     old_records_rank_like_new_ones(proof, &neomem)?;
     the_command_line_prints_the_hits(proof, &neomem)?;
     raw_search_stays_fast_over_thousands_of_records(proof, &neomem)?;
+    search_falls_back_to_keywords_when_the_daemon_cannot_start(proof, &mut neomem, binaries)?;
     proof.attach_logs(&neomem.logs());
     Ok(())
 }
@@ -141,5 +142,33 @@ fn raw_search_stays_fast_over_thousands_of_records(
         Ok(())
     })?;
     proof.claim("raw search over 5,000+ records answers under 30 ms at p95", latency.p95_ms < 30.0, latency);
+    Ok(())
+}
+
+fn search_falls_back_to_keywords_when_the_daemon_cannot_start(
+    proof: &mut ProofRun,
+    neomem: &mut IsolatedNeomem,
+    binaries: &Binaries,
+) -> anyhow::Result<()> {
+    neomem.stop_daemon()?;
+    let alone = tempfile::tempdir()?;
+    let lone_client = alone.path().join("neomem");
+    std::fs::copy(&binaries.neomem, &lone_client)?;
+    let output = std::process::Command::new(&lone_client)
+        .args(["search", "signing error certificate"])
+        .env_clear()
+        .env("PATH", "/usr/bin:/bin")
+        .env("HOME", alone.path())
+        .env("NEOMEM_HOME", neomem.home().root())
+        .output()?;
+    let printed = String::from_utf8_lossy(&output.stdout);
+    let warned = String::from_utf8_lossy(&output.stderr);
+    proof.claim(
+        "with the daemon down and unable to start, neomem search falls back to keyword search over the intake log with a warning",
+        output.status.success()
+            && printed.contains("Fixed the signing error by rotating the Edge distribution certificate")
+            && warned.contains("neomemd is not running"),
+        format!("{} | {}", printed.lines().next().unwrap_or_default(), warned.trim()),
+    );
     Ok(())
 }

@@ -23,13 +23,13 @@
   status: proven
   last_proof: proofs/spool/2026-10-21T045220Z
 - id: raw
-  does: keyword and date search over the raw intake log, without decay
-  reached_via: [neomem raw]
+  does: keyword and date search over the raw intake log, without decay; search falls back to it when the daemon cannot start
+  reached_via: [neomem raw, neomem search]
   module: neomem-state (raw)
   depends_on: [intake]
   proof: raw
   status: proven
-  last_proof: proofs/raw/2026-10-21T045220Z
+  last_proof: proofs/raw/2026-10-21T045808Z
 - id: correct
   does: marks an intake record as logged incorrectly, hides facts drawn only from it and queues them for re-checking
   reached_via: [neomem correct]
