@@ -1,4 +1,0 @@
-2026-10-21T04:38:29.666719Z  INFO neomemd::http: HTTP listening on 127.0.0.1:35391
-2026-10-21T04:38:29.667665Z  INFO neomemd: neomemd serving /tmp/neomemctl-IMisKA
-2026-10-21T04:38:29.677977Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
-2026-10-21T04:38:31.958738Z  INFO neomem_engine::maintenance: committed 21 vault changes

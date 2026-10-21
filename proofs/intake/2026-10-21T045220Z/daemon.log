@@ -1,0 +1,8 @@
+2026-10-21T04:52:20.140604Z  INFO neomemd::http: HTTP listening on 127.0.0.1:45337
+2026-10-21T04:52:20.141132Z  INFO neomemd: neomemd serving /tmp/neomemctl-tBtaYA
+2026-10-21T04:52:20.141916Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-21T04:52:20.259437Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T04:52:20.259475Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T04:52:20.275647Z  INFO neomemd::http: HTTP listening on 127.0.0.1:33635
+2026-10-21T04:52:20.276158Z  INFO neomemd: neomemd serving /tmp/neomemctl-tBtaYA
+2026-10-21T04:52:20.276222Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-tBtaYA/run/neomemd.sock

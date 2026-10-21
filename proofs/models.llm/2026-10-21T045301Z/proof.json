@@ -1,0 +1,162 @@
+{
+  "feature": "models.llm",
+  "scenario": "models-llm",
+  "passed": true,
+  "started_at": "2026-10-21T045301Z",
+  "duration_ms": 3580,
+  "code_version": "e2202b7b0892-dirty",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "neomem login chatgpt signs in through the browser flow and keeps neomem's own token in the isolated home's secrets.env (mode 600)",
+      "passed": true,
+      "detail": "Some(LoggedIn { provider: \"chatgpt\", account: \"neomem-test@example.com\" }); browser Ok(200); mode 600; tokens stored true; 48 ms; Sign in to chatgpt in your browser:\nhttp://127.0.0.1:46471/oauth/authorize?response_type=code&client_id=app_EMoamEEZ73f0CkXaXp7hrann&redirect_uri=http%3A%2F%2Flocalhost%3A36801%2Fauth%2Fcallback&scope=openid+profile+email+offline_access&code_challenge=2CV_dcN0m6tmtCLbBbwwzZbbWqpNE7XG5u-ansLo7OA&code_challenge_method=S256&id_token_add_organizations=true&codex_cli_simplified_flow=true&state=WUOA6jw_LgqfvFZvgK5Y2w&originator=neomem"
+    },
+    {
+      "claim": "the sign-in uses PKCE: an S256 challenge, then the code exchanged with its verifier",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "claim": "neomem models test planner answers through the openai (chat completions) provider",
+      "passed": true,
+      "detail": "openai:fake-planner answered \"OK\" in 4.4 ms, first text 4.1 ms via /v1/chat/completions"
+    },
+    {
+      "claim": "openai (chat completions): streamed text reaches the caller before the reply completes",
+      "passed": true,
+      "detail": "openai:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 607.7 ms, first text 3.9 ms"
+    },
+    {
+      "claim": "openai (chat completions): a structured answer is valid JSON for the schema",
+      "passed": true,
+      "detail": "openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 4.7 ms, first text 4.7 ms"
+    },
+    {
+      "claim": "openai (chat completions): an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+      "detail": "2 calls; openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 8.9 ms, first text 8.8 ms"
+    },
+    {
+      "claim": "neomem models test planner answers through the openai (responses) provider",
+      "passed": true,
+      "detail": "openai:fake-planner answered \"OK\" in 5.0 ms, first text 4.8 ms via /v1/responses"
+    },
+    {
+      "claim": "openai (responses): streamed text reaches the caller before the reply completes",
+      "passed": true,
+      "detail": "openai:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 547.4 ms, first text 5.5 ms"
+    },
+    {
+      "claim": "openai (responses): a structured answer is valid JSON for the schema",
+      "passed": true,
+      "detail": "openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 5.4 ms, first text 5.4 ms"
+    },
+    {
+      "claim": "openai (responses): an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+      "detail": "2 calls; openai:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 8.3 ms, first text 8.3 ms"
+    },
+    {
+      "claim": "neomem models test planner answers through the anthropic provider",
+      "passed": true,
+      "detail": "anthropic:fake-planner answered \"OK\" in 5.9 ms, first text 5.5 ms via /v1/messages"
+    },
+    {
+      "claim": "anthropic requests mark the system prompt for prompt caching",
+      "passed": true,
+      "detail": "Some(String(\"ephemeral\"))"
+    },
+    {
+      "claim": "anthropic: streamed text reaches the caller before the reply completes",
+      "passed": true,
+      "detail": "anthropic:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 547.7 ms, first text 5.6 ms"
+    },
+    {
+      "claim": "anthropic: a structured answer is valid JSON for the schema",
+      "passed": true,
+      "detail": "anthropic:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 6.1 ms, first text 6.1 ms"
+    },
+    {
+      "claim": "anthropic: an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+      "detail": "2 calls; anthropic:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 10.4 ms, first text 10.4 ms"
+    },
+    {
+      "claim": "neomem models test planner answers through the chatgpt provider",
+      "passed": true,
+      "detail": "chatgpt:fake-planner answered \"OK\" in 8.3 ms, first text 8.1 ms via /backend-api/codex/responses"
+    },
+    {
+      "claim": "chatgpt: streamed text reaches the caller before the reply completes",
+      "passed": true,
+      "detail": "chatgpt:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 546.6 ms, first text 3.5 ms"
+    },
+    {
+      "claim": "chatgpt: a structured answer is valid JSON for the schema",
+      "passed": true,
+      "detail": "chatgpt:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 6.1 ms, first text 6.1 ms"
+    },
+    {
+      "claim": "chatgpt: an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+      "detail": "2 calls; chatgpt:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 11.0 ms, first text 11.0 ms"
+    },
+    {
+      "claim": "neomem models test planner answers through the codex provider",
+      "passed": true,
+      "detail": "codex:fake-planner answered \"OK\" in 8.6 ms, first text 8.5 ms via /v1/brain"
+    },
+    {
+      "claim": "codex: streamed text reaches the caller before the reply completes",
+      "passed": true,
+      "detail": "codex:fake-planner answered \"Edge signing error fix\\nEdge release date\\nsigning certificate renewal\" in 546.3 ms, first text 4.0 ms"
+    },
+    {
+      "claim": "codex: a structured answer is valid JSON for the schema",
+      "passed": true,
+      "detail": "codex:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 5.5 ms, first text 5.5 ms"
+    },
+    {
+      "claim": "codex: an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+      "detail": "2 calls; codex:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 8.6 ms, first text 8.5 ms"
+    },
+    {
+      "claim": "neomem models test planner answers through the command provider",
+      "passed": true,
+      "detail": "command:fake-planner answered \"OK\" in 5.3 ms, first text 5.3 ms via /v1/brain"
+    },
+    {
+      "claim": "command: a structured answer is valid JSON for the schema",
+      "passed": true,
+      "detail": "command:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 2.4 ms, first text 2.4 ms"
+    },
+    {
+      "claim": "command: an answer that breaks the schema is retried exactly once and the retry fits",
+      "passed": true,
+      "detail": "2 calls; command:fake-planner answered \"{\\\"answer\\\":\\\"ok\\\"}\" in 9.2 ms, first text 9.2 ms"
+    },
+    {
+      "claim": "effort low reaches every provider kind in its own form",
+      "passed": true,
+      "detail": "openai (chat completions)=low, openai (responses)=low, anthropic=low, chatgpt=low, codex=low, command=low"
+    },
+    {
+      "claim": "an expiring ChatGPT token is refreshed with the refresh token neomem stored, and the rotated token is saved",
+      "passed": true,
+      "detail": "1 refreshes"
+    },
+    {
+      "claim": "signing in, refreshing and every provider call leave the Codex, pi and Hermes sign-ins untouched and never send their tokens",
+      "passed": true,
+      "detail": "7 files unchanged: true; leaked []"
+    },
+    {
+      "claim": "[models.extractor_by_source] sends bank-digest extraction to its own provider and everything else to the default",
+      "passed": true,
+      "detail": "default: openai:fake-extractor answered \"OK\" in 2.8 ms, first text 2.6 ms; bank-digest: anthropic:claude-fake answered \"OK\" in 4.0 ms, first text 3.8 ms"
+    }
+  ]
+}
