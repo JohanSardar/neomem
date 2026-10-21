@@ -73,3 +73,4 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - A local model used by background work stays loaded until two minutes (or the idle timeout, if shorter) after its last use, so a burst of writes loads it once instead of once per write; only reads extend the 15-minute idle window.
 - pi has no built-in MCP (its docs say so), so install gives pi the skill and the neomem-pi extension (capture and recall) but no MCP server; Claude Code and Codex get MCP through the plugin's .mcp.json.
 - A daemon whose NEOMEM_HOME is not ~/.neomem captures only the agent folders [capture] names; the default agent folders belong to the default home, so a test or eval home never reads the user's real sessions.
+- pi's extension registers neomem's read tools (neomem_search, entity, resolve, show, history, raw, useful) with pi.registerTool, the same requests as the MCP tools, since pi has no MCP.
