@@ -12,15 +12,30 @@ pub struct Cli {
 #[derive(Debug, Subcommand)]
 pub enum Command {
     Status,
-    Hook { agent: String, event: String },
+    Hook {
+        agent: String,
+        event: String,
+    },
     Add(AddArgs),
     Raw(RawArgs),
     Correct(CorrectArgs),
     Rebuild,
+    Reextract {
+        #[arg(long)]
+        source: Option<String>,
+        #[arg(long)]
+        from: Option<String>,
+    },
     Search(SearchArgs),
-    Resolve { name: String },
-    Entity { name: String },
-    Show { id: String },
+    Resolve {
+        name: String,
+    },
+    Entity {
+        name: String,
+    },
+    Show {
+        id: String,
+    },
     Models(ModelsArgs),
     Login(LoginArgs),
 }

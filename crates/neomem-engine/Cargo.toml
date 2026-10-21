@@ -12,6 +12,7 @@ neomem-index.workspace = true
 neomem-proto.workspace = true
 neomem-state.workspace = true
 neomem-vault.workspace = true
+serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 tracing.workspace = true

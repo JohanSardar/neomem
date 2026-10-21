@@ -23,11 +23,13 @@ pub(crate) enum IndexingError {
     Embedding(#[from] ModelError),
     #[error(transparent)]
     Index(#[from] IndexError),
+    #[error("writing the memory file failed: {0}")]
+    Vault(#[from] neomem_vault::VaultError),
 }
 
 impl Engine {
     pub(crate) fn index_memories(&self, located: Vec<(Memory, PathBuf)>) -> Result<(), IndexingError> {
-        let _writing = self.writer.lock().unwrap_or_else(PoisonError::into_inner);
+        let _writing = self.lock_writer();
         let changes = self.embedded(located)?;
         self.index.apply(&changes)?;
         Ok(())
@@ -41,7 +43,7 @@ impl Engine {
     }
 
     pub(crate) fn rebuild_index(&self) -> Result<RebuildReport, IndexingError> {
-        let _writing = self.writer.lock().unwrap_or_else(PoisonError::into_inner);
+        let _writing = self.lock_writer();
         let started = Instant::now();
         let mut unreadable_files = 0;
         let mut located = Vec::new();
@@ -85,7 +87,7 @@ impl Engine {
         }
     }
 
-    fn embedded(&self, located: Vec<(Memory, PathBuf)>) -> Result<Vec<Change>, IndexingError> {
+    pub(crate) fn embedded(&self, located: Vec<(Memory, PathBuf)>) -> Result<Vec<Change>, IndexingError> {
         let Some(embedder) = &self.embedder else {
             return Ok(located
                 .into_iter()

@@ -1374,6 +1374,7 @@ dependencies = [
  "neomem-proto",
  "neomem-state",
  "neomem-vault",
+ "serde",
  "serde_json",
  "thiserror",
  "tracing",

@@ -6,9 +6,18 @@ use crate::Engine;
 
 const TICK: Duration = Duration::from_millis(250);
 const SPOOL_EVERY_TICKS: u64 = 8;
+const WORKER_IDLE: Duration = Duration::from_millis(200);
 
 impl Engine {
     pub fn run(self: &Arc<Self>) -> std::io::Result<thread::JoinHandle<()>> {
+        let worker = Arc::clone(self);
+        thread::Builder::new().name("neomemd-worker".to_owned()).spawn(move || {
+            loop {
+                if !worker.work_once() {
+                    thread::sleep(WORKER_IDLE);
+                }
+            }
+        })?;
         let engine = Arc::clone(self);
         thread::Builder::new().name("neomemd-maintenance".to_owned()).spawn(move || {
             engine.heal_index();

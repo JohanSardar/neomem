@@ -107,6 +107,7 @@ impl Engine {
             Request::Raw(query) => self.raw(&query),
             Request::Correct { intake, reason } => self.correct(intake, &reason),
             Request::Rebuild => self.rebuild(),
+            Request::Reextract { source, from } => self.reextract(source.as_ref(), from),
             Request::CheckDrift => self.drift(),
             Request::Search(query) => self.search(&query),
             Request::SetClock { .. } => crate::reply::failed(

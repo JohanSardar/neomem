@@ -2,10 +2,12 @@ mod capture;
 mod capture_cc;
 mod capture_codex;
 mod capture_pi;
+mod check;
 mod correct;
 mod daemon;
 mod drift;
 mod entity;
+mod extract;
 mod index;
 mod intake;
 pub(crate) mod models_embed;
@@ -47,6 +49,8 @@ pub const ALL: &[Scenario] = &[
     Scenario { name: "models-embed", run: models_embed::prove },
     Scenario { name: "models-judge", run: models_judge::prove },
     Scenario { name: "search", run: search::prove },
+    Scenario { name: "extract", run: extract::prove },
+    Scenario { name: "check", run: check::prove },
 ];
 
 pub fn find(name: &str) -> Option<Scenario> {

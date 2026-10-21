@@ -59,10 +59,16 @@ impl Judge for ScriptedJudge {
     fn decide(&self, context: &str, question: &str, options: &[Choice<'_>]) -> Result<Decision, ModelError> {
         let preferred = match self.matching(question, context, None) {
             Some(JudgeAnswer::Choice { label, probability }) => Some((label, probability)),
-            _ => options
-                .iter()
-                .find(|option| option.label == "new")
-                .map(|option| (option.label.to_owned(), 0.9)),
+            _ => identical_existing_fact(context)
+                .map(|number| format!("same_{number}"))
+                .filter(|label| options.iter().any(|option| option.label == label))
+                .map(|label| (label, 0.95))
+                .or_else(|| {
+                    options
+                        .iter()
+                        .find(|option| option.label == "new")
+                        .map(|option| (option.label.to_owned(), 0.9))
+                }),
         };
         let (label, probability) =
             preferred.unwrap_or_else(|| (options.first().map_or("", |option| option.label).to_owned(), 0.9));
@@ -88,6 +94,15 @@ impl Judge for ScriptedJudge {
     }
 }
 
+fn identical_existing_fact(context: &str) -> Option<usize> {
+    let new_fact = context.lines().find_map(|line| line.strip_prefix("New fact: "))?.trim();
+    context.lines().find_map(|line| {
+        let (number, text) = line.split_once(". ")?;
+        let number: usize = number.trim().parse().ok()?;
+        text.trim().eq_ignore_ascii_case(new_fact).then_some(number)
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -102,6 +117,15 @@ mod tests {
     fn without_a_rule_a_relation_question_answers_new() {
         let decision = ScriptedJudge::default().decide("ctx", "relation?", RELATIONS).unwrap();
         assert_eq!(RELATIONS[decision.choice()].label, "new");
+    }
+
+    #[test]
+    fn an_identical_existing_fact_is_the_same() {
+        let options =
+            [Choice { label: "same_1", meaning: "same" }, Choice { label: "new", meaning: "unrelated" }];
+        let context = "New fact: Edge ships Nov 1.\n\nExisting facts:\n1. Edge ships Nov 1.\n";
+        let decision = ScriptedJudge::default().decide(context, "relation?", &options).unwrap();
+        assert_eq!(options[decision.choice()].label, "same_1");
     }
 
     #[test]

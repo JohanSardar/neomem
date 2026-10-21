@@ -14,6 +14,12 @@ pub enum Request {
         reason: String,
     },
     Rebuild,
+    Reextract {
+        #[serde(default)]
+        source: Option<Source>,
+        #[serde(default)]
+        from: Option<EpochMs>,
+    },
     CheckDrift,
     Search(SearchQuery),
     SetClock {

@@ -13,6 +13,7 @@ pub enum Response {
     RawHits(Vec<RawHit>),
     Corrected(CorrectionReceipt),
     Rebuilt(RebuildReport),
+    Reextracting { queued: usize },
     DriftChecked(DriftReport),
     SearchResults(Box<SearchResults>),
     ClockSet { now: EpochMs },

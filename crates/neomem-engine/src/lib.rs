@@ -1,7 +1,11 @@
 mod capture;
+mod check;
 mod drift;
 mod engine;
 mod entity;
+mod extract;
+mod extraction_output;
+mod extraction_prompt;
 mod ids;
 mod indexing;
 mod intake;
@@ -15,6 +19,7 @@ mod search;
 mod spool;
 mod status;
 mod worker_config;
+mod writer;
 
 pub use engine::{Engine, EngineError, EngineParts};
 pub use neomem_vault::CommitPolicy;
