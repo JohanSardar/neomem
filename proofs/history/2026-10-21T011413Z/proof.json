@@ -2,9 +2,9 @@
   "feature": "history",
   "scenario": "history",
   "passed": true,
-  "started_at": "2026-10-21T011122Z",
-  "duration_ms": 260,
-  "code_version": "1efe50ecaa14-dirty",
+  "started_at": "2026-10-21T011413Z",
+  "duration_ms": 274,
+  "code_version": "91d92b9b50cc-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
