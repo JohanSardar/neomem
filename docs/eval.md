@@ -27,43 +27,60 @@ The development sample contains seven LongMemEval-S questions, one for each publ
 
 The private coding corpus contains sanitized material from this project's own permitted Claude Code and Codex sessions. Sixty manually authored questions have checkable transcript answers; fifty are selected with the same seed and ten held out. Each question replays a bounded original transcript window containing its evidence and three fixed distractor events from other permitted project sessions; update questions also include the older event. This measures retrieval over curated windows, not the entire session archive. Replay uses the real Capture protocol and original event timestamps. Questions, source transcripts and per-question outputs remain private under `eval-data/coding-set/`.
 
-The run executes frozen Vulkan binaries, whose SHA-256 values are saved in `binaries.json`. A private source archive and `source.json` preserve the source revision at freeze; each arm's manifest separately records the workspace HEAD at invocation. CI runs on the CPU backend to avoid concurrent GPU contention. Pauses during ingestion for earlier CI runs are recorded in `pauses.jsonl`; wall time and ingestion time include them, while measured answer latency excludes them.
+Hardware is Ubuntu 26.04.1, Intel Core Ultra 9 288V (8 cores), 30 GB RAM and Intel Arc 140V Vulkan GPU. LongMemEval uses `xiaowu0162/longmemeval-cleaned`, file `longmemeval_s_cleaned.json`, SHA-256 `d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442`.
 
-LongMemEval uses `xiaowu0162/longmemeval-cleaned`, file `longmemeval_s_cleaned.json`, SHA-256 `d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442`. Frozen executable SHA-256 values are `eada64bdaf46977e3452da90ec721f7d443d04f9ab6fbe7e834416bf0881f56b` (`neomem-eval`) and `13fc01d40cf9e236b717e5d819033525127fa0ddccf8cfd65cc760e5c567241c` (`neomemd`). The source was frozen at `49710e64aba52d8f5cb03a0b392671b8d3461ebc` before later proof refreshes and main merges; its private source archive has SHA-256 `5fe3d997f502eef3cc0a08e1945eaaf1ffc329bdfc1f14ce5740a9aade1d7098`. Hardware is Ubuntu 26.04.1, Intel Core Ultra 9 288V (8 cores), 30 GB RAM and Intel Arc 140V Vulkan GPU.
+## What the first run exposed
 
-The LongMemEval result is a failed effectiveness baseline: both arms answer only the abstention correctly (1/7, 14.3%). Search retrieves no evidence for any of the six answerable questions. Six searches return no facts; the multi-session search returns ten facts with no gold evidence-session sources. This does not establish whether a stronger extractor or larger reader improves results. No prompt, sample or model was tuned against these development answers, and held-out questions were not scored.
+The first baseline (source `49710e6`) answered only the abstention question in both arms: extraction wrote no facts for six of seven LongMemEval histories and for all fifty coding windows. Proxying the local extractor's requests showed why, and each cause was fixed in the product, not in the evaluation:
+
+- the extractor was never told who speaks in `user:` turns, so it dropped first-person facts or borrowed a name from the prompt's examples (#55);
+- it turned assistants' general advice into "the user plans to ..." facts and skipped the user's own details (#57);
+- it ignored what an agent reported doing and finding in coding sessions (#59);
+- facts citing entities the model forgot to list were rejected, and non-owner entities were filed under the owner (#60);
+- background writes reloaded the embedder for every batch, about 0.5 s each (#54).
+
+These rules were designed by inspecting extraction batches from the development sample, which §16.6 allows; the held-out questions were never scored or inspected.
+
+## Runs
+
+LongMemEval: both arms ran at source `329938c` (after #54, #55 and #57) with executables `neomem-eval` `603b0451…c4a155a` and `neomemd` `e47282a3…bc6a647536efa3`; ingestion of the seven search-arm histories took 15,201 s in total. The coding set ran again after #59 and #60 at source `96b2dc3` with `neomemd` `012a1181…3ed695050` and the same `neomem-eval`; its search-arm ingestion took 2,106 s. Write-time generation samples at temperature 0.8, so a replay can extract different facts. Per-question outputs stay private under `eval-data/`.
 
 ## LongMemEval-S development sample
 
+Search answers 3/7 correctly, against 1/7 with memory off. One question per type supports no strong generalization.
+
 | Type | Arm | N | Recall@5 | Recall@10 | Precision@5 | Accuracy | Mean answer seconds | Mean prompt tokens |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| abstention | memory-off | 1 | — | — | — | 100.0% | 0.85 | 104.0 |
-| knowledge-update | memory-off | 1 | — | — | — | 0.0% | 1.04 | 107.0 |
-| multi-session | memory-off | 1 | — | — | — | 0.0% | 1.05 | 107.0 |
-| single-session-assistant | memory-off | 1 | — | — | — | 0.0% | 1.36 | 141.0 |
-| single-session-preference | memory-off | 1 | — | — | — | 0.0% | 1.66 | 109.0 |
-| single-session-user | memory-off | 1 | — | — | — | 0.0% | 1.70 | 101.0 |
-| temporal-reasoning | memory-off | 1 | — | — | — | 0.0% | 1.80 | 119.0 |
-| abstention | search | 1 | — | — | — | 100.0% | 5.45 | 104.0 |
-| knowledge-update | search | 1 | 0.0% | 0.0% | 0.0% | 0.0% | 2.95 | 107.0 |
-| multi-session | search | 1 | 0.0% | 0.0% | 0.0% | 0.0% | 4.58 | 328.0 |
-| single-session-assistant | search | 1 | 0.0% | 0.0% | 0.0% | 0.0% | 6.30 | 141.0 |
-| single-session-preference | search | 1 | 0.0% | 0.0% | 0.0% | 0.0% | 5.31 | 109.0 |
-| single-session-user | search | 1 | 0.0% | 0.0% | 0.0% | 0.0% | 3.21 | 101.0 |
-| temporal-reasoning | search | 1 | 0.0% | 0.0% | 0.0% | 0.0% | 1.77 | 119.0 |
+| abstention | memory-off | 1 | — | — | — | 100.0% | 0.72 | 104.0 |
+| knowledge-update | memory-off | 1 | — | — | — | 0.0% | 0.62 | 107.0 |
+| multi-session | memory-off | 1 | — | — | — | 0.0% | 0.58 | 107.0 |
+| single-session-assistant | memory-off | 1 | — | — | — | 0.0% | 0.60 | 141.0 |
+| single-session-preference | memory-off | 1 | — | — | — | 0.0% | 0.68 | 109.0 |
+| single-session-user | memory-off | 1 | — | — | — | 0.0% | 0.67 | 101.0 |
+| temporal-reasoning | memory-off | 1 | — | — | — | 0.0% | 0.60 | 119.0 |
+| abstention | search | 1 | — | — | — | 100.0% | 7.79 | 386.0 |
+| knowledge-update | search | 1 | 50.0% | 50.0% | 60.0% | 100.0% | 6.21 | 358.0 |
+| multi-session | search | 1 | 100.0% | 100.0% | 100.0% | 100.0% | 8.49 | 376.0 |
+| single-session-assistant | search | 1 | 0.0% | 0.0% | 0.0% | 0.0% | 6.46 | 437.0 |
+| single-session-preference | search | 1 | 0.0% | 0.0% | 0.0% | 0.0% | 4.45 | 391.0 |
+| single-session-user | search | 1 | 100.0% | 100.0% | 100.0% | 0.0% | 21.75 | 248.0 |
+| temporal-reasoning | search | 1 | 50.0% | 50.0% | 40.0% | 0.0% | 3.87 | 400.0 |
+
+Search retrieves the gold evidence for the knowledge-update, multi-session, single-session-user and temporal-reasoning questions; the reader still misses the single-session-user and temporal answers. Search returned no evidence for the preference and assistant questions: preference questions reward inferring what the user would like, which neomem deliberately does not do (§3.2), and the assistant question asks about something an assistant said, which the extractor now keeps only when it is a result or decision (#57).
 
 ## Private coding development sample
 
+Search answers 8/50 correctly, against 0/50 with memory off; 33 of 50 searches return at least one fact.
+
 | Type | Arm | N | Recall@5 | Recall@10 | Precision@5 | Accuracy | Mean answer seconds | Mean prompt tokens |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| coding-build | memory-off | 17 | — | — | — | 0.0% | 0.65 | 106.2 |
+| coding-build | memory-off | 17 | — | — | — | 0.0% | 0.64 | 106.2 |
 | coding-capture | memory-off | 17 | — | — | — | 0.0% | 0.63 | 106.5 |
-| coding-models | memory-off | 14 | — | — | — | 0.0% | 0.64 | 105.1 |
+| coding-models | memory-off | 14 | — | — | — | 0.0% | 0.63 | 105.1 |
 | coding-update | memory-off | 2 | — | — | — | 0.0% | 0.64 | 105.0 |
-| coding-build | search | 17 | 0.0% | 0.0% | 0.0% | 0.0% | 1.68 | 106.2 |
-| coding-capture | search | 17 | 0.0% | 0.0% | 0.0% | 0.0% | 1.67 | 106.5 |
-| coding-models | search | 14 | 0.0% | 0.0% | 0.0% | 0.0% | 1.67 | 105.1 |
-| coding-update | search | 2 | 0.0% | 0.0% | 0.0% | 0.0% | 1.66 | 105.0 |
+| coding-build | search | 17 | 11.8% | 11.8% | 2.4% | 11.8% | 2.38 | 155.4 |
+| coding-capture | search | 17 | 35.3% | 35.3% | 11.8% | 23.5% | 2.67 | 156.2 |
+| coding-models | search | 14 | 50.0% | 50.0% | 18.6% | 14.3% | 2.61 | 141.0 |
+| coding-update | search | 2 | 100.0% | 100.0% | 50.0% | 0.0% | 4.40 | 389.0 |
 
-
-The complete sequential run took 8620.94 seconds (2 h 23 min 41 s), including 780.99 seconds of recorded ingestion pauses for CI. LongMemEval search ingestion consumed 8044.95 seconds in total. Coding accuracy was 0/50 in both arms, with zero evidence recall and no returned facts in all fifty search queries. These results establish a reproducible low-quality baseline, not useful memory performance. All fifty coding histories were replayed through Capture; no private questions or per-question outputs are committed. A live Jev judge smoke check also succeeded (`jev:jev-1.13.0`, 97.5 ms), clearing the previous missing-key blocker without exposing the key.
+Many answers (exact proof counts, versions) sit in raw tool output, which capture keeps out of memory by design (§5.1), so this set rewards what agents say about their work rather than everything they saw.
