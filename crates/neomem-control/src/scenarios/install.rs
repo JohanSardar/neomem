@@ -13,7 +13,7 @@ use crate::agents::{Agent, AgentSandbox};
 use crate::binaries::Binaries;
 use crate::isolated::IsolatedNeomem;
 use crate::proof::ProofRun;
-use crate::scenarios::support;
+use crate::scenarios::{recall_support, support};
 use crate::{repo, seed};
 
 const SHIP_DATE: &str = "fct_01M5D6RA00000000000000000B";
@@ -53,7 +53,16 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
         "",
     );
     neomem.neomem(&["recall", "on"])?;
-    neomem.add_fake_rules(&FakeRules { llm: agent_replies(), ..FakeRules::default() })?;
+    let mut replies = agent_replies();
+    replies.push(recall_support::planner(0, 0));
+    neomem.add_fake_rules(&FakeRules {
+        judge: vec![
+            recall_support::rule("long-term memory", None, 0.9),
+            recall_support::rule("this memory", None, 0.9),
+        ],
+        llm: replies,
+        ..FakeRules::default()
+    })?;
     for agent in Agent::ALL {
         a_session_captures_and_recalls(proof, &neomem, &sandbox, agent)?;
     }
@@ -145,7 +154,8 @@ fn calls_of(neomem: &IsolatedNeomem, agent: Agent) -> anyhow::Result<Vec<Recorde
 fn mentions_neomem_tool(body: &Value) -> bool {
     let offered = body["tools"].as_array().is_some_and(|tools| {
         tools.iter().any(|tool| {
-            let name = tool["name"].as_str().or_else(|| tool["function"]["name"].as_str()).unwrap_or_default();
+            let name =
+                tool["name"].as_str().or_else(|| tool["function"]["name"].as_str()).unwrap_or_default();
             name.starts_with("mcp__neomem")
         })
     });
