@@ -1,1 +1,0 @@
-{"request":{"protocol":1,"request":{"arguments":{"agent":"cc","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-28Gxst/capture/cc/projects/./rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":1.104863}
