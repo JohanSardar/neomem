@@ -16,9 +16,8 @@ const NOVEMBER: &str = "fct_01M59NY2N09AC5V7E9Z0C1HT0H";
 const SOURCED: &str = "fct_01M59NY2N09AC5V7E9Z0C1HT0K";
 
 pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
-    let neomem = IsolatedNeomem::start(binaries)?;
+    let neomem = seed::start_with_vault_fixture("edge-ship-date", binaries)?;
     let home = neomem.home().root().to_path_buf();
-    seed::copy_vault_fixture("edge-ship-date", &home)?;
     let source = log_source(&neomem)?;
     write_merged_duplicate_and_sourced_fact(&home, source)?;
     support::wait_for_index(&neomem, proof, 3, 3)?;

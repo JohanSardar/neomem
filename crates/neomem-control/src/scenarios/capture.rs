@@ -270,7 +270,47 @@ fn partial_and_sweep(
     let positions: i64 =
         db.query_row("SELECT count(*) FROM transcript_positions WHERE position > 0", [], |row| row.get(0))?;
     proof.claim("byte positions persist in state.db", positions == 2, format!("{positions} transcripts"));
+    if agent == "pi" {
+        reactivate_pi_branch(proof, isolated, fixture, transcript)?;
+    }
     proof.attach_logs(&isolated.logs());
+    Ok(())
+}
+
+fn reactivate_pi_branch(
+    proof: &mut ProofRun,
+    isolated: &mut IsolatedNeomem,
+    fixture: &Path,
+    transcript: &Path,
+) -> anyhow::Result<()> {
+    let before = count_intake(isolated)?;
+    fs::OpenOptions::new()
+        .append(true)
+        .open(transcript)?
+        .write_all(&fs::read(fixture.join("reactivate.jsonl"))?)?;
+    isolated.call(
+        proof,
+        neomem_proto::Request::Capture(neomem_core::CaptureSignal {
+            agent: neomem_core::CaptureAgent::Pi,
+            session: "capture-session".to_owned(),
+            transcript_path: Some(transcript.to_path_buf()),
+            event: neomem_core::CaptureEvent::Stop,
+        }),
+    )?;
+    wait_for(isolated, "Selected the alternate branch")?;
+    proof.claim(
+        "reactivating an older pi branch captures its previously skipped ancestor once",
+        count_intake(isolated)? == before + 2 && contents(isolated)?.contains("ABANDONED_BRANCH_SENTINEL"),
+        contents(isolated)?,
+    );
+    isolated.stop_daemon()?;
+    isolated.start_daemon()?;
+    thread::sleep(Duration::from_millis(300));
+    proof.claim(
+        "pi ancestry checkpoints survive restart without duplicates",
+        count_intake(isolated)? == before + 2,
+        contents(isolated)?,
+    );
     Ok(())
 }
 

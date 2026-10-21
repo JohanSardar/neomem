@@ -1,5 +1,7 @@
 mod codex;
+mod pi;
 pub use codex::Codex;
+pub use pi::Pi;
 
 use std::fs;
 use std::io::{BufRead, BufReader, Seek, SeekFrom};
@@ -31,10 +33,16 @@ fn read(file: &Path, position: u64, agent: CaptureAgent) -> Result<Captured, Cap
         return Err(CaptureError("transcript shrank below its committed position".to_owned()));
     }
     let session = read_session(&mut reader, agent)?;
-    reader.seek(SeekFrom::Start(position)).map_err(|error| CaptureError(error.to_string()))?;
-    let (entries, complete) = read_entries(&mut reader, position)?;
+    let start = if agent == CaptureAgent::Pi && length > position { 0 } else { position };
+    reader.seek(SeekFrom::Start(start)).map_err(|error| CaptureError(error.to_string()))?;
+    let (entries, complete) = read_entries(&mut reader, start)?;
     let mut records = Vec::new();
-    for (offset, entry) in entries.iter().filter(|(offset, _)| *offset >= position) {
+    let selected = if agent == CaptureAgent::Pi {
+        pi::active_entries(&entries, position)?
+    } else {
+        entries.iter().filter(|(offset, _)| *offset >= position).collect()
+    };
+    for (offset, entry) in selected {
         if let Some(content) = content(entry, agent).filter(|text| !text.trim().is_empty()) {
             let at = entry
                 .get("timestamp")
@@ -113,7 +121,8 @@ fn content(entry: &Value, agent: CaptureAgent) -> Option<String> {
             message(&entry["message"])
         }
         CaptureAgent::Codex => codex::content(entry),
-        _ => None,
+        CaptureAgent::Pi => pi::content(entry),
+        CaptureAgent::Cc => None,
     }
 }
 
@@ -133,6 +142,7 @@ fn message(value: &Value) -> Option<String> {
 
 fn block(value: &Value) -> Option<String> {
     match value["type"].as_str()? {
+        "image" | "input_image" | "image_url" => Some("[image]".to_owned()),
         "text" | "input_text" | "output_text" => value["text"].as_str().map(str::to_owned),
         "tool_use" | "toolCall" => {
             Some(action(value["name"].as_str()?, value.get("input").or_else(|| value.get("arguments"))?))

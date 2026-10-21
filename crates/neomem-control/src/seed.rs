@@ -5,6 +5,16 @@ use anyhow::{Context, bail};
 
 use crate::repo;
 
+pub fn start_with_vault_fixture(
+    name: &str,
+    binaries: &crate::binaries::Binaries,
+) -> anyhow::Result<crate::isolated::IsolatedNeomem> {
+    let mut isolated = crate::isolated::IsolatedNeomem::prepared(binaries)?;
+    copy_vault_fixture(name, isolated.home().root())?;
+    isolated.start_daemon()?;
+    Ok(isolated)
+}
+
 pub fn fixture_dir(name: &str) -> anyhow::Result<PathBuf> {
     let directory = repo::root()?.join(".agents/skills/neomem-control/fixtures").join(name);
     if !directory.is_dir() {

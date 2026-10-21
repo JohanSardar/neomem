@@ -19,8 +19,9 @@ const MEMORIES: i64 = 100;
 const NOVEMBER: &str = "fct_01M59NY2N09AC5V7E9Z0C1HT0H";
 
 pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
-    let mut neomem = IsolatedNeomem::start(binaries)?;
+    let mut neomem = IsolatedNeomem::prepared(binaries)?;
     seed_memories(&neomem)?;
+    neomem.start_daemon()?;
     support::wait_for_index(&neomem, proof, 98, 2)?;
     let output = neomem.neomem(&["models", "use", "planner", "new-planner"])?;
     let planner = neomem.call(

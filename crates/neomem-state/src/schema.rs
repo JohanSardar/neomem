@@ -72,6 +72,14 @@ CREATE TABLE transcript_positions (
     PRIMARY KEY (agent, path)
 ) STRICT;
 ",
+    r"
+CREATE TABLE transcript_entries (
+    agent TEXT NOT NULL,
+    path TEXT NOT NULL,
+    turn TEXT NOT NULL,
+    PRIMARY KEY (agent, path, turn)
+) STRICT;
+",
 ];
 
 pub fn migrate(connection: &mut Connection) -> Result<(), StateError> {

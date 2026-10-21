@@ -252,7 +252,7 @@ fn corrected_facts_are_never_returned(
         receipt.id
     );
     fs::write(home.join(format!("facts/2026/06/{fact}_osprey.md")), text)?;
-    support::wait_for_index(neomem, proof, 57, 11)?;
+    support::wait_for_index(neomem, proof, 56, 10)?;
     let before = search(neomem, proof, asking(content))?.iter().any(|hit| hit.fact.id() == fact);
     neomem.client()?.call(Request::Correct { intake: receipt.id, reason: "wrong project".to_owned() })?;
     let after = search(neomem, proof, asking(content))?.iter().any(|hit| hit.fact.id() == fact);

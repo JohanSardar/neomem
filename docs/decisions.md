@@ -42,3 +42,4 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - Model selectors accept a bare model on the current provider, a configured provider/model prefix, or a local .gguf filename for the embedder, judge and checker.
 - index.db records active-model and staged-vector progress; model-history.json retains provider configurations, without secrets, so a restart can reopen the old embedder during a swap.
 - Capture hooks bound stdin to 4 MiB and give input/delivery 20 ms internally, leaving headroom inside the 50 ms process budget; folder watches and the sweep recover missed signals.
+- Pi branch reactivation checkpoints emitted transcript entry references together with intake records and byte positions, so previously skipped ancestors can be captured once when selected.
