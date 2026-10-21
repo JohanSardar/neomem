@@ -2,9 +2,9 @@
   "feature": "extract",
   "scenario": "extract",
   "passed": true,
-  "started_at": "2026-10-21T001640Z",
-  "duration_ms": 12227,
-  "code_version": "089377fb8691-dirty",
+  "started_at": "2026-10-21T002020Z",
+  "duration_ms": 12313,
+  "code_version": "97982164c5fb",
   "models": "fake",
   "failure": null,
   "checks": [

@@ -2,9 +2,9 @@
   "feature": "check",
   "scenario": "check",
   "passed": true,
-  "started_at": "2026-10-21T001653Z",
-  "duration_ms": 12812,
-  "code_version": "089377fb8691-dirty",
+  "started_at": "2026-10-21T002033Z",
+  "duration_ms": 12771,
+  "code_version": "97982164c5fb-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
