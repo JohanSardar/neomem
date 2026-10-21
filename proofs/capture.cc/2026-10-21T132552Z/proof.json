@@ -2,26 +2,26 @@
   "feature": "capture.cc",
   "scenario": "capture-cc",
   "passed": true,
-  "started_at": "2026-10-21T131533Z",
-  "duration_ms": 1890,
-  "code_version": "97980b0eb9e2",
+  "started_at": "2026-10-21T132552Z",
+  "duration_ms": 12192,
+  "code_version": "f426280ffa97-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "hook with stalled stdin still exits zero silently within 50 ms",
       "passed": true,
-      "detail": "24.658 ms"
+      "detail": "22.297 ms"
     },
     {
       "claim": "large hook payload is spooled silently within 50 ms",
       "passed": true,
-      "detail": "4.900 ms"
+      "detail": "11.064 ms"
     },
     {
       "claim": "offline hook exits zero silently within 50 ms",
       "passed": true,
-      "detail": "3.823 ms"
+      "detail": "3.421 ms"
     },
     {
       "claim": "offline signal is spooled",
@@ -64,9 +64,14 @@
       "detail": "3/3"
     },
     {
+      "claim": "a daemon on a temporary NEOMEM_HOME reads no agent folders unless [capture] names them, while the default home captures them",
+      "passed": true,
+      "detail": "temporary home captured 0, default home captured 3"
+    },
+    {
       "claim": "online hook p95 stays below 50 ms",
       "passed": true,
-      "detail": "p95 5.476 ms"
+      "detail": "p95 6.264 ms"
     },
     {
       "claim": "path aliases cannot duplicate captured turns",

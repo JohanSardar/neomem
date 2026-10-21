@@ -190,7 +190,7 @@
   depends_on: [intake]
   proof: capture-cc
   status: proven
-  last_proof: proofs/capture.cc/2026-10-21T131533Z
+  last_proof: proofs/capture.cc/2026-10-21T132552Z
 - id: capture.codex
   does: reads Codex rollouts from their stored position, finding the file by session ID when the hook has no transcript path
   reached_via: [hook codex prompt, hook codex tool, hook codex stop, hook codex subagent-stop, hook codex compact, hook codex end]
