@@ -23,6 +23,8 @@ pub(crate) enum IndexingError {
     Embedding(#[from] ModelError),
     #[error(transparent)]
     Index(#[from] IndexError),
+    #[error(transparent)]
+    State(#[from] neomem_state::StateError),
     #[error("writing the memory file failed: {0}")]
     Vault(#[from] neomem_vault::VaultError),
 }
@@ -55,6 +57,7 @@ impl Engine {
         }
         let changes = self.embedded(located)?;
         self.index.rebuild(&changes)?;
+        self.index.register_external_links(&self.state.external_links()?)?;
         self.health.lock().unwrap_or_else(PoisonError::into_inner).needs_rebuild = false;
         let took_ms = i64::try_from(started.elapsed().as_millis()).unwrap_or(i64::MAX);
         Ok(RebuildReport { index: self.index_report(), unreadable_files, took_ms })

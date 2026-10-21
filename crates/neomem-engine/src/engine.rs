@@ -76,6 +76,8 @@ impl Engine {
             needs_rebuild: opened.needs_rebuild,
             missing_vectors: opened.missing_vectors.len(),
         };
+        let state = StateDb::open(&parts.state_db)?;
+        opened.index.register_external_links(&state.external_links()?)?;
         Ok(Self {
             capture: Mutex::default(),
             index: opened.index,
@@ -83,7 +85,7 @@ impl Engine {
             writer: Mutex::new(()),
             vault: Vault::open(&parts.home)?,
             home: parts.home,
-            state: StateDb::open(&parts.state_db)?,
+            state,
             commit_policy: parts.commit_policy,
             nightly_at: parts.nightly_at,
             search_config: parts.search_config,
@@ -102,6 +104,8 @@ impl Engine {
         match request {
             Request::Recall(query) => self.recall(query),
             Request::Capture(signal) => self.capture_signal(&signal),
+            Request::Tags { new } => self.tags(new.as_deref()),
+            Request::Link { external, to, kind } => self.link_external(external, to, kind),
             Request::Status => Response::Status(self.status()),
             Request::Shutdown => {
                 self.flush();
