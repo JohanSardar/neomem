@@ -4,7 +4,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::{Envelope, Home, IncomingEnvelope};
+use crate::{Envelope, Home, IncomingEnvelope, publish_file};
 
 const REJECTED_DIR: &str = "rejected";
 
@@ -24,10 +24,8 @@ pub fn spool(home: &Home, envelope: &Envelope) -> io::Result<PathBuf> {
     hasher.write_u32(std::process::id());
     hasher.write_u128(nanos);
     let name = format!("{nanos:020}-{:016x}.json", hasher.finish());
-    let temporary = directory.join(format!(".{name}.tmp"));
-    fs::write(&temporary, &body)?;
     let path = directory.join(name);
-    fs::rename(&temporary, &path)?;
+    publish_file(&path, &body)?;
     Ok(path)
 }
 

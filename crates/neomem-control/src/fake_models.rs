@@ -1,7 +1,7 @@
-use std::fs;
 use std::path::Path;
 
 use anyhow::Context;
+use neomem_proto::publish_file;
 use neomem_testkit::{FakeModelServer, FakeRules, RecordedCall};
 
 use crate::isolated::Models;
@@ -13,7 +13,7 @@ pub const FAKE_SECRETS: &str =
 pub fn serve(address_file: &Path) -> anyhow::Result<bool> {
     let server = FakeModelServer::bind(0)?;
     let address = server.address().context("the fake model server has no TCP address")?;
-    fs::write(address_file, address.to_string())
+    publish_file(address_file, address.to_string())
         .with_context(|| format!("writing {}", address_file.display()))?;
     server.serve_forever();
     Ok(true)
