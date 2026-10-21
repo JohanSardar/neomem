@@ -21,6 +21,16 @@ pub struct LlmRule {
     pub delta_delay_ms: u64,
     #[serde(default)]
     pub times: Option<u32>,
+    #[serde(default)]
+    pub step: Option<usize>,
+    #[serde(default)]
+    pub tool_calls: Vec<RuleToolCall>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RuleToolCall {
+    pub name: String,
+    pub arguments: Value,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
@@ -59,13 +69,14 @@ impl ScriptedLlm {
         self.rules.lock().unwrap_or_else(PoisonError::into_inner).extend(rules);
     }
 
-    pub fn take_rule(&self, system: &str, user: &str) -> Option<LlmRule> {
+    pub fn take_rule(&self, system: &str, user: &str, step: usize) -> Option<LlmRule> {
         let contains = |pattern: &Option<String>, text: &str| {
             pattern.as_ref().is_none_or(|needle| text.contains(needle))
         };
         let mut rules = self.rules.lock().unwrap_or_else(PoisonError::into_inner);
         let rule = rules.iter_mut().rev().find(|rule| {
             rule.times != Some(0)
+                && rule.step.is_none_or(|wanted| wanted == step)
                 && contains(&rule.system_contains, system)
                 && contains(&rule.user_contains, user)
         })?;
@@ -76,13 +87,25 @@ impl ScriptedLlm {
     }
 
     pub fn answer(&self, request: &LlmRequest) -> ScriptedAnswer {
-        if let Some(LlmMessage::ToolResult { content, .. }) = request.messages.last() {
-            return ScriptedAnswer::of_text(&format!("The tool answered: {content}"));
-        }
-        if let Some(rule) = self.take_rule(&request.system, &last_user_text(request)) {
+        let step = request
+            .messages
+            .iter()
+            .filter(|message| matches!(message, LlmMessage::ToolResult { .. }))
+            .count();
+        if let Some(rule) = self.take_rule(&request.system, &last_user_text(request), step) {
+            let tool_calls = rule
+                .tool_calls
+                .iter()
+                .enumerate()
+                .map(|(index, call)| ToolCall {
+                    id: format!("call_{step}_{index}"),
+                    name: call.name.clone(),
+                    arguments: call.arguments.to_string(),
+                })
+                .collect();
             return ScriptedAnswer {
                 deltas: split_into_deltas(&rule.reply),
-                tool_calls: Vec::new(),
+                tool_calls,
                 delay_ms: rule.delay_ms,
                 delta_delay_ms: rule.delta_delay_ms,
             };
@@ -95,6 +118,9 @@ impl ScriptedLlm {
                 arguments: example_for(&schema).to_string(),
             };
             return ScriptedAnswer { tool_calls: vec![call], ..ScriptedAnswer::default() };
+        }
+        if let Some(LlmMessage::ToolResult { content, .. }) = request.messages.last() {
+            return ScriptedAnswer::of_text(&format!("The tool answered: {content}"));
         }
         if request.system.contains(EXTRACTOR_MARKER) {
             return ScriptedAnswer::of_text(&default_extraction(&last_user_text(request)).to_string());
@@ -212,6 +238,7 @@ mod tests {
             delay_ms: 0,
             delta_delay_ms: 0,
             times: None,
+            ..LlmRule::default()
         }
     }
 }
