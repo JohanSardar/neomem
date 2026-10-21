@@ -68,3 +68,4 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - The consolidation proof seeds 69 records (50-fact trigger plus the largest deferred 19-record intake batch) so intake batching cannot hide the consolidation trigger.
 - recall.hooks: empty recall slices use the adapter’s last 16 active-branch transcript turns, located through the daemon’s capture cursor (at most 16,000 characters); pi ships plain JavaScript and uses the same TOML switch precedence and framed socket/spool envelopes as the CLI.
 - The pi smoke proof follows npm’s installed global bin/pi entrypoint instead of hardcoding either pi package name.
+- A local model used by background work stays loaded until two minutes after its last use, so a burst of writes loads it once instead of once per write; only reads extend the 15-minute idle window.
