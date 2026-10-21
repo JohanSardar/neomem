@@ -9,9 +9,8 @@ reprove=$(comm -23 <(echo "$proven_here") <(echo "$proven_on_main") | tr '\n' ' 
 if git merge --no-edit origin/main; then
   exit 0
 fi
-git checkout --theirs .agents/skills/neomem-control/feature-graph.yaml 2>/dev/null || true
-git add .agents/skills/neomem-control/feature-graph.yaml 2>/dev/null || true
-git add -A -- proofs
+git restore --source=origin/main --staged --worktree -- "$graph"
+git rm -r -f --ignore-unmatch -- proofs >/dev/null
 git restore --source=origin/main --staged --worktree -- proofs
 remaining=$(git diff --name-only --diff-filter=U)
 if [ -n "$remaining" ]; then
