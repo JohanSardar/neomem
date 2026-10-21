@@ -1,0 +1,8 @@
+2026-10-21T13:29:55.213798Z  INFO neomemd::http: HTTP listening on 127.0.0.1:46083
+2026-10-21T13:29:55.214767Z  INFO neomemd: neomemd serving /tmp/neomemctl-xh86bR
+2026-10-21T13:29:55.222841Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
+2026-10-21T13:29:56.504482Z  INFO neomem_engine::maintenance: committed 2 vault changes
+2026-10-21T13:29:59.032549Z  INFO neomem_engine::maintenance: committed 1 vault changes
+2026-10-21T13:30:01.561780Z  INFO neomem_engine::maintenance: committed 1 vault changes
+2026-10-21T13:30:04.085126Z  INFO neomem_engine::maintenance: committed 1 vault changes
+2026-10-21T13:30:06.616573Z  INFO neomem_engine::maintenance: committed 1 vault changes
