@@ -1,9 +1,0 @@
-2026-10-21T00:04:45.708698Z  INFO neomemd::http: HTTP listening on 127.0.0.1:38837
-2026-10-21T00:04:45.713296Z  INFO neomemd: neomemd serving /tmp/neomemctl-PENtlI
-2026-10-21T00:04:45.713311Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
-2026-10-21T00:04:46.002609Z  INFO neomem_engine::maintenance: committed 4 vault changes
-2026-10-21T00:04:47.283445Z  INFO neomem_engine::maintenance: committed 2 vault changes
-2026-10-21T00:04:49.809843Z  INFO neomem_engine::maintenance: committed 1 vault changes
-2026-10-21T00:04:52.086045Z  INFO neomem_engine::maintenance: committed 1 vault changes
-2026-10-21T00:04:54.862593Z  INFO neomem_engine::maintenance: committed 1 vault changes
-2026-10-21T00:04:57.147405Z  INFO neomem_engine::maintenance: committed 1 vault changes
