@@ -1,0 +1,22 @@
+{
+  "feature": "recall.plan",
+  "scenario": "recall-plan",
+  "passed": true,
+  "started_at": "2026-10-21T182843Z",
+  "duration_ms": 3789,
+  "code_version": "3e525db80037",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "streamed lines enter search before the planner finishes",
+      "passed": true,
+      "detail": "first search Some(124.60931) ms; total 978.8 ms"
+    },
+    {
+      "claim": "a slow planner falls back at 2.5 s and recall finishes under 3.5 s",
+      "passed": true,
+      "detail": "3 queries; 2516.5 ms"
+    }
+  ]
+}
