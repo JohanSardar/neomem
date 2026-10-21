@@ -6,7 +6,7 @@ use std::time::{Duration, Instant};
 use neomem_core::Source;
 
 use neomem_proto::{InstallOutcome, InstallReport, RawQuery, Request, Response};
-use neomem_testkit::{FakeRules, LlmRule, RecordedCall};
+use neomem_testkit::{FakeRules, LlmRule, RecordedCall, RuleToolCall};
 use serde_json::Value;
 
 use crate::agents::{Agent, AgentSandbox};
@@ -66,6 +66,7 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     for agent in Agent::ALL {
         a_session_captures_and_recalls(proof, &neomem, &sandbox, agent)?;
     }
+    pi_answers_from_the_neomem_tool(proof, &neomem, &sandbox)?;
     proof.attach_logs(&neomem.logs());
     Ok(())
 }
@@ -156,7 +157,7 @@ fn mentions_neomem_tool(body: &Value) -> bool {
         tools.iter().any(|tool| {
             let name =
                 tool["name"].as_str().or_else(|| tool["function"]["name"].as_str()).unwrap_or_default();
-            name.starts_with("mcp__neomem")
+            name.starts_with("mcp__neomem") || name == "neomem_search"
         })
     });
     offered || body.to_string().contains("mcp__plugin_neomem_neomem__search")
@@ -210,13 +211,11 @@ fn a_session_captures_and_recalls(
         calls.iter().any(|call| call.body.to_string().contains(SKILL_DESCRIPTION)),
         "",
     );
-    if agent != Agent::Pi {
-        proof.claim(
-            &format!("{name} offers the neomem MCP tools to its model"),
-            calls.iter().any(|call| mentions_neomem_tool(&call.body)),
-            "",
-        );
-    }
+    proof.claim(
+        &format!("{name} offers the neomem search tool to its model (MCP for Claude Code and Codex, the extension for pi)"),
+        calls.iter().any(|call| mentions_neomem_tool(&call.body)),
+        "",
+    );
     let was_captured = captured(neomem, proof, agent)?;
     proof.claim(
         &format!("{name}'s prompt and answer reach the intake log through capture"),
@@ -227,6 +226,54 @@ fn a_session_captures_and_recalls(
         &format!("{name}'s model call carries the recalled ship-date fact with its fct_ ID"),
         calls.iter().any(|call| call.body.to_string().contains(SHIP_DATE)),
         "",
+    );
+    Ok(())
+}
+
+const TOOL_PROMPT: &str = "Look the Edge ship date up in memory with the neomem tool.";
+
+fn tool_results_of(body: &Value) -> Vec<String> {
+    body["messages"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter(|message| message["role"] == "tool")
+        .map(|message| message["content"].to_string())
+        .collect()
+}
+
+fn pi_answers_from_the_neomem_tool(
+    proof: &mut ProofRun,
+    neomem: &IsolatedNeomem,
+    sandbox: &AgentSandbox,
+) -> anyhow::Result<()> {
+    neomem.neomem(&["recall", "off"])?;
+    let scripted = |step: usize, tool_calls: Vec<RuleToolCall>, reply: &str| LlmRule {
+        system_contains: Some(Agent::Pi.system_marker().to_owned()),
+        user_contains: Some(TOOL_PROMPT.to_owned()),
+        step: Some(step),
+        tool_calls,
+        reply: reply.to_owned(),
+        ..LlmRule::default()
+    };
+    let search = RuleToolCall {
+        name: "neomem_search".to_owned(),
+        arguments: serde_json::json!({ "text": "Edge ship date" }),
+    };
+    neomem.add_fake_rules(&FakeRules {
+        llm: vec![scripted(0, vec![search], ""), scripted(1, Vec::new(), ANSWER)],
+        ..FakeRules::default()
+    })?;
+    let output = sandbox.session(Agent::Pi, TOOL_PROMPT)?;
+    let results: Vec<String> = calls_of(neomem, Agent::Pi)?
+        .iter()
+        .filter(|call| call.body.to_string().contains(TOOL_PROMPT))
+        .flat_map(|call| tool_results_of(&call.body))
+        .collect();
+    proof.claim(
+        "pi calls neomem_search through the extension and the answer, with the ship-date fct_ ID, reaches its model",
+        output.status.success() && results.iter().any(|result| result.contains(SHIP_DATE)),
+        format!("{} tool results", results.len()),
     );
     Ok(())
 }
