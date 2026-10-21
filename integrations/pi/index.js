@@ -4,6 +4,20 @@ import { join, resolve } from "node:path";
 import { parse } from "smol-toml";
 import { Daemon } from "./socket.js";
 
+const TOOL_DEADLINE_MS = 10000;
+const text = { type: "string" };
+const id = { type: "string", description: "a fct_, ent_ or int_ ID" };
+const TOOLS = [
+  { command: "search", description: "Search long-term memory: the latest version of each fact, ranked. Write the query the way the fact would be written. Cite the fct_ IDs you use.",
+    properties: { text, k: { type: "integer" }, as_of: { type: "integer", description: "epoch milliseconds" }, include_invalid: { type: "boolean" } }, required: ["text"] },
+  { command: "entity", description: "Read a person, project or thing from memory: aliases, facts and links.", properties: { name: text }, required: ["name"] },
+  { command: "resolve", description: "Find the entity ID for a name or alias.", properties: { name: text }, required: ["name"] },
+  { command: "show", description: "Read a memory in full with the records it came from.", properties: { id }, required: ["id"] },
+  { command: "history", description: "Read every version of a fact, oldest first.", properties: { id }, required: ["id"] },
+  { command: "raw", description: "Keyword search over the raw history of what was said, by words and dates.", properties: { text, limit: { type: "integer" } }, required: ["text"] },
+  { command: "useful", description: "Record that a memory helped, which keeps it from fading.", properties: { id }, required: ["id"] },
+];
+
 export default function neomem(pi) {
   const home = process.env.NEOMEM_HOME || join(homedir(), ".neomem");
   const daemon = new Daemon(home);
@@ -13,6 +27,19 @@ export default function neomem(pi) {
     transcript_path: ctx.sessionManager.getSessionFile() ?? null,
     event,
   });
+  for (const tool of TOOLS) {
+    pi.registerTool({
+      name: `neomem_${tool.command}`,
+      label: `neomem ${tool.command}`,
+      description: tool.description,
+      parameters: { type: "object", properties: tool.properties, required: tool.required, additionalProperties: false },
+      async execute(_toolCallId, params) {
+        const response = await daemon.call({ command: tool.command, arguments: params }, TOOL_DEADLINE_MS);
+        const text = response === undefined ? "neomem is not running" : JSON.stringify(response.body ?? response);
+        return { content: [{ type: "text", text }], details: {} };
+      },
+    });
+  }
   pi.on("turn_end", (_event, ctx) => { daemon.capture(signal(ctx, "stop")); });
   pi.on("agent_end", (_event, ctx) => { daemon.capture(signal(ctx, "end")); });
   pi.on("session_shutdown", (_event, ctx) => {

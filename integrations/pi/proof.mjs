@@ -52,7 +52,9 @@ const server = createServer(socket => {
 });
 await new Promise(resolve => server.listen(join(home, "run", "neomemd.sock"), resolve));
 const handlers = new Map();
-extension({ on: (event, handler) => handlers.set(event, handler) });
+const tools = [];
+extension({ on: (event, handler) => handlers.set(event, handler), registerTool: tool => tools.push(tool.name) });
+assert.ok(tools.includes("neomem_search"));
 const ctx = { cwd: home, sessionManager: { getSessionId: () => "wire-proof", getSessionFile: () => join(home, "session.jsonl") } };
 const prompt = { prompt: "again" };
 const recalled = await handlers.get("before_agent_start")(prompt, ctx);
