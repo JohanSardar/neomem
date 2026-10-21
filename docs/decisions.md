@@ -52,3 +52,4 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - A daemon runs one recall pipeline at a time; overlapping recalls fail open, and an expired pipeline cannot mark facts injected after its caller has returned.
 - Recall gates on the new error when one is supplied; model-free name queries consider both the new message and error.
 - Recall project switch keys use canonical absolute paths when they exist, and absolute paths otherwise.
+- The neomem skill lives in integrations/skills/neomem, outside the agents plugin, so each agent loads it once: ~/.agents/skills for Codex and pi, ~/.claude/skills for Claude Code (§10.1); the plugin carries only hooks and MCP.
