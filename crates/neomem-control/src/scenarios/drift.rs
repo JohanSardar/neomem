@@ -18,9 +18,7 @@ const A_DAY_MS: i64 = 86_400_000;
 const RUN_WAIT: Duration = Duration::from_secs(10);
 
 pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
-    let mut neomem = IsolatedNeomem::start(binaries)?;
-    let home = neomem.home().root().to_path_buf();
-    seed::copy_vault_fixture("edge-ship-date", &home)?;
+    let mut neomem = seed::start_with_vault_fixture("edge-ship-date", binaries)?;
     support::wait_for_index(&neomem, proof, 2, 2)?;
     neomem.stop_daemon()?;
     drift_behind_the_daemons_back(&neomem)?;

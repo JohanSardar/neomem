@@ -26,8 +26,13 @@ pub fn wait_for_index(
         let report = index_report(neomem, proof)?;
         let ready =
             report.as_ref().is_some_and(|report| report.facts >= facts && report.entities >= entities);
-        if ready || Instant::now() > deadline {
+        if ready {
             return Ok(report);
+        }
+        if Instant::now() > deadline {
+            anyhow::bail!(
+                "index did not reach {facts} facts and {entities} entities within {INDEX_WAIT:?}: {report:?}"
+            );
         }
         thread::sleep(Duration::from_millis(100));
     }

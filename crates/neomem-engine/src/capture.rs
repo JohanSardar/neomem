@@ -104,7 +104,7 @@ impl Engine {
             return Ok(());
         }
         let path = std::fs::canonicalize(path).map_err(|error| error.to_string())?;
-        let _writer = self.writer.lock().map_err(|error| error.to_string())?;
+        let _writer = self.lock_writer();
         let path_text = path.to_string_lossy();
         let agent = source.adapter.agent().source();
         let position =

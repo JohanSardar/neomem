@@ -162,6 +162,7 @@ impl DaemonConfig {
 pub struct CaptureConfig {
     pub claude_dir: Option<std::path::PathBuf>,
     pub codex_dir: Option<std::path::PathBuf>,
+    pub pi_dir: Option<std::path::PathBuf>,
     #[serde(default = "default_capture_sweep")]
     pub sweep_every: String,
 }
@@ -172,7 +173,7 @@ fn default_capture_sweep() -> String {
 
 impl Default for CaptureConfig {
     fn default() -> Self {
-        Self { claude_dir: None, codex_dir: None, sweep_every: default_capture_sweep() }
+        Self { claude_dir: None, codex_dir: None, pi_dir: None, sweep_every: default_capture_sweep() }
     }
 }
 
@@ -187,6 +188,10 @@ impl CaptureConfig {
             neomem_engine::CaptureSource {
                 root: self.codex_dir.clone().unwrap_or_else(|| home.join(".codex")).join("sessions"),
                 adapter: std::sync::Arc::new(neomem_capture::Codex),
+            },
+            neomem_engine::CaptureSource {
+                root: self.pi_dir.clone().unwrap_or_else(|| home.join(".pi/agent")).join("sessions"),
+                adapter: std::sync::Arc::new(neomem_capture::Pi),
             },
         ]
     }

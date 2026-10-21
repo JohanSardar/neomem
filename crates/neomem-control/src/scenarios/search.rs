@@ -14,8 +14,7 @@ const SISTER: &str = "fct_01M50ARQ00000000000000000E";
 const RAW_EXPORT: &str = "fct_01M5AMBK00000000000000000N";
 
 pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
-    let neomem = IsolatedNeomem::start(binaries)?;
-    seed::copy_vault_fixture("workspace", neomem.home().root())?;
+    let neomem = seed::start_with_vault_fixture("workspace", binaries)?;
     let ready = support::wait_for_index(&neomem, proof, 13, 7)?;
     proof.claim(
         "the workspace fixture is indexed: 13 facts, 7 entities",

@@ -38,6 +38,15 @@ impl StateDb {
         let mut writer = self.writer()?;
         let transaction = writer.transaction()?;
         for logged in records {
+            if let Some(turn) = &logged.record.source_ref
+                && transaction.execute(
+                    "INSERT OR IGNORE INTO transcript_entries (agent, path, turn) VALUES (?1, ?2, ?3)",
+                    params![agent, path, turn],
+                )? == 0
+            {
+                continue;
+            }
+
             let job = ExtractionJob { batch: BatchKey::for_record(logged), not_before };
             super::intake::insert_intake(&transaction, logged, &job)?;
         }
@@ -96,5 +105,29 @@ mod tests {
         };
         state.log_transcript(&cursor, &[], EpochMs::from_millis(100)).unwrap();
         assert_eq!(state.transcript_position(cursor.agent, cursor.path).unwrap(), cursor.position);
+    }
+    #[test]
+    fn revisited_turns_are_checkpointed_but_distinct_turns_are_not_deduplicated() {
+        let directory = tempfile::tempdir().unwrap();
+        let state = StateDb::open(&directory.path().join("state.db")).unwrap();
+        let mut first = record(1);
+        first.record.source_ref = Some("transcript#0".to_owned());
+        let mut repeated = record(2);
+        repeated.record.source_ref = first.record.source_ref.clone();
+        let mut distinct = record(3);
+        distinct.record.source_ref = Some("transcript#100".to_owned());
+        let mut cursor = TranscriptPosition {
+            agent: "claude-code",
+            path: "transcript",
+            session: "session",
+            position: 100,
+        };
+        state.log_transcript(&cursor, std::slice::from_ref(&first), first.recorded_at).unwrap();
+        cursor.position = 200;
+        state.log_transcript(&cursor, &[repeated.clone(), distinct.clone()], first.recorded_at).unwrap();
+        assert!(state.intake(first.id).unwrap().is_some());
+        assert!(state.intake(repeated.id).unwrap().is_none());
+        assert!(state.intake(distinct.id).unwrap().is_some());
+        assert_eq!(state.transcript_position(cursor.agent, cursor.path).unwrap(), 200);
     }
 }
