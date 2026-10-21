@@ -11,40 +11,44 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
+    #[command(about = "Show whether the daemon runs and what it holds")]
     Status,
+    #[command(about = "Recall memories for an agent turn, or switch recall mode on or off")]
     Recall(RecallArgs),
-    Hook {
-        agent: String,
-        event: String,
-    },
+    #[command(about = "Handle an agent hook event (called by Claude Code, Codex and pi)")]
+    Hook { agent: String, event: String },
+    #[command(about = "Write a record to the intake log")]
     Add(AddArgs),
+    #[command(about = "Keyword search over the raw intake history, by words and dates")]
     Raw(RawArgs),
+    #[command(about = "Mark an intake record as logged incorrectly")]
     Correct(CorrectArgs),
+    #[command(about = "Rebuild the search index from the memory files")]
     Rebuild,
+    #[command(about = "Run consolidation now")]
     Dream,
+    #[command(about = "Run extraction again over the intake log")]
     Reextract {
         #[arg(long)]
         source: Option<String>,
         #[arg(long)]
         from: Option<String>,
     },
+    #[command(about = "Search facts: the latest version of each, ranked")]
     Search(SearchArgs),
-    Resolve {
-        name: String,
-    },
-    Entity {
-        name: String,
-    },
-    Show {
-        id: String,
-    },
-    History {
-        id: String,
-    },
-    Useful {
-        id: String,
-    },
+    #[command(about = "Find the entity ID for a name or alias")]
+    Resolve { name: String },
+    #[command(about = "Show an entity with its aliases, facts and links")]
+    Entity { name: String },
+    #[command(about = "Show a memory's full file and its sources")]
+    Show { id: String },
+    #[command(about = "Show every version of a fact")]
+    History { id: String },
+    #[command(about = "Record that a memory helped")]
+    Useful { id: String },
+    #[command(about = "Show or swap the model for each role")]
     Models(ModelsArgs),
+    #[command(about = "Sign in to a model provider")]
     Login(LoginArgs),
 }
 
