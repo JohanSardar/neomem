@@ -41,8 +41,9 @@ impl LiveKeys {
         let keys = LIVE_KEYS
             .iter()
             .filter_map(|name| {
-                let value = std::env::var(name).ok()?;
-                (!value.is_empty()).then(|| ((*name).to_owned(), value))
+                let value =
+                    std::env::var(name).ok().filter(|value| !value.is_empty()).or_else(|| saved_key(name))?;
+                Some(((*name).to_owned(), value))
             })
             .collect();
         Self(keys)
@@ -51,6 +52,14 @@ impl LiveKeys {
     fn has(&self, name: &str) -> bool {
         self.0.iter().any(|(present, _)| present == name)
     }
+}
+
+fn saved_key(name: &str) -> Option<String> {
+    let saved = Path::new(&std::env::var_os("HOME")?).join(".neomem/secrets.env");
+    fs::read_to_string(saved).ok()?.lines().find_map(|line| {
+        let value = line.strip_prefix(name)?.strip_prefix('=')?.trim().trim_matches('"');
+        (!value.is_empty()).then(|| value.to_owned())
+    })
 }
 
 #[derive(Debug)]

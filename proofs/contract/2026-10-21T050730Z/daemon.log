@@ -1,4 +1,0 @@
-2026-10-21T05:07:30.262448Z  INFO neomemd::http: HTTP listening on 127.0.0.1:41743
-2026-10-21T05:07:30.263004Z  INFO neomemd: neomemd serving /tmp/neomemctl-441KWv
-2026-10-21T05:07:30.268230Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
-2026-10-21T05:07:30.529763Z  INFO neomem_engine::maintenance: committed 3 vault changes

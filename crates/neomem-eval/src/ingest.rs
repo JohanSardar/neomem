@@ -17,7 +17,7 @@ pub fn replay(daemon: &Daemon, question: &BenchmarkItem) -> anyhow::Result<BTree
             let Response::Added(receipt) = daemon.call(request)? else {
                 anyhow::bail!("add did not return receipt");
             };
-            if question.answer_session_ids.contains(&question.haystack_session_ids[index]) {
+            if question.evidence_sessions().contains(&question.haystack_session_ids[index]) {
                 evidence.insert(receipt.id.to_string(), question.haystack_session_ids[index].clone());
             }
         }
@@ -47,7 +47,7 @@ pub fn replay(daemon: &Daemon, question: &BenchmarkItem) -> anyhow::Result<BTree
         };
         ensure!(records.len() < 200, "capture evidence exceeds raw page; use bounded transcript windows");
         for record in records {
-            if seen.insert(record.id.to_string()) && question.answer_session_ids.contains(&capture.session) {
+            if seen.insert(record.id.to_string()) && question.evidence_sessions().contains(&capture.session) {
                 evidence.insert(record.id.to_string(), capture.session.clone());
             }
         }

@@ -299,7 +299,8 @@ fn triggers_start_runs_on_their_own(
         wait_for_trigger(neomem, "late data or a correction")?,
         format!("{:?}", consolidation_triggers(neomem)?),
     );
-    for number in 0..60 {
+    let records_with_deferred_batch = 50 + 20 - 1;
+    for number in 0..records_with_deferred_batch {
         let record = IntakeRecord {
             source: Source::new("standup-digest")?,
             occurred: Span::instant(EpochMs::from_millis(now_ms())),

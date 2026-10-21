@@ -1,0 +1,8 @@
+2026-10-21T05:41:40.206018Z  INFO neomemd::http: HTTP listening on 127.0.0.1:37259
+2026-10-21T05:41:40.206581Z  INFO neomemd: neomemd serving /tmp/neomemctl-oiyCra
+2026-10-21T05:41:40.215802Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
+2026-10-21T05:41:41.494451Z  INFO neomem_engine::maintenance: committed 2 vault changes
+2026-10-21T05:41:44.012533Z  INFO neomem_engine::maintenance: committed 1 vault changes
+2026-10-21T05:41:46.543995Z  INFO neomem_engine::maintenance: committed 1 vault changes
+2026-10-21T05:41:49.057292Z  INFO neomem_engine::maintenance: committed 1 vault changes
+2026-10-21T05:41:51.567735Z  INFO neomem_engine::maintenance: committed 1 vault changes

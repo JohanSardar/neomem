@@ -1,4 +1,0 @@
-2026-10-21T05:07:17.131383Z  INFO neomemd::http: HTTP listening on 127.0.0.1:46783
-2026-10-21T05:07:17.131910Z  INFO neomemd: neomemd serving /tmp/neomemctl-HaxbAV
-2026-10-21T05:07:17.132205Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
-2026-10-21T05:07:18.398560Z  INFO neomem_engine::maintenance: committed 20 vault changes
