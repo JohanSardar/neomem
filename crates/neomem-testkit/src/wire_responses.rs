@@ -59,11 +59,19 @@ pub fn request(body: &Value) -> LlmRequest {
     }
 }
 
+fn message(answer: &ScriptedAnswer, status: &str) -> Value {
+    let content = if status == "completed" {
+        vec![json!({ "type": "output_text", "text": answer.text(), "annotations": [] })]
+    } else {
+        Vec::new()
+    };
+    json!({ "type": "message", "id": "msg_fake", "role": "assistant", "status": status, "content": content })
+}
+
 fn output(answer: &ScriptedAnswer) -> Vec<Value> {
     let mut output = Vec::new();
     if !answer.deltas.is_empty() {
-        output.push(json!({ "type": "message", "id": "msg_fake", "role": "assistant", "status": "completed",
-            "content": [{ "type": "output_text", "text": answer.text(), "annotations": [] }] }));
+        output.push(message(answer, "completed"));
     }
     output.extend(answer.tool_calls.iter().map(function_call));
     output
@@ -75,23 +83,75 @@ fn function_call(call: &ToolCall) -> Value {
 }
 
 fn response(answer: &ScriptedAnswer, status: &str) -> Value {
+    let output_tokens = answer.deltas.len();
     json!({ "id": "resp_fake", "object": "response", "status": status, "output": output(answer),
-        "usage": { "input_tokens": 12, "output_tokens": answer.deltas.len() } })
+        "usage": { "input_tokens": 12, "input_tokens_details": { "cached_tokens": 0 },
+            "output_tokens": output_tokens, "output_tokens_details": { "reasoning_tokens": 0 },
+            "total_tokens": 12 + output_tokens } })
+}
+
+fn event(wait: u64, data: &Value) -> TimedEvent {
+    TimedEvent::named(wait, data["type"].as_str().unwrap_or_default(), data)
+}
+
+fn text_events(answer: &ScriptedAnswer, events: &mut Vec<TimedEvent>) {
+    let part = json!({ "type": "output_text", "text": "", "annotations": [] });
+    events.push(event(
+        0,
+        &json!({ "type": "response.output_item.added", "output_index": 0,
+        "item": message(answer, "in_progress") }),
+    ));
+    events.push(event(
+        0,
+        &json!({ "type": "response.content_part.added", "item_id": "msg_fake",
+        "output_index": 0, "content_index": 0, "part": part }),
+    ));
+    let mut wait = 0;
+    for delta in &answer.deltas {
+        events.push(event(
+            wait,
+            &json!({ "type": "response.output_text.delta", "item_id": "msg_fake",
+            "output_index": 0, "content_index": 0, "delta": delta }),
+        ));
+        wait = answer.delta_delay_ms;
+    }
+    events.push(event(
+        0,
+        &json!({ "type": "response.output_text.done", "item_id": "msg_fake",
+        "output_index": 0, "content_index": 0, "text": answer.text() }),
+    ));
+    events.push(event(
+        0,
+        &json!({ "type": "response.content_part.done", "item_id": "msg_fake",
+        "output_index": 0, "content_index": 0,
+        "part": { "type": "output_text", "text": answer.text(), "annotations": [] } }),
+    ));
+    events.push(event(
+        0,
+        &json!({ "type": "response.output_item.done", "output_index": 0,
+        "item": message(answer, "completed") }),
+    ));
 }
 
 fn events(answer: &ScriptedAnswer) -> Vec<TimedEvent> {
     let created = json!({ "type": "response.created", "response": response(&ScriptedAnswer::default(), "in_progress") });
     let mut events = vec![TimedEvent::named(answer.delay_ms, "response.created", &created)];
-    let mut wait = 0;
-    for delta in &answer.deltas {
-        let data = json!({ "type": "response.output_text.delta", "item_id": "msg_fake",
-            "output_index": 0, "content_index": 0, "delta": delta });
-        events.push(TimedEvent::named(wait, "response.output_text.delta", &data));
-        wait = answer.delta_delay_ms;
+    let first_call_index = usize::from(!answer.deltas.is_empty());
+    if !answer.deltas.is_empty() {
+        text_events(answer, &mut events);
     }
     for (index, call) in answer.tool_calls.iter().enumerate() {
-        let data = json!({ "type": "response.output_item.done", "output_index": index + 1, "item": function_call(call) });
-        events.push(TimedEvent::named(0, "response.output_item.done", &data));
+        let output_index = first_call_index + index;
+        events.push(event(
+            0,
+            &json!({ "type": "response.output_item.added", "output_index": output_index,
+            "item": function_call(call) }),
+        ));
+        events.push(event(
+            0,
+            &json!({ "type": "response.output_item.done", "output_index": output_index,
+            "item": function_call(call) }),
+        ));
     }
     let completed = json!({ "type": "response.completed", "response": response(answer, "completed") });
     events.push(TimedEvent::named(0, "response.completed", &completed));
