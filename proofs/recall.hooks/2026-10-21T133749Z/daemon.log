@@ -1,0 +1,10 @@
+2026-10-21T13:37:49.946644Z  INFO neomemd::http: HTTP listening on 127.0.0.1:41001
+2026-10-21T13:37:49.947342Z  INFO neomemd: neomemd serving /tmp/neomemctl-sVi53h
+2026-10-21T13:37:49.948049Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-21T13:37:50.163415Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T13:37:50.204561Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T13:37:50.253280Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T13:37:51.238647Z  INFO neomem_engine::maintenance: committed 20 vault changes
+2026-10-21T13:37:57.019861Z  INFO neomem_engine::maintenance: committed 29 vault changes
+2026-10-21T13:37:58.521440Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T13:37:58.521556Z  INFO neomemd::dispatch: neomemd shutting down on request
