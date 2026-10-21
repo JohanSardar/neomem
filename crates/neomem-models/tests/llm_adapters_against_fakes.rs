@@ -151,6 +151,7 @@ fn every_wire_format_streams_text_before_the_reply_completes() {
             delay_ms: 0,
             delta_delay_ms: 80,
             times: None,
+            ..LlmRule::default()
         });
         let started = Instant::now();
         let mut first = None;

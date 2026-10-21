@@ -7,6 +7,7 @@ mod correct;
 mod daemon;
 mod decay;
 mod drift;
+mod entities;
 mod entity;
 mod extract;
 mod history;
@@ -24,6 +25,7 @@ mod recall_approve;
 mod recall_gate;
 mod recall_plan;
 pub(crate) mod recall_support;
+mod reconcile;
 mod search;
 mod spool;
 pub mod support;
@@ -66,6 +68,8 @@ pub const ALL: &[Scenario] = &[
     Scenario { name: "links", run: links::prove },
     Scenario { name: "history", run: history::prove },
     Scenario { name: "decay", run: decay::prove },
+    Scenario { name: "reconcile", run: reconcile::prove },
+    Scenario { name: "entities", run: entities::prove },
 ];
 
 pub fn find(name: &str) -> Option<Scenario> {

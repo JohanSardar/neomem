@@ -1,4 +1,3 @@
-use std::fs;
 use std::net::{Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 use std::thread;
@@ -7,7 +6,7 @@ use anyhow::Context;
 use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
-use neomem_proto::{Home, IncomingEnvelope, Response};
+use neomem_proto::{Home, IncomingEnvelope, Response, publish_file};
 use tokio::net::TcpListener;
 use tokio::signal::unix::{SignalKind, signal};
 
@@ -24,7 +23,7 @@ pub fn start(dispatcher: Arc<Dispatcher>, config: &HttpConfig, home: &Home) -> a
     let listener = if config.enabled { Some(runtime.block_on(bind(config.port))?) } else { None };
     if let Some(listener) = &listener {
         let address = listener.local_addr()?;
-        fs::write(home.http_address_path(), address.to_string()).context("recording the HTTP address")?;
+        publish_file(&home.http_address_path(), address.to_string()).context("recording the HTTP address")?;
         tracing::info!("HTTP listening on {address}");
     }
     thread::Builder::new().name("neomemd-async".to_owned()).spawn(move || {

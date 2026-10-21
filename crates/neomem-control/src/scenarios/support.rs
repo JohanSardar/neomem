@@ -37,3 +37,15 @@ pub fn wait_for_index(
         thread::sleep(Duration::from_millis(100));
     }
 }
+
+pub fn first_real_id(text: &str) -> Option<String> {
+    ["fct_", "ent_", "int_"].iter().find_map(|prefix| {
+        text.match_indices(prefix).find_map(|(at, _)| {
+            let candidate = text.get(at..at + prefix.len() + 26)?;
+            candidate[prefix.len()..]
+                .chars()
+                .all(|character| character.is_ascii_digit() || character.is_ascii_uppercase())
+                .then(|| candidate.to_owned())
+        })
+    })
+}

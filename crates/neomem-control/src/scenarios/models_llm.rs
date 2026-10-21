@@ -175,6 +175,7 @@ fn rule(user_contains: &str, reply: &str) -> LlmRule {
         delay_ms: 0,
         delta_delay_ms: 0,
         times: Some(1),
+        ..LlmRule::default()
     }
 }
 

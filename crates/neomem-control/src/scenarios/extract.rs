@@ -133,8 +133,7 @@ fn the_model_never_sees_a_real_id_but_sees_the_dates(
         .filter(|call| call.route == "/v1/chat/completions" && call.body.to_string().contains(EXTRACTOR))
         .map(|call| call.body.to_string())
         .collect();
-    let leaked =
-        prompts.iter().any(|prompt| ["int_", "fct_", "ent_"].iter().any(|prefix| prompt.contains(prefix)));
+    let leaked = prompts.iter().any(|prompt| support::first_real_id(prompt).is_some());
     proof.claim(
         "the extraction prompt never shows a real ID",
         !prompts.is_empty() && !leaked,

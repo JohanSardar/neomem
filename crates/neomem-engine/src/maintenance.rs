@@ -7,15 +7,22 @@ use crate::Engine;
 const TICK: Duration = Duration::from_millis(250);
 const SPOOL_EVERY_TICKS: u64 = 8;
 const WORKER_IDLE: Duration = Duration::from_millis(200);
+const CONSOLIDATION_CHECK: Duration = Duration::from_secs(10);
 
 impl Engine {
     pub fn run(self: &Arc<Self>) -> std::io::Result<thread::JoinHandle<()>> {
         let worker = Arc::clone(self);
         thread::Builder::new().name("neomemd-worker".to_owned()).spawn(move || {
+            let mut last_consolidation_check = std::time::Instant::now();
             loop {
-                if !worker.work_once() {
-                    thread::sleep(WORKER_IDLE);
+                if worker.work_once() {
+                    continue;
                 }
+                if last_consolidation_check.elapsed() >= CONSOLIDATION_CHECK {
+                    worker.consolidate_when_due();
+                    last_consolidation_check = std::time::Instant::now();
+                }
+                thread::sleep(WORKER_IDLE);
             }
         })?;
         let engine = Arc::clone(self);
@@ -53,6 +60,9 @@ impl Engine {
         match self.check_drift() {
             Ok(report) => tracing::info!("nightly drift check: {} differences repaired", report.differences),
             Err(error) => tracing::error!("the nightly drift check failed: {error}"),
+        }
+        if let Err(error) = self.dream("nightly") {
+            tracing::warn!("the nightly consolidation failed: {error}");
         }
     }
 

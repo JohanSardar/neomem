@@ -18,11 +18,8 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries, agent: &str) -> anyhow::
     isolated.add_fake_rules(&FakeRules {
         llm: vec![LlmRule {
             system_contains: Some("You are neomem's memory extractor".to_owned()),
-            user_contains: None,
             reply: json!({"facts": [], "entities": []}).to_string(),
-            delay_ms: 0,
-            delta_delay_ms: 0,
-            times: None,
+            ..LlmRule::default()
         }],
         ..FakeRules::default()
     })?;

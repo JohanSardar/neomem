@@ -36,11 +36,10 @@ pub fn rule(question: &str, candidate: Option<&str>, probability: f32) -> JudgeR
 pub fn planner(delay_ms: u64, delta_delay_ms: u64) -> LlmRule {
     LlmRule {
         system_contains: Some("fact-shaped".to_owned()),
-        user_contains: None,
         reply: "Edge signing\nEdge ship date\nSam Acme designer\n".to_owned(),
         delay_ms,
         delta_delay_ms,
-        times: None,
+        ..LlmRule::default()
     }
 }
 

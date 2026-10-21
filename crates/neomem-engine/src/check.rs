@@ -53,13 +53,11 @@ impl Engine {
     }
 
     pub(crate) fn embed_one(&self, snapshot: &Snapshot, text: &str) -> Option<Vector> {
-        self.models
-            .embedder_for(snapshot.model()?)
-            .ok()?
-            .embed(&[text], Purpose::Document)
-            .ok()?
-            .into_iter()
-            .next()
+        self.embed_one_as(snapshot, text, Purpose::Document)
+    }
+
+    pub(crate) fn embed_one_as(&self, snapshot: &Snapshot, text: &str, purpose: Purpose) -> Option<Vector> {
+        self.models.embedder_for(snapshot.model()?).ok()?.embed(&[text], purpose).ok()?.into_iter().next()
     }
 }
 

@@ -2,6 +2,7 @@ mod recall;
 pub use recall::RecallConfig;
 mod capture;
 mod check;
+mod consolidation;
 mod drift;
 mod engine;
 mod entity;

@@ -113,6 +113,7 @@ impl Engine {
             Request::Rebuild => self.rebuild(),
             Request::Reextract { source, from } => self.reextract(source.as_ref(), from),
             Request::CheckDrift => self.drift(),
+            Request::Dream => self.dream_now(),
             Request::Search(query) => self.search(&query),
             Request::SetClock { .. } => crate::reply::failed(
                 neomem_proto::FailureKind::BadRequest,
