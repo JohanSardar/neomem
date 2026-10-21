@@ -174,16 +174,16 @@
   module: neomem-engine (consolidation)
   depends_on: [check]
   proof: reconcile
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/reconcile/2026-10-21T025541Z
 - id: entities
   does: the entity keeper creates recurring entities, merges duplicates with aliases and merged_from, and records possibly_same
   reached_via: [neomem dream]
   module: neomem-engine (consolidation)
   depends_on: [reconcile]
   proof: entities
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/entities/2026-10-21T025602Z
 - id: capture.cc
   does: reads Claude Code transcripts from their stored position into one intake record per turn after a hook signal (spooled while the daemon is down), folder change or sweep
   reached_via: [neomem hook, hook cc prompt, hook cc tool, hook cc stop, hook cc subagent-stop, hook cc compact, hook cc end]

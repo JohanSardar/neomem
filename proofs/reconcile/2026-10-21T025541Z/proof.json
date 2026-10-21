@@ -2,9 +2,9 @@
   "feature": "reconcile",
   "scenario": "reconcile",
   "passed": true,
-  "started_at": "2026-10-21T024436Z",
-  "duration_ms": 20511,
-  "code_version": "c00e97d4cc57-dirty",
+  "started_at": "2026-10-21T025541Z",
+  "duration_ms": 20486,
+  "code_version": "719cd9702e7c-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
@@ -16,12 +16,12 @@
     {
       "claim": "an update link from the reconciler leaves only the newer ship date in search",
       "passed": true,
-      "detail": "[FactId(Ulid(2167060578619504112483436791660019715))]"
+      "detail": "[FactId(Ulid(2167061382734095177514803089123573763))]"
     },
     {
       "claim": "an invented fact number and a tool outside the reconciler's set are both rejected",
       "passed": true,
-      "detail": "Some(DreamReport { trigger: \"manual\", reconciler: SpecialistReport { focus: 4, rounds: 2, writes: 2, rejected: 2 }, entity_keeper: SpecialistReport { focus: 1, rounds: 8, writes: 0, rejected: 0 }, took_ms: 66 })"
+      "detail": "Some(DreamReport { trigger: \"manual\", reconciler: SpecialistReport { focus: 4, rounds: 2, writes: 2, rejected: 2 }, entity_keeper: SpecialistReport { focus: 1, rounds: 2, writes: 0, rejected: 0 }, took_ms: 43 })"
     },
     {
       "claim": "the reconciler is offered exactly its tools: reads plus link, invalidate and merge, and no delete",

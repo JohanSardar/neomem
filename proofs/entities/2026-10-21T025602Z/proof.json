@@ -2,9 +2,9 @@
   "feature": "entities",
   "scenario": "entities",
   "passed": true,
-  "started_at": "2026-10-21T025003Z",
-  "duration_ms": 341,
-  "code_version": "c00e97d4cc57-dirty",
+  "started_at": "2026-10-21T025602Z",
+  "duration_ms": 336,
+  "code_version": "719cd9702e7c-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
