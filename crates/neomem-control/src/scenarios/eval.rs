@@ -6,7 +6,7 @@ use serde_json::{Value, json};
 
 use crate::binaries::Binaries;
 use crate::isolated::IsolatedNeomem;
-use crate::proof::ProofRun;
+use crate::proof::{Exchange, ProofRun};
 use crate::seed;
 
 pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
@@ -52,6 +52,13 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
         String::from_utf8_lossy(&output.stderr),
     );
     let items: Vec<Value> = serde_json::from_slice(&std::fs::read(directory.join("items.json"))?)?;
+    for exchange in items.iter().flat_map(|item| item["exchanges"].as_array().into_iter().flatten()) {
+        proof.record_exchange(Exchange {
+            request: exchange["request"].clone(),
+            response: exchange["response"].clone(),
+            elapsed_ms: exchange["elapsed_ms"].as_f64().unwrap_or_default(),
+        });
+    }
     let item = |id| items.iter().find(|item| item["id"] == id).context("missing fixture question");
     proof.claim(
         "extracted evidence is a retrieval hit and absent evidence is a miss",
@@ -67,7 +74,8 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     let isolated = items.iter().all(|item| {
         item["exchanges"].as_array().is_some_and(|exchanges| {
             let has = |command| exchanges.iter().any(|e| e["request"]["command"] == command);
-            has("add")
+            has("status")
+                && has("add")
                 && has("search")
                 && has("dream")
                 && exchanges

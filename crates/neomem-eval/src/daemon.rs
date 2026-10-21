@@ -60,12 +60,13 @@ impl Daemon {
     }
 
     pub fn call(&self, request: Request) -> anyhow::Result<Response> {
+        let started = Instant::now();
         let envelope = serde_json::to_value(&request)?;
         let response = Client::connect(&self.home, Duration::from_mins(30))?.call(request)?;
         self.exchanges
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .push(serde_json::json!({"request":envelope,"response":response}));
+            .push(serde_json::json!({"request":envelope,"response":response,"elapsed_ms":started.elapsed().as_secs_f64()*1000.0}));
         if let Response::Failed(failure) = &response {
             bail!("daemon: {}", failure.message);
         }

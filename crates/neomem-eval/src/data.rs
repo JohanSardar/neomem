@@ -28,12 +28,22 @@ pub struct BenchmarkItem {
     pub question_id: String,
     pub question_type: String,
     pub question: String,
+    #[serde(deserialize_with = "answer_text")]
     pub answer: String,
     pub question_date: String,
     pub haystack_sessions: Vec<Vec<Turn>>,
     pub haystack_session_ids: Vec<String>,
     pub haystack_dates: Vec<String>,
     pub answer_session_ids: Vec<String>,
+}
+
+fn answer_text<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<String, D::Error> {
+    let answer = serde_json::Value::deserialize(deserializer)?;
+    match answer {
+        serde_json::Value::String(text) => Ok(text),
+        serde_json::Value::Number(number) => Ok(number.to_string()),
+        _ => Err(serde::de::Error::custom("gold answer must be text or a number")),
+    }
 }
 
 impl BenchmarkItem {
@@ -128,6 +138,17 @@ mod tests {
             selected.iter().map(BenchmarkItem::category).collect::<std::collections::BTreeSet<_>>().len(),
             3
         );
+    }
+
+    #[test]
+    fn cleaned_benchmark_accepts_numeric_gold_answers() {
+        let mut fixture: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../.agents/skills/neomem-control/fixtures/eval/questions.json"
+        ))
+        .unwrap();
+        fixture[0]["answer"] = serde_json::json!(3);
+        let questions: Vec<BenchmarkItem> = serde_json::from_value(fixture).unwrap();
+        assert_eq!(questions[0].answer, "3");
     }
 
     #[test]

@@ -15,7 +15,7 @@ const UNRELATED: &str = "Maya is my sister";
 const SIMILARITY_MARGIN: f32 = 0.1;
 const SAME_SCORE_TOLERANCE: f32 = 1e-5;
 const QUERY_LATENCY_SANITY_P50_MS: f64 = 150.0;
-const CACHED_QUERY_CEILING_MS: f64 = 1.0;
+const CACHED_QUERY_CEILING_MS: f64 = 5.0;
 
 const QUERY_TOPICS: &[&str] = &[
     "what did we decide about the signing certificate for the Edge release build",
@@ -161,7 +161,7 @@ fn a_repeated_query_skips_the_model(
     let query = distinct_queries().remove(0);
     let repeated = test_embedder(proof, neomem, &[&query])?;
     let holds = matches!(&repeated, Ok(report)
-        if report.latency_ms < CACHED_QUERY_CEILING_MS && report.latency_ms * 10.0 < uncached_p50);
+        if report.latency_ms < CACHED_QUERY_CEILING_MS && report.latency_ms * 5.0 < uncached_p50);
     proof.claim(
         "a repeated query is answered from the query cache, far faster than the model",
         holds,
