@@ -40,3 +40,4 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - Isolated real-model proofs accept live keys only from environment variables; the control CLI never reads the real ~/.neomem to discover credentials.
 - Model tests are explicit read probes for idle timing; worker document embeddings do not extend the search/recall idle window.
 - Capture hooks bound stdin to 4 MiB and give input/delivery 20 ms internally, leaving headroom inside the 50 ms process budget; folder watches and the sweep recover missed signals.
+- §8 Decay: activation is `ln Σ age_days^-d` over evidence events (written, a source attached again, `useful`), squashed with a logistic into [0.3, 1.5] (one event a day old gives 0.9). d is 0.5 for ordinary facts and 0.25 for preferences, and it shrinks by up to half as importance rises; stable facts are always 1. Ages under a minute count as a minute.
