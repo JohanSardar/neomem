@@ -275,9 +275,13 @@ impl Engine {
             .valid_from
             .or_else(|| cited.iter().map(|logged| logged.record.occurred.start).min())
             .unwrap_or(now);
-        let mut tags: BTreeSet<Tag> =
-            cited.iter().flat_map(|logged| logged.record.tags.iter().cloned()).collect();
-        for tag in &extracted.tags {
+        let proposed: BTreeSet<&str> = cited
+            .iter()
+            .flat_map(|logged| logged.record.tags.iter().map(Tag::as_str))
+            .chain(extracted.tags.iter().map(String::as_str))
+            .collect();
+        let mut tags = BTreeSet::new();
+        for tag in proposed {
             tags.insert(self.canonical_tag(tag)?);
         }
         Fact::new(NewFact {

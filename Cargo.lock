@@ -1627,8 +1627,11 @@ name = "neomem-proto"
 version = "0.1.0"
 dependencies = [
  "neomem-core",
+ "quote",
+ "schemars",
  "serde",
  "serde_json",
+ "syn 3.0.9",
  "tempfile",
  "thiserror",
 ]
