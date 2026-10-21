@@ -2,9 +2,15 @@
   "feature": "drift",
   "scenario": "drift",
   "passed": true,
+<<<<<<<< HEAD:proofs/drift/2026-10-21T003949Z/proof.json
   "started_at": "2026-10-21T003949Z",
   "duration_ms": 630,
   "code_version": "6bfb862d16d5-dirty",
+========
+  "started_at": "2026-10-21T004042Z",
+  "duration_ms": 601,
+  "code_version": "66e94e98501a-dirty",
+>>>>>>>> origin/main:proofs/drift/2026-10-21T004042Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
@@ -16,7 +22,11 @@
     {
       "claim": "neomemctl set clock moves the isolated daemon's clock a day ahead",
       "passed": true,
+<<<<<<<< HEAD:proofs/drift/2026-10-21T003949Z/proof.json
       "detail": "1792629589768"
+========
+      "detail": "1792629642977"
+>>>>>>>> origin/main:proofs/drift/2026-10-21T004042Z/proof.json
     },
     {
       "claim": "the nightly drift check indexes the new file, the edited fact and the lost row",
@@ -36,7 +46,11 @@
     {
       "claim": "checking again finds no differences",
       "passed": true,
+<<<<<<<< HEAD:proofs/drift/2026-10-21T003949Z/proof.json
       "detail": "Some(DriftReport { differences: 0, added: 0, changed: 0, missing_files: 0, unreadable: 0, took_ms: 4 })"
+========
+      "detail": "Some(DriftReport { differences: 0, added: 0, changed: 0, missing_files: 0, unreadable: 0, took_ms: 9 })"
+>>>>>>>> origin/main:proofs/drift/2026-10-21T004042Z/proof.json
     }
   ]
 }

@@ -2,7 +2,8 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use neomem_core::{
-    Direction, Entity, EntityId, Fact, FactId, FactLinkKind, Filter, LinkKind, MemoryId, ModelId, Vector,
+    Direction, Entity, EntityId, EpochMs, Fact, FactId, FactLinkKind, Filter, LinkKind, MemoryId, ModelId,
+    Vector,
 };
 
 use crate::{Slot, VectorIndex};
@@ -41,6 +42,8 @@ pub struct Snapshot {
     fact_by_slot: HashMap<Slot, FactId>,
     entity_by_slot: HashMap<Slot, EntityId>,
     latest: HashMap<FactId, FactId>,
+    chains: HashMap<FactId, Vec<FactId>>,
+    chain_of: HashMap<FactId, FactId>,
     links: HashMap<MemoryId, Vec<Neighbor>>,
     names: HashMap<String, Vec<EntityId>>,
     facts_about: HashMap<EntityId, Vec<FactId>>,
@@ -58,6 +61,8 @@ impl Snapshot {
             fact_by_slot: HashMap::new(),
             entity_by_slot: HashMap::new(),
             latest: HashMap::new(),
+            chains: HashMap::new(),
+            chain_of: HashMap::new(),
             links: HashMap::new(),
             names: HashMap::new(),
             facts_about: HashMap::new(),
@@ -90,6 +95,10 @@ impl Snapshot {
 
     pub fn latest(&self, id: FactId) -> FactId {
         self.latest.get(&id).copied().unwrap_or(id)
+    }
+
+    pub fn chain(&self, id: FactId) -> Vec<FactId> {
+        self.chain_of.get(&id).and_then(|root| self.chains.get(root)).cloned().unwrap_or_else(|| vec![id])
     }
 
     pub fn neighbors(&self, id: MemoryId) -> &[Neighbor] {
@@ -204,45 +213,84 @@ impl Snapshot {
             self.facts.iter().filter_map(|(id, stored)| stored.slot.map(|slot| (slot, *id))).collect();
         self.entity_by_slot =
             self.entities.iter().filter_map(|(id, stored)| stored.slot.map(|slot| (slot, *id))).collect();
-        self.latest = latest_versions(&self.facts);
+        let chains = chains_of(&self.facts);
+        self.latest = latest_versions(&self.facts, &chains);
+        self.chain_of = chains
+            .iter()
+            .flat_map(|(root, members)| members.iter().map(move |member| (*member, *root)))
+            .collect();
+        self.chains = chains;
         self.links = link_map(&self.facts, &self.entities);
         self.names = name_map(&self.entities);
         self.facts_about = facts_about(&self.facts);
     }
 }
 
-fn latest_versions(facts: &HashMap<FactId, Stored<Fact>>) -> HashMap<FactId, FactId> {
-    let mut successors: HashMap<FactId, Vec<FactId>> = HashMap::new();
+fn chains_of(facts: &HashMap<FactId, Stored<Fact>>) -> HashMap<FactId, Vec<FactId>> {
+    let mut parents = UnionFind::default();
     for stored in facts.values() {
         for link in stored.memory.links().iter().filter(|link| link.kind == FactLinkKind::Updates) {
-            successors.entry(link.to).or_default().push(stored.memory.id());
+            if facts.contains_key(&link.to) {
+                parents.join(stored.memory.id(), link.to);
+            }
         }
     }
-    let newest = |candidates: &[FactId]| {
-        candidates
-            .iter()
-            .copied()
-            .filter_map(|id| {
-                facts.get(&id).map(|stored| (id, stored.memory.valid_at(), stored.memory.recorded_at()))
-            })
-            .max_by_key(|(id, valid_at, recorded_at)| (*valid_at, *recorded_at, *id))
-            .map(|(id, _, _)| id)
-    };
+    let mut chains: HashMap<FactId, Vec<FactId>> = HashMap::new();
+    for member in parents.members() {
+        chains.entry(parents.root(member)).or_default().push(member);
+    }
+    for members in chains.values_mut() {
+        members.sort_by_key(|id| {
+            facts.get(id).map(|stored| (stored.memory.valid_at(), stored.memory.recorded_at(), *id))
+        });
+    }
+    chains
+}
+
+fn latest_versions(
+    facts: &HashMap<FactId, Stored<Fact>>,
+    chains: &HashMap<FactId, Vec<FactId>>,
+) -> HashMap<FactId, FactId> {
     let mut latest = HashMap::new();
-    for id in successors.keys() {
-        let mut head = *id;
-        let mut seen = HashSet::from([head]);
-        while let Some(next) = successors.get(&head).and_then(|candidates| newest(candidates)) {
-            if !seen.insert(next) {
-                break;
-            }
-            head = next;
-        }
-        if head != *id {
-            latest.insert(*id, head);
-        }
+    for members in chains.values() {
+        let Some(head) = members.iter().copied().max_by_key(|id| head_rank(&facts[id].memory)) else {
+            continue;
+        };
+        latest.extend(members.iter().copied().filter(|member| *member != head).map(|member| (member, head)));
     }
     latest
+}
+
+fn head_rank(fact: &Fact) -> (bool, EpochMs, EpochMs, FactId) {
+    (fact.invalid_at().is_none(), fact.valid_at(), fact.recorded_at(), fact.id())
+}
+
+#[derive(Default)]
+struct UnionFind {
+    parent: HashMap<FactId, FactId>,
+}
+
+impl UnionFind {
+    fn join(&mut self, left: FactId, right: FactId) {
+        let (left, right) = (self.root(left), self.root(right));
+        self.parent.entry(left).or_insert(left);
+        self.parent.entry(right).or_insert(right);
+        if left != right {
+            self.parent.insert(left.max(right), left.min(right));
+        }
+    }
+
+    fn root(&self, id: FactId) -> FactId {
+        let mut current = id;
+        while let Some(next) = self.parent.get(&current).copied().filter(|next| *next != current) {
+            current = next;
+        }
+        current
+    }
+
+    fn members(&self) -> Vec<FactId> {
+        self.parent.keys().copied().collect()
+    }
 }
 
 fn link_map(

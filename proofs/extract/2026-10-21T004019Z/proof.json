@@ -2,9 +2,15 @@
   "feature": "extract",
   "scenario": "extract",
   "passed": true,
+<<<<<<<< HEAD:proofs/extract/2026-10-21T004019Z/proof.json
   "started_at": "2026-10-21T004019Z",
   "duration_ms": 12506,
   "code_version": "6bfb862d16d5-dirty",
+========
+  "started_at": "2026-10-21T004100Z",
+  "duration_ms": 12533,
+  "code_version": "66e94e98501a-dirty",
+>>>>>>>> origin/main:proofs/extract/2026-10-21T004100Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
