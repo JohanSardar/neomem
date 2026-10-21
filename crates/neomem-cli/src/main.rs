@@ -52,6 +52,8 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
         Command::Resolve { name } => Request::Resolve { name: name.clone() },
         Command::Entity { name } => Request::Entity { name: name.clone() },
         Command::Show { id } => Request::Show { id: id.parse()? },
+        Command::History { id } => Request::History { id: id.parse()? },
+        Command::Useful { id } => Request::Useful { id: id.parse()? },
         Command::Rebuild => Request::Rebuild,
         Command::Reextract { source, from } => Request::Reextract {
             source: source.as_deref().map(neomem_core::Source::new).transpose()?,

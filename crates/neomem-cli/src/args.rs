@@ -37,6 +37,12 @@ pub enum Command {
     Show {
         id: String,
     },
+    History {
+        id: String,
+    },
+    Useful {
+        id: String,
+    },
     Models(ModelsArgs),
     Login(LoginArgs),
 }

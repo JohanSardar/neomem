@@ -1,0 +1,5 @@
+<<<<<<<< HEAD:proofs/capture.cc/2026-10-21T011108Z/exchanges.jsonl
+{"request":{"protocol":1,"request":{"arguments":{"agent":"cc","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-WH2uB9/capture/cc/projects/./rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":1.153756}
+========
+{"request":{"protocol":1,"request":{"arguments":{"agent":"cc","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-npb6fY/capture/cc/projects/./rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":0.51277}
+>>>>>>>> origin/main:proofs/capture.cc/2026-10-21T010237Z/exchanges.jsonl

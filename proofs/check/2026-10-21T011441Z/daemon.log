@@ -1,8 +1,0 @@
-2026-10-21T01:14:41.322274Z  INFO neomemd::http: HTTP listening on 127.0.0.1:34461
-2026-10-21T01:14:41.322687Z  INFO neomemd: neomemd serving /tmp/neomemctl-h86Dmn
-2026-10-21T01:14:41.326740Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
-2026-10-21T01:14:42.602825Z  INFO neomem_engine::maintenance: committed 2 vault changes
-2026-10-21T01:14:45.133153Z  INFO neomem_engine::maintenance: committed 1 vault changes
-2026-10-21T01:14:47.662951Z  INFO neomem_engine::maintenance: committed 1 vault changes
-2026-10-21T01:14:50.190158Z  INFO neomem_engine::maintenance: committed 1 vault changes
-2026-10-21T01:14:52.717702Z  INFO neomem_engine::maintenance: committed 1 vault changes

@@ -142,16 +142,16 @@
   module: neomem-engine (search)
   depends_on: [search]
   proof: links
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/links/2026-10-21T011413Z
 - id: history
   does: shows a fact's full update chain and answers as-of and include-invalid queries without decay
   reached_via: [neomem history, neomem search]
   module: neomem-engine (history)
   depends_on: [latest]
   proof: history
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/history/2026-10-21T011413Z
 - id: entity
   does: shows an entity with aliases, facts, linked entities and external references, shows any memory file with its sources, and resolves names to entity IDs
   reached_via: [neomem entity, neomem show, neomem resolve]
@@ -166,8 +166,8 @@
   module: neomem-core (decay)
   depends_on: [search]
   proof: decay
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/decay/2026-10-21T011414Z
 - id: reconcile
   does: the fact reconciler settles conflicts, updates and duplicate facts with capped tool rounds and real source IDs only
   reached_via: [neomem dream, daemon consolidation trigger]

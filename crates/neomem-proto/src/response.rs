@@ -21,6 +21,8 @@ pub enum Response {
     Resolved(Vec<ResolvedEntity>),
     Entity(Box<EntityView>),
     Shown(Box<ShownMemory>),
+    History(Box<HistoryView>),
+    MarkedUseful { id: FactId, evidence: usize },
     ModelRoster(Vec<RoleAssignment>),
     ModelTested(ModelTestReport),
     LoginOpened { provider: String, url: String },
@@ -206,6 +208,13 @@ pub struct SearchTrace {
     pub seeds: usize,
     pub after_latest: usize,
     pub linked_kept: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct HistoryView {
+    pub versions: Vec<Fact>,
+    pub current: FactId,
+    pub extensions: Vec<Fact>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
