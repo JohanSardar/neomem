@@ -274,9 +274,9 @@
   last_proof: proofs/contract/2026-10-21T041322Z
 - id: eval
   does: runs LongMemEval-S and the own coding set through the real daemon and reports retrieval and end-to-end scores
-  reached_via: [neomem-eval run]
+  reached_via: [neomem-eval run, neomem-eval report]
   module: neomem-eval
   depends_on: [search, extract]
   proof: eval
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/eval/2026-10-21T042953Z
