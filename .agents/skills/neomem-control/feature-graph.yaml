@@ -222,8 +222,8 @@
   module: neomem-cli (skill)
   depends_on: [search]
   proof: skill
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/skill/2026-10-21T033445Z
 - id: install
   does: wires Claude Code, Codex and pi (plugin, pi package, skill, MCP) and the systemd or launchd service
   reached_via: [neomem install]
