@@ -1,0 +1,77 @@
+{
+  "feature": "recall.gate",
+  "scenario": "recall-gate",
+  "passed": true,
+  "started_at": "2026-10-21T035124Z",
+  "duration_ms": 1730,
+  "code_version": "55ef67d2ea9c-dirty",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "gate at P=0.49 stops after one noul call",
+      "passed": true,
+      "detail": "0 memories, 1 calls, 7.08 ms"
+    },
+    {
+      "claim": "gate at P=0.5 opens the pipeline",
+      "passed": true,
+      "detail": "5 memories, 6 calls, 19.50 ms"
+    },
+    {
+      "claim": "an agent search on a skipped turn records a free gate training label without content",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "claim": "a new error without a new message is scored by the gate and recalls memories",
+      "passed": true,
+      "detail": "error-only turn"
+    },
+    {
+      "claim": "recall is off by default and prints nothing",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "recall switches persist without model calls",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "recall switches persist without model calls",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "agent and project switches are in config.toml",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "enabled recall CLI prints approved memories and fct IDs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "a relative project switch applies to the current project and overrides the agent switch",
+      "passed": true,
+      "detail": "relative project scope"
+    },
+    {
+      "claim": "an invalid judge probability fails open quickly",
+      "passed": true,
+      "detail": "7.3 ms"
+    },
+    {
+      "claim": "a judge timeout fails open quickly",
+      "passed": true,
+      "detail": "665.5 ms"
+    },
+    {
+      "claim": "the hard deadline returns nothing without waiting for an unresponsive model",
+      "passed": true,
+      "detail": "142.7 ms"
+    }
+  ]
+}

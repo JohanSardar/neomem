@@ -1,0 +1,8 @@
+2026-10-21T03:50:40.846307Z  INFO neomemd::http: HTTP listening on 127.0.0.1:40333
+2026-10-21T03:50:40.847225Z  INFO neomemd: neomemd serving /tmp/neomemctl-FZAjFS
+2026-10-21T03:50:40.852274Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
+2026-10-21T03:50:42.131917Z  INFO neomem_engine::maintenance: committed 2 vault changes
+2026-10-21T03:50:44.660889Z  INFO neomem_engine::maintenance: committed 1 vault changes
+2026-10-21T03:50:47.178311Z  INFO neomem_engine::maintenance: committed 1 vault changes
+2026-10-21T03:50:49.690800Z  INFO neomem_engine::maintenance: committed 1 vault changes
+2026-10-21T03:50:52.223905Z  INFO neomem_engine::maintenance: committed 1 vault changes

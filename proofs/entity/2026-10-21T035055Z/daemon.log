@@ -1,0 +1,3 @@
+2026-10-21T03:50:55.692150Z  INFO neomemd::http: HTTP listening on 127.0.0.1:42333
+2026-10-21T03:50:55.692778Z  INFO neomemd: neomemd serving /tmp/neomemctl-fynSAC
+2026-10-21T03:50:55.705542Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities

@@ -1,0 +1,47 @@
+{
+  "feature": "raw",
+  "scenario": "raw",
+  "passed": true,
+  "started_at": "2026-10-21T034952Z",
+  "duration_ms": 10919,
+  "code_version": "55ef67d2ea9c-dirty",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "keywords find every record that says them, and only those",
+      "passed": true,
+      "detail": "[\"Fixed the signing error by rotating the Edge distribution certificate\", \"Back in 2020 the signing error came from an expired certificate\", \"The Edge build fails with a code signing error on the release config\"]"
+    },
+    {
+      "claim": "a hit carries the record's exact content",
+      "passed": true,
+      "detail": "3"
+    },
+    {
+      "claim": "\"what did I say on Tuesday\": a date window with no keywords lists exactly that day's records",
+      "passed": true,
+      "detail": "[\"The Edge build fails with a code signing error on the release config\", \"Slept 7h 12m, readiness 84\"]"
+    },
+    {
+      "claim": "a source filter keeps only that source's records",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "claim": "a six-year-old record that matches best comes first (raw search has no decay)",
+      "passed": true,
+      "detail": "[\"Back in 2020 the signing error came from an expired certificate\"]"
+    },
+    {
+      "claim": "neomem raw prints matching records with their source and time",
+      "passed": true,
+      "detail": "2026-10-20T00:00:00Z  claude-code  int_01M5E98SSX5EF4ZJHHF1GW118T\n  Renamed the paywall component in Edge"
+    },
+    {
+      "claim": "raw search over 5,000+ records answers under 30 ms at p95",
+      "passed": true,
+      "detail": "p50 1.370 ms, p95 1.549 ms, max 2.031 ms"
+    }
+  ]
+}
