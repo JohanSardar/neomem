@@ -2,26 +2,26 @@
   "feature": "capture.codex",
   "scenario": "capture-codex",
   "passed": true,
-  "started_at": "2026-10-21T041313Z",
-  "duration_ms": 1745,
-  "code_version": "9f8808b2e418",
+  "started_at": "2026-10-21T044052Z",
+  "duration_ms": 1838,
+  "code_version": "0547d869633a-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "hook with stalled stdin still exits zero silently within 50 ms",
       "passed": true,
-      "detail": "21.695 ms"
+      "detail": "23.917 ms"
     },
     {
       "claim": "large hook payload is spooled silently within 50 ms",
       "passed": true,
-      "detail": "3.929 ms"
+      "detail": "7.424 ms"
     },
     {
       "claim": "offline hook exits zero silently within 50 ms",
       "passed": true,
-      "detail": "1.855 ms"
+      "detail": "2.989 ms"
     },
     {
       "claim": "offline signal is spooled",
@@ -69,9 +69,14 @@
       "detail": "5/5"
     },
     {
+      "claim": "the environment context Codex injects as a user message is not logged as a turn",
+      "passed": true,
+      "detail": ""
+    },
+    {
       "claim": "online hook p95 stays below 50 ms",
       "passed": true,
-      "detail": "p95 2.219 ms"
+      "detail": "p95 4.488 ms"
     },
     {
       "claim": "path aliases cannot duplicate captured turns",

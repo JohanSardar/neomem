@@ -199,7 +199,7 @@
   depends_on: [intake]
   proof: capture-codex
   status: proven
-  last_proof: proofs/capture.codex/2026-10-21T041313Z
+  last_proof: proofs/capture.codex/2026-10-21T044052Z
 - id: capture.pi
   does: reads pi session trees along the active branch after the extension's signals
   reached_via: [hook pi prompt, hook pi tool, hook pi stop, hook pi subagent-stop, hook pi compact, hook pi end]
@@ -222,8 +222,8 @@
   module: neomem-cli (skill)
   depends_on: [search]
   proof: skill
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/skill/2026-10-21T044239Z
 - id: install
   does: wires Claude Code, Codex and pi (plugin, pi package, skill, MCP) and the systemd or launchd service
   reached_via: [neomem install]
