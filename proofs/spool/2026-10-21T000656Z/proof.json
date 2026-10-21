@@ -1,0 +1,37 @@
+{
+  "feature": "spool",
+  "scenario": "spool",
+  "passed": true,
+  "started_at": "2026-10-21T000656Z",
+  "duration_ms": 196,
+  "code_version": "9741e05402b8-dirty",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "neomem add with the daemon down exits 0 at once and leaves one spool file per add",
+      "passed": true,
+      "detail": "8.883291ms, files [\"01792541216411081016-ada550054ceb71e3.json\", \"01792541216405726454-895d2e37fa8f56c2.json\"], stdout {\"spooled\":\"/tmp/neomemctl-Ees14p/spool/01792541216405726454-895d2e37fa8f56c2.json\"}"
+    },
+    {
+      "claim": "a spooled add says so instead of inventing an ID",
+      "passed": true,
+      "detail": "{\"spooled\":\"/tmp/neomemctl-Ees14p/spool/01792541216405726454-895d2e37fa8f56c2.json\"}\n"
+    },
+    {
+      "claim": "a corrupt spool file is in place before the daemon starts",
+      "passed": true,
+      "detail": "3 files"
+    },
+    {
+      "claim": "after a restart both spooled adds are in the intake log, each once, and the spool is empty",
+      "passed": true,
+      "detail": "logged 2, left []"
+    },
+    {
+      "claim": "the corrupt file was moved to spool/rejected instead of blocking the drain",
+      "passed": true,
+      "detail": "true"
+    }
+  ]
+}
