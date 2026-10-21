@@ -40,6 +40,7 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     corrected_records_are_skipped(proof, &neomem)?;
     reextraction_adds_no_duplicates(proof, &neomem)?;
     the_run_log_names_the_model_and_counts(proof, &neomem)?;
+    the_owner_speaks_in_user_turns(proof, &neomem)?;
     proof.attach_logs(&neomem.logs());
     Ok(())
 }
@@ -250,6 +251,39 @@ fn the_run_log_names_the_model_and_counts(
         "every extraction run is logged with its model and counts, never content, and the rejection is counted",
         !runs.is_empty() && named && rejected,
         format!("{} runs", runs.len()),
+    );
+    Ok(())
+}
+
+fn the_owner_speaks_in_user_turns(proof: &mut ProofRun, neomem: &IsolatedNeomem) -> anyhow::Result<()> {
+    let scripted = r#"{"facts":[{"content":"The user is allergic to peanuts.","sources":[1],"about":["E1"],"valid_from":null,"importance":8,"durability":"stable","tags":["health"]}],"entities":[{"ref":"E1","name":"me","kind":"person","aliases":[],"existing":0}]}"#;
+    neomem.add_fake_rules(&FakeRules {
+        llm: vec![LlmRule {
+            system_contains: Some(EXTRACTOR.to_owned()),
+            user_contains: Some("allergic to peanuts".to_owned()),
+            reply: scripted.to_owned(),
+            ..LlmRule::default()
+        }],
+        ..FakeRules::default()
+    })?;
+    add(neomem, "claude-code", Some("owner-session"), "user: I am allergic to peanuts", &[])?;
+    neomem.set_clock(now().plus_millis(160 * 60_000))?;
+    thread::sleep(Duration::from_secs(3));
+    let introduced = neomem.fake_model_calls()?.iter().any(|call| {
+        let body = call.body.to_string();
+        body.contains("allergic to peanuts")
+            && body.contains("[0] the user (person): the owner of this memory")
+    });
+    let owner = match neomem.call(proof, Request::Entity { name: "the user".to_owned() })? {
+        Response::Entity(view) => {
+            view.facts.iter().any(|fact| fact.content().contains("allergic to peanuts"))
+        }
+        _ => false,
+    };
+    proof.claim(
+        "the extractor is told who speaks in user turns, and a fact it gives to the owner lands on the owner entity",
+        introduced && owner,
+        format!("introduced {introduced}, on the owner {owner}"),
     );
     Ok(())
 }

@@ -1,0 +1,28 @@
+2026-10-21T13:33:32.059814Z  INFO neomemd::http: HTTP listening on 127.0.0.1:42807
+2026-10-21T13:33:32.060482Z  INFO neomemd: neomemd serving /tmp/neomemctl-gnneQ4
+2026-10-21T13:33:32.083602Z  INFO neomem_engine::indexing: index rebuilt from the files: 13 facts, 7 entities
+2026-10-21T13:33:33.474328Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T13:33:33.474403Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T13:33:33.842504Z  INFO neomemd::http: HTTP listening on 127.0.0.1:39425
+2026-10-21T13:33:33.843069Z  INFO neomemd: neomemd serving /tmp/neomemctl-gnneQ4
+2026-10-21T13:33:33.843106Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-gnneQ4/run/neomemd.sock
+2026-10-21T13:33:34.964563Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T13:33:34.964604Z  INFO neomemd::http: neomemd stopped by signal
+2026-10-21T13:33:35.011731Z  INFO neomemd::http: HTTP listening on 127.0.0.1:45371
+2026-10-21T13:33:35.012293Z  INFO neomemd: neomemd serving /tmp/neomemctl-gnneQ4
+2026-10-21T13:33:35.012326Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-gnneQ4/run/neomemd.sock
+2026-10-21T13:33:35.294759Z  INFO serve_inner: rmcp::service: Service initialized as server peer_info=Some(InitializeRequestParams { meta: None, protocol_version: ProtocolVersion("2025-11-25"), capabilities: ClientCapabilities { experimental: None, extensions: None, roots: None, sampling: None, elicitation: None }, client_info: Implementation { name: "rmcp", title: None, version: "3.6.0", description: None, icons: None, website_url: None } })
+2026-10-21T13:33:35.294948Z  INFO serve_inner: rmcp::service: input stream terminated
+2026-10-21T13:33:35.294979Z  INFO serve_inner: rmcp::service: serve finished quit_reason=Closed
+2026-10-21T13:33:35.297715Z  INFO serve_inner: rmcp::service: Service initialized as server peer_info=Some(InitializeRequestParams { meta: None, protocol_version: ProtocolVersion("2025-11-25"), capabilities: ClientCapabilities { experimental: None, extensions: None, roots: None, sampling: None, elicitation: None }, client_info: Implementation { name: "rmcp", title: None, version: "3.6.0", description: None, icons: None, website_url: None } })
+2026-10-21T13:33:35.297974Z  INFO serve_inner: rmcp::service: input stream terminated
+2026-10-21T13:33:35.297993Z  INFO serve_inner: rmcp::service: serve finished quit_reason=Closed
+2026-10-21T13:33:35.372698Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T13:33:35.438207Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T13:33:35.603971Z  INFO serve_inner: rmcp::service: Service initialized as server peer_info=Some(InitializeRequestParams { meta: None, protocol_version: ProtocolVersion("2025-06-18"), capabilities: ClientCapabilities { experimental: None, extensions: None, roots: None, sampling: None, elicitation: None }, client_info: Implementation { name: "rmcp", title: None, version: "3.6.0", description: None, icons: None, website_url: None } })
+2026-10-21T13:33:35.604137Z  INFO serve_inner: rmcp::service: input stream terminated
+2026-10-21T13:33:35.604153Z  INFO serve_inner: rmcp::service: serve finished quit_reason=Closed
+2026-10-21T13:33:35.606150Z  INFO serve_inner: rmcp::service: Service initialized as server peer_info=Some(InitializeRequestParams { meta: None, protocol_version: ProtocolVersion("2025-06-18"), capabilities: ClientCapabilities { experimental: None, extensions: None, roots: None, sampling: None, elicitation: None }, client_info: Implementation { name: "rmcp", title: None, version: "3.6.0", description: None, icons: None, website_url: None } })
+2026-10-21T13:33:35.606600Z  INFO serve_inner: rmcp::service: input stream terminated
+2026-10-21T13:33:35.606628Z  INFO serve_inner: rmcp::service: serve finished quit_reason=Closed
+2026-10-21T13:33:35.747033Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
