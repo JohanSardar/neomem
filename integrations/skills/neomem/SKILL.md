@@ -36,6 +36,7 @@ neomem history <fact-id>
 neomem entity "Edge"
 neomem resolve "Sam Kim"
 neomem raw "signing" --from 2026-09-01
+neomem tags
 ```
 
 | Command | Answers |
@@ -45,6 +46,7 @@ neomem raw "signing" --from 2026-09-01
 | `neomem entity <name>` | a person, project or thing: aliases, facts, linked entities |
 | `neomem resolve <name>` | the entity ID for a name or alias |
 | `neomem raw <words>` | keyword search over the raw history, no ranking ("what did I say on Tuesday?") |
+| `neomem tags` | the tags in use; filter and add with these rather than inventing near-duplicates |
 
 ## Give feedback and write
 

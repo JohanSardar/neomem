@@ -1,3 +1,4 @@
+mod contract;
 mod recall;
 pub use recall::{RecallLog, RecallScore};
 mod connection;

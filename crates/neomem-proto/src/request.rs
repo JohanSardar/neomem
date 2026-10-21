@@ -4,6 +4,14 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "command", content = "arguments", rename_all = "snake_case")]
 pub enum Request {
+    Tags {
+        new: Option<String>,
+    },
+    Link {
+        external: neomem_core::ExternalRef,
+        to: MemoryId,
+        kind: neomem_core::ExternalLinkKind,
+    },
     Status,
     Recall(RecallQuery),
     Capture(neomem_core::CaptureSignal),

@@ -11,6 +11,19 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
+    #[command(about = "List the tag registry, or add a tag after checking it is not a near-duplicate")]
+    Tags {
+        #[arg(long)]
+        new: Option<String>,
+    },
+    #[command(about = "Attach an external reference (ext:<system>/<id>) to a fact or entity")]
+    Link {
+        external: String,
+        #[arg(long)]
+        to: String,
+        #[arg(long = "type")]
+        kind: String,
+    },
     #[command(about = "Show whether the daemon runs and what it holds")]
     Status,
     #[command(about = "Recall memories for an agent turn, or switch recall mode on or off")]

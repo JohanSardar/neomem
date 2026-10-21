@@ -2,21 +2,35 @@
   "feature": "models.embed",
   "scenario": "models-embed",
   "passed": true,
+<<<<<<<< HEAD:proofs/models.embed/2026-10-21T035011Z/proof.json
   "started_at": "2026-10-21T035011Z",
   "duration_ms": 2300,
   "code_version": "55ef67d2ea9c-dirty",
+========
+  "started_at": "2026-10-21T033638Z",
+  "duration_ms": 4467,
+  "code_version": "d1377d92ec02-dirty",
+>>>>>>>> origin/main:proofs/models.embed/2026-10-21T033638Z/proof.json
   "models": "real llama.cpp embedder, fake OpenAI-compatible embedder",
   "failure": null,
   "checks": [
     {
       "claim": "neomem models test embedder answers from EmbeddingGemma-300m in-process through llama.cpp with 768 dimensions",
       "passed": true,
+<<<<<<<< HEAD:proofs/models.embed/2026-10-21T035011Z/proof.json
       "detail": "{\"reply\":\"model_tested\",\"body\":{\"role\":\"embedder\",\"model\":\"llama.cpp:embeddinggemma-300m-Q8_0\",\"latency_ms\":415.439466,\"answer\":\"768 dimensions\"}}"
+========
+      "detail": "{\"reply\":\"model_tested\",\"body\":{\"role\":\"embedder\",\"model\":\"llama.cpp:embeddinggemma-300m-Q8_0\",\"latency_ms\":947.363404,\"answer\":\"768 dimensions\"}}"
+>>>>>>>> origin/main:proofs/models.embed/2026-10-21T033638Z/proof.json
     },
     {
       "claim": "a query scores a related fact clearly higher than an unrelated one",
       "passed": true,
+<<<<<<<< HEAD:proofs/models.embed/2026-10-21T035011Z/proof.json
       "detail": "llama.cpp:embeddinggemma-300m-Q8_0 answered \"768 dimensions\" in 57.92 ms, scores [0.78686297, 0.0990538]"
+========
+      "detail": "llama.cpp:embeddinggemma-300m-Q8_0 answered \"768 dimensions\" in 72.97 ms, scores [0.78686297, 0.0990538]"
+>>>>>>>> origin/main:proofs/models.embed/2026-10-21T033638Z/proof.json
     },
     {
       "claim": "the same texts embed the same across calls and across a daemon restart",
@@ -26,22 +40,38 @@
     {
       "claim": "30 distinct 16-32 token queries embed in-process (p50 and p95 recorded; §13.5 budgets 5-20 ms on a release build)",
       "passed": true,
+<<<<<<<< HEAD:proofs/models.embed/2026-10-21T035011Z/proof.json
       "detail": "p50 30.687 ms, p95 37.437 ms, max 43.220 ms; 0 failures, first None"
+========
+      "detail": "p50 57.963 ms, p95 93.294 ms, max 103.948 ms; 0 failures, first None"
+>>>>>>>> origin/main:proofs/models.embed/2026-10-21T033638Z/proof.json
     },
     {
       "claim": "a repeated query is answered from the query cache, far faster than the model",
       "passed": true,
+<<<<<<<< HEAD:proofs/models.embed/2026-10-21T035011Z/proof.json
       "detail": "llama.cpp:embeddinggemma-300m-Q8_0 answered \"768 dimensions\" in 0.08 ms, scores []; uncached p50 30.69 ms"
+========
+      "detail": "llama.cpp:embeddinggemma-300m-Q8_0 answered \"768 dimensions\" in 0.21 ms, scores []; uncached p50 57.96 ms"
+>>>>>>>> origin/main:proofs/models.embed/2026-10-21T033638Z/proof.json
     },
     {
       "claim": "an OpenAI-compatible embeddings endpoint answers through the same command",
       "passed": true,
+<<<<<<<< HEAD:proofs/models.embed/2026-10-21T035011Z/proof.json
       "detail": "openai:hash-256 answered \"256 dimensions\" in 2.12 ms, scores [0.50572175, 0.0]"
+========
+      "detail": "openai:hash-256 answered \"256 dimensions\" in 8.92 ms, scores [0.50572175, 0.0]"
+>>>>>>>> origin/main:proofs/models.embed/2026-10-21T033638Z/proof.json
     },
     {
       "claim": "the query cache wraps any embedder: a repeated query reaches the OpenAI-compatible endpoint once",
       "passed": true,
+<<<<<<<< HEAD:proofs/models.embed/2026-10-21T035011Z/proof.json
       "detail": "1 endpoint calls; openai:hash-256 answered \"256 dimensions\" in 0.04 ms, scores []"
+========
+      "detail": "1 endpoint calls; openai:hash-256 answered \"256 dimensions\" in 0.10 ms, scores []"
+>>>>>>>> origin/main:proofs/models.embed/2026-10-21T033638Z/proof.json
     }
   ]
 }

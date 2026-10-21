@@ -3,6 +3,7 @@ mod capture_cc;
 mod capture_codex;
 mod capture_pi;
 mod check;
+mod contract;
 mod correct;
 mod daemon;
 mod decay;
@@ -42,6 +43,7 @@ pub struct Scenario {
 }
 
 pub const ALL: &[Scenario] = &[
+    Scenario { name: "contract", run: contract::prove },
     Scenario { name: "recall-gate", run: recall_gate::prove },
     Scenario { name: "recall-plan", run: recall_plan::prove },
     Scenario { name: "recall-approve", run: recall_approve::prove },

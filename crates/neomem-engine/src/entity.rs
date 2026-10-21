@@ -38,6 +38,16 @@ impl Engine {
             entity: Entity::clone(entity),
             facts: current_facts_about(&snapshot, entity.id()),
             linked: linked_entities(&snapshot, entity.id()),
+            external: match self.state.external_links() {
+                Ok(links) => links
+                    .into_iter()
+                    .filter(|link| match link.to {
+                        MemoryId::Entity(id) => snapshot.survivor(id) == entity.id(),
+                        MemoryId::Fact(_) => false,
+                    })
+                    .collect(),
+                Err(error) => return failed(FailureKind::Internal, error.to_string()),
+            },
         }))
     }
 

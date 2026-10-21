@@ -2,9 +2,9 @@
   "feature": "skill",
   "scenario": "skill",
   "passed": true,
-  "started_at": "2026-10-21T035124Z",
-  "duration_ms": 456,
-  "code_version": "55ef67d2ea9c-dirty",
+  "started_at": "2026-10-21T035857Z",
+  "duration_ms": 244,
+  "code_version": "c289caa10a35-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
@@ -16,12 +16,12 @@
     {
       "claim": "the skill stays short enough to load into every session",
       "passed": true,
-      "detail": "66 lines"
+      "detail": "68 lines"
     },
     {
       "claim": "every example in the skill runs against a live daemon and answers in JSON with --json",
       "passed": true,
-      "detail": "13 examples, failed: []"
+      "detail": "14 examples, failed: []"
     },
     {
       "claim": "the first search example finds the current Edge ship date",

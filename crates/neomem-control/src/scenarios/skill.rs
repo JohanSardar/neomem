@@ -10,7 +10,7 @@ use crate::{repo, seed};
 const SKILL_FROM_ROOT: &str = "integrations/skills/neomem/SKILL.md";
 const SHIP_DATE: &str = "fct_01M5D6RA00000000000000000B";
 const AGENT_COMMANDS: &[&str] =
-    &["search", "show", "history", "entity", "resolve", "raw", "useful", "add", "correct"];
+    &["search", "show", "history", "entity", "resolve", "raw", "tags", "useful", "add", "correct"];
 const OPERATOR_COMMANDS: &[&str] = &[
     "status",
     "recall",
@@ -21,7 +21,6 @@ const OPERATOR_COMMANDS: &[&str] = &[
     "models",
     "login",
     "help",
-    "tags",
     "link",
     "mcp",
     "install",

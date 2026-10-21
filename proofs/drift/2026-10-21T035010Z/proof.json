@@ -2,9 +2,15 @@
   "feature": "drift",
   "scenario": "drift",
   "passed": true,
+<<<<<<<< HEAD:proofs/drift/2026-10-21T035010Z/proof.json
   "started_at": "2026-10-21T035010Z",
   "duration_ms": 508,
   "code_version": "55ef67d2ea9c-dirty",
+========
+  "started_at": "2026-10-21T033637Z",
+  "duration_ms": 530,
+  "code_version": "d1377d92ec02-dirty",
+>>>>>>>> origin/main:proofs/drift/2026-10-21T033637Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
@@ -16,7 +22,11 @@
     {
       "claim": "neomemctl set clock moves the isolated daemon's clock a day ahead",
       "passed": true,
+<<<<<<<< HEAD:proofs/drift/2026-10-21T035010Z/proof.json
       "detail": "1792641010886"
+========
+      "detail": "1792640197954"
+>>>>>>>> origin/main:proofs/drift/2026-10-21T033637Z/proof.json
     },
     {
       "claim": "the nightly drift check indexes the new file, the edited fact and the lost row",

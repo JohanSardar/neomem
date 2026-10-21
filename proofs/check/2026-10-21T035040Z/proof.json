@@ -2,9 +2,15 @@
   "feature": "check",
   "scenario": "check",
   "passed": true,
+<<<<<<<< HEAD:proofs/check/2026-10-21T035040Z/proof.json
   "started_at": "2026-10-21T035040Z",
   "duration_ms": 12734,
   "code_version": "55ef67d2ea9c-dirty",
+========
+  "started_at": "2026-10-21T033724Z",
+  "duration_ms": 12851,
+  "code_version": "d1377d92ec02-dirty",
+>>>>>>>> origin/main:proofs/check/2026-10-21T033724Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
