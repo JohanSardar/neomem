@@ -1,5 +1,5 @@
-use crate::local_slot::{LocalSlot, WallClock};
-use neomem_core::{Clock, EpochMs};
+use crate::local_slot::LocalSlot;
+use neomem_core::EpochMs;
 use std::num::NonZeroU32;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -199,11 +199,11 @@ pub struct LazyReranker {
 
 impl LazyReranker {
     pub fn at(path: PathBuf) -> Self {
-        Self::with_activity(path, Arc::new(WallClock), Arc::new(AtomicI64::new(i64::MIN)))
+        Self::with_activity(path, Arc::new(AtomicI64::new(i64::MIN)))
     }
 
-    pub(crate) fn with_activity(path: PathBuf, clock: Arc<dyn Clock>, last_read: Arc<AtomicI64>) -> Self {
-        Self { path, loaded: LocalSlot::new(clock, last_read) }
+    pub(crate) fn with_activity(path: PathBuf, last_read: Arc<AtomicI64>) -> Self {
+        Self { path, loaded: LocalSlot::new(last_read) }
     }
 
     pub(crate) fn maintain(&self, now: EpochMs, timeout: Duration) {

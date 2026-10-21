@@ -65,14 +65,16 @@ impl Engine {
     fn run_search(&self, query: &SearchQuery) -> Result<SearchResults, SearchError> {
         let started = Instant::now();
         let mut lap = Lap::start();
-        let embedder = self.embedder.as_ref().ok_or(SearchError::NoEmbedder)?;
+        self.models.record_read();
+        let snapshot = self.index.snapshot();
+        let model = snapshot.model().ok_or(SearchError::NoEmbedder)?;
+        let embedder = self.models.embedder_for(model)?;
         let vector = embedder
             .embed(&[query.text.as_str()], Purpose::Query)?
             .into_iter()
             .next()
             .ok_or(SearchError::NoEmbedder)?;
         let embed_ms = lap.next();
-        let snapshot = self.index.snapshot();
         let filter = filter_for(&snapshot, query)?;
         let config = &self.search_config;
         let seeds = snapshot.nearest_facts(&vector, &filter, query.k.unwrap_or(config.k).max(1));

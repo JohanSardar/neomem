@@ -191,3 +191,104 @@ fn nearest_facts_respect_tags_entities_and_hidden_tags() {
     let social = Filter { tags: vec![Tag::new("social").unwrap()], ..Filter::default() };
     assert_eq!(snapshot.nearest_facts(&query, &social, 10).len(), 1);
 }
+
+#[test]
+fn a_partial_swap_resumes_and_publishes_one_complete_snapshot() {
+    use neomem_core::{ModelId, Vector};
+
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("index.db");
+    let index = open(&directory).index;
+    let world = world();
+    index.apply(&changes(&world)).unwrap();
+    let old = index.snapshot();
+    let query = HashEmbedder::vector("when Edge ships");
+    let old_answer = old.nearest_facts(&query, &Filter::default(), 6);
+    let target = ModelId::new("new-three-dimensional-model");
+    let mut first = index.pending_vectors(&target, 2).unwrap();
+    for change in &mut first {
+        change.vector = Some(Vector::normalized(vec![1.0, 0.0, 0.0]));
+    }
+    index.stage_vectors(&target, &first).unwrap();
+    assert!(index.activate_model(&target, 3).is_err());
+    assert_eq!(index.snapshot().model(), old.model());
+    drop(index);
+    let index = Index::open(&path, Some((target.clone(), 3))).unwrap().index;
+    assert_eq!(index.snapshot().model(), old.model());
+    let mut remaining = index.pending_vectors(&target, 32).unwrap();
+    assert_eq!(remaining.len(), 4);
+    for change in &mut remaining {
+        change.vector = Some(Vector::normalized(vec![1.0, 0.0, 0.0]));
+    }
+    index.stage_vectors(&target, &remaining).unwrap();
+    index.activate_model(&target, 3).unwrap();
+    assert_eq!(index.snapshot().model(), Some(&target));
+    assert_eq!(index.snapshot().counts().vectors, 6);
+    assert_eq!(old.model(), Some(&HashEmbedder.model_id()));
+    assert_eq!(old.counts().vectors, 6);
+    assert_eq!(old.nearest_facts(&query, &Filter::default(), 6), old_answer);
+    assert_eq!(
+        index.snapshot().nearest_facts(&Vector::normalized(vec![1.0, 0.0, 0.0]), &Filter::default(), 6).len(),
+        4
+    );
+    let connection = rusqlite::Connection::open(&path).unwrap();
+    let old_rows: i64 = connection
+        .query_row("SELECT count(*) FROM vectors WHERE model_id != ?1", [target.as_str()], |row| row.get(0))
+        .unwrap();
+    assert_eq!(old_rows, 0);
+    drop(index);
+    let reopened = Index::open(&path, Some((HashEmbedder.model_id(), HashEmbedder.dims()))).unwrap();
+    assert_eq!(reopened.index.snapshot().model(), Some(&target));
+}
+
+#[test]
+fn edits_during_a_swap_invalidate_the_pending_vector() {
+    use neomem_core::{ModelId, Vector};
+
+    for model in [None, Some((HashEmbedder.model_id(), HashEmbedder.dims()))] {
+        let directory = tempfile::tempdir().unwrap();
+        let index = Index::open(&directory.path().join("index.db"), model).unwrap().index;
+        let world = world();
+        index.apply(&changes(&world)).unwrap();
+        let target = ModelId::new("pending");
+        let mut pending = index.pending_vectors(&target, 32).unwrap();
+        for change in &mut pending {
+            change.vector = Some(Vector::normalized(vec![1.0, 0.0]));
+        }
+        index.stage_vectors(&target, &pending).unwrap();
+        assert!(index.pending_vectors(&target, 32).unwrap().is_empty());
+        let edited =
+            fact(11, "Edge ships on November 2", world.edge.id(), 200, Some(world.october.id()), &["code"]);
+        index.apply(&[change(Memory::Fact(edited))]).unwrap();
+        assert_eq!(index.pending_vectors(&target, 32).unwrap().len(), 1);
+        assert!(index.activate_model(&target, 2).is_err());
+    }
+}
+
+#[test]
+fn a_restart_finishes_cleanup_after_an_interrupted_activation() {
+    use neomem_core::{ModelId, Vector};
+
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("index.db");
+    let index = open(&directory).index;
+    index.apply(&changes(&world())).unwrap();
+    let target = ModelId::new("new-model");
+    let mut pending = index.pending_vectors(&target, 32).unwrap();
+    for change in &mut pending {
+        change.vector = Some(Vector::normalized(vec![1.0, 0.0]));
+    }
+    index.stage_vectors(&target, &pending).unwrap();
+    index.activate_model(&target, 2).unwrap();
+    drop(index);
+    let connection = rusqlite::Connection::open(&path).unwrap();
+    connection.execute_batch("INSERT INTO vectors SELECT memory_id, 'old-cache', data FROM vectors; UPDATE active_model SET cleanup = 1;").unwrap();
+    drop(connection);
+    let reopened = Index::open(&path, Some((target.clone(), 2))).unwrap();
+    assert_eq!(reopened.index.snapshot().model(), Some(&target));
+    let connection = rusqlite::Connection::open(&path).unwrap();
+    let old_rows: i64 = connection
+        .query_row("SELECT count(*) FROM vectors WHERE model_id = 'old-cache'", [], |row| row.get(0))
+        .unwrap();
+    assert_eq!(old_rows, 0);
+}

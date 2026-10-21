@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use neomem_core::Effort;
 use serde::Deserialize;
 
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
 pub struct ModelsConfig {
     #[serde(default)]
     pub providers: BTreeMap<String, ProviderConfig>,
@@ -22,7 +22,7 @@ pub enum ProviderKind {
     Jev,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct ProviderConfig {
     pub kind: ProviderKind,
     pub base_url: Option<String>,
@@ -34,7 +34,7 @@ pub struct ProviderConfig {
     pub callback_port: Option<u16>,
 }
 
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
 pub struct RolesConfig {
     pub embedder: Option<RoleConfig>,
     pub judge: Option<RoleConfig>,
@@ -47,7 +47,7 @@ pub struct RolesConfig {
     pub extractor_by_source: BTreeMap<String, RoleConfig>,
 }
 
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
 pub struct RoleConfig {
     pub provider: Option<String>,
     pub model: Option<String>,

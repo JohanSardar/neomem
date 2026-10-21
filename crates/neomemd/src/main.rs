@@ -11,7 +11,7 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use neomem_engine::{Engine, EngineParts};
-use neomem_models::{ModelHost, Secrets};
+use neomem_models::{ReloadingHost, Secrets};
 use neomem_proto::Home;
 
 use crate::config::DaemonConfig;
@@ -59,7 +59,7 @@ fn run() -> anyhow::Result<()> {
 
 fn open_engine(home: &Home, config: &DaemonConfig, clock: Arc<DaemonClock>) -> anyhow::Result<Engine> {
     let secrets = Secrets::load(&home.secrets_path());
-    let models = ModelHost::new(config.models.clone(), secrets, home.models_dir()).with_clock(clock.clone());
+    let models = ReloadingHost::open(home.config_path(), home.models_dir(), secrets, clock.clone())?;
     let parts = EngineParts {
         models: Arc::new(models),
         home: home.root().to_path_buf(),

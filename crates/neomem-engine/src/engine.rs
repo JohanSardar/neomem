@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-use neomem_core::{Clock, Embedder, EpochMs, ModelRoles, SearchConfig};
+use neomem_core::{Clock, EpochMs, ModelRoles, SearchConfig};
 use neomem_index::Index;
 use neomem_proto::{Request, Response};
 use neomem_state::StateDb;
@@ -42,7 +42,6 @@ pub struct Engine {
     pub(crate) worker: WorkerConfig,
     pub(crate) ids: IdMint,
     pub(crate) models: Arc<dyn ModelRoles>,
-    pub(crate) embedder: Option<Arc<dyn Embedder>>,
     pub(crate) index: Index,
     pub(crate) health: Mutex<IndexHealth>,
     pub(crate) writer: Mutex<()>,
@@ -76,7 +75,6 @@ impl Engine {
         };
         Ok(Self {
             capture: Mutex::default(),
-            embedder,
             index: opened.index,
             health: Mutex::new(health),
             writer: Mutex::new(()),
@@ -118,6 +116,10 @@ impl Engine {
             Request::Entity { name } => self.entity(&name),
             Request::Show { id } => self.show(id),
             Request::Models => self.model_roster(),
+            Request::ModelsUse { role, model } => match self.models.use_model(role, &model) {
+                Ok(()) => self.model_roster(),
+                Err(error) => crate::reply::failed(neomem_proto::FailureKind::BadRequest, error.to_string()),
+            },
             Request::ModelsTest { role, source, structured, inputs } => {
                 self.test_model(ModelProbe { role, source: source.as_ref(), structured, inputs: &inputs })
             }

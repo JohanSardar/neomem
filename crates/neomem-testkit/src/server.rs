@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex, PoisonError};
 use std::thread;
 use std::time::Duration;
 
-use neomem_core::{Choice, Decision, Judge, LlmRequest};
+use neomem_core::{Choice, Decision, Judge, LlmRequest, Vector};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use tiny_http::{Request, Server};
@@ -120,9 +120,21 @@ fn embeddings(body: &Value) -> Value {
     let data: Vec<Value> = texts
         .iter()
         .enumerate()
-        .map(|(index, text)| json!({ "object": "embedding", "index": index, "embedding": HashEmbedder::vector(text).as_slice() }))
+        .map(|(index, text)| json!({ "object": "embedding", "index": index, "embedding": embedding(text, body["model"].as_str().unwrap_or("")).as_slice() }))
         .collect();
     json!({ "object": "list", "model": body["model"], "data": data })
+}
+
+fn embedding(text: &str, model: &str) -> Vector {
+    let vector = HashEmbedder::vector(text);
+    if model == "hash-384" {
+        let mut values = vector.into_inner();
+        values.rotate_left(73);
+        values.resize(384, 0.0);
+        Vector::normalized(values)
+    } else {
+        vector
+    }
 }
 
 fn system_one(shared: &Shared, body: &Value) -> Value {

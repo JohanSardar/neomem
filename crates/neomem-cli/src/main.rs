@@ -61,6 +61,9 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
         }
         Command::Models(arguments) => match &arguments.action {
             None => Request::Models,
+            Some(ModelsAction::Use { role, model }) => {
+                Request::ModelsUse { role: role.model_role(), model: model.clone() }
+            }
             Some(ModelsAction::Test { role, source, structured, inputs }) => Request::ModelsTest {
                 role: role.model_role(),
                 source: source.as_deref().map(Source::new).transpose()?,

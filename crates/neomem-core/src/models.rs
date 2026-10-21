@@ -223,7 +223,19 @@ pub struct RoleAssignment {
 pub trait ModelRoles: Send + Sync + Debug {
     fn maintain(&self, _now: crate::EpochMs) {}
     fn record_read(&self) {}
+    fn retain_embedders(&self, _models: &[ModelId]) {}
     fn embedder(&self) -> Result<Arc<dyn Embedder>, ModelError>;
+    fn embedder_for(&self, model: &ModelId) -> Result<Arc<dyn Embedder>, ModelError> {
+        let embedder = self.embedder()?;
+        if embedder.model_id() == *model {
+            Ok(embedder)
+        } else {
+            Err(ModelError::Unavailable(format!("no embedder for {model}")))
+        }
+    }
+    fn use_model(&self, _role: ModelRole, _model: &str) -> Result<(), ModelError> {
+        Err(ModelError::Unavailable("this host cannot change model assignments".to_owned()))
+    }
     fn judge(&self, role: JudgeRole) -> Result<Arc<dyn Judge>, ModelError>;
     fn llm(&self, role: LlmRole, source: Option<&Source>) -> Result<Arc<dyn Llm>, ModelError>;
     fn describe(&self) -> Vec<RoleAssignment>;

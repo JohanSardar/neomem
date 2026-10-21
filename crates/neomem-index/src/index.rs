@@ -13,8 +13,6 @@ use crate::store::{Change, IndexDb};
 pub struct Index {
     db: Mutex<IndexDb>,
     current: ArcSwap<Snapshot>,
-    model: Option<ModelId>,
-    dims: Option<usize>,
 }
 
 #[derive(Debug)]
@@ -26,7 +24,14 @@ pub struct Opened {
 
 impl Index {
     pub fn open(path: &Path, model: Option<(ModelId, usize)>) -> Result<Opened, IndexError> {
-        let (db, fresh) = IndexDb::open(path)?;
+        let (mut db, fresh) = IndexDb::open(path)?;
+        let model = db.active_model()?.or(model);
+        if db.active_model()?.is_none()
+            && let Some((model, dims)) = &model
+        {
+            db.activate(model, *dims)?;
+        }
+        db.finish_activation()?;
         let (model, dims) = model.map_or((None, None), |(model, dims)| (Some(model), Some(dims)));
         let mut snapshot = Snapshot::empty(model.clone(), dims)?;
         let mut missing_vectors = Vec::new();
@@ -38,7 +43,7 @@ impl Index {
             insert(&mut snapshot, row.memory, row.vector.as_ref())?;
         }
         snapshot.rederive();
-        let index = Self { db: Mutex::new(db), current: ArcSwap::from_pointee(snapshot), model, dims };
+        let index = Self { db: Mutex::new(db), current: ArcSwap::from_pointee(snapshot) };
         Ok(Opened { index, needs_rebuild: fresh, missing_vectors })
     }
 
@@ -52,8 +57,8 @@ impl Index {
 
     pub fn apply(&self, changes: &[Change]) -> Result<(), IndexError> {
         let mut db = self.db.lock().unwrap_or_else(PoisonError::into_inner);
-        db.write(changes, self.model.as_ref(), false)?;
         let previous = self.current.load_full();
+        db.write(changes, previous.model(), false)?;
         let mut next = Snapshot::clone(&previous);
         for change in changes {
             insert(&mut next, change.memory.clone(), change.vector.as_ref())?;
@@ -66,8 +71,9 @@ impl Index {
 
     pub fn rebuild(&self, changes: &[Change]) -> Result<IndexCounts, IndexError> {
         let mut db = self.db.lock().unwrap_or_else(PoisonError::into_inner);
-        db.write(changes, self.model.as_ref(), true)?;
-        let mut next = Snapshot::empty(self.model.clone(), self.dims)?;
+        let previous = self.current.load_full();
+        db.write(changes, previous.model(), true)?;
+        let mut next = Snapshot::empty(previous.model().cloned(), previous.dims())?;
         for change in changes {
             insert(&mut next, change.memory.clone(), change.vector.as_ref())?;
         }
@@ -76,6 +82,38 @@ impl Index {
         let counts = next.counts();
         self.current.store(Arc::new(next));
         Ok(counts)
+    }
+    pub fn pending_vectors(&self, model: &ModelId, limit: usize) -> Result<Vec<Change>, IndexError> {
+        let db = self.db.lock().unwrap_or_else(PoisonError::into_inner);
+        Ok(db
+            .missing(model, limit)?
+            .into_iter()
+            .map(|row| Change { memory: row.memory, path: row.path, vector: None })
+            .collect())
+    }
+
+    pub fn stage_vectors(&self, model: &ModelId, changes: &[Change]) -> Result<(), IndexError> {
+        self.db.lock().unwrap_or_else(PoisonError::into_inner).stage_vectors(model, changes)
+    }
+
+    pub fn activate_model(&self, model: &ModelId, dims: usize) -> Result<(), IndexError> {
+        let mut db = self.db.lock().unwrap_or_else(PoisonError::into_inner);
+        let mut next = Snapshot::empty(Some(model.clone()), Some(dims))?;
+        for row in db.load(Some(model))? {
+            if row.vector.is_none() {
+                return Err(IndexError::Corrupt("cannot activate an incomplete vector set".to_owned()));
+            }
+            insert(&mut next, row.memory, row.vector.as_ref())?;
+        }
+        next.rederive();
+        db.activate(model, dims)?;
+        self.current.store(Arc::new(next));
+        db.finish_activation()?;
+        Ok(())
+    }
+
+    pub fn finish_activation(&self) -> Result<(), IndexError> {
+        self.db.lock().unwrap_or_else(PoisonError::into_inner).finish_activation()
     }
 }
 

@@ -40,10 +40,22 @@ fn deliver(engine: &Engine, events: &Receiver<Event>) {
                 Err(RecvTimeoutError::Disconnected) => return,
             }
         }
-        for path in changed {
+        for path in settled_files(changed) {
             engine.notice(Notice::FileChanged(path));
         }
     }
+}
+
+fn settled_files(changed: BTreeSet<PathBuf>) -> BTreeSet<PathBuf> {
+    let mut files = BTreeSet::new();
+    for path in changed {
+        if path.is_dir() {
+            watched_files_below(&path, &mut files);
+        } else if is_watched_file(&path) {
+            files.insert(path);
+        }
+    }
+    files
 }
 
 fn collect(event: Event, changed: &mut BTreeSet<PathBuf>) {
@@ -51,9 +63,7 @@ fn collect(event: Event, changed: &mut BTreeSet<PathBuf>) {
         return;
     }
     for path in event.paths {
-        if path.is_dir() {
-            watched_files_below(&path, changed);
-        } else if is_watched_file(&path) {
+        if path.is_dir() || is_watched_file(&path) {
             changed.insert(path);
         }
     }
@@ -72,4 +82,27 @@ fn watched_files_below(directory: &Path, changed: &mut BTreeSet<PathBuf>) {
 
 fn is_watched_file(path: &Path) -> bool {
     path.extension().is_some_and(|extension| extension == "md" || extension == "jsonl")
+}
+
+#[cfg(test)]
+mod tests {
+    use notify::event::CreateKind;
+
+    use super::*;
+
+    #[test]
+    fn directory_events_include_files_created_before_the_batch_settles() {
+        let directory = tempfile::tempdir().unwrap();
+        let created = directory.path().join("new-month");
+        std::fs::create_dir(&created).unwrap();
+        let event = Event::new(EventKind::Create(CreateKind::Folder)).add_path(created.clone());
+        let mut changed = BTreeSet::new();
+        collect(event, &mut changed);
+        let markdown = created.join("late.md");
+        std::fs::write(&markdown, "late fact").unwrap();
+        let transcript = created.join("late.jsonl");
+        std::fs::write(&transcript, "{}\n").unwrap();
+        std::fs::write(created.join("ignored.txt"), "not a memory").unwrap();
+        assert_eq!(settled_files(changed), BTreeSet::from([markdown, transcript]));
+    }
 }

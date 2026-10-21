@@ -7,6 +7,8 @@ mod duration;
 mod fallback_judge;
 mod gguf;
 mod host;
+mod reloading_host;
+pub use reloading_host::ReloadingHost;
 mod http;
 mod jev;
 mod json_schema;
