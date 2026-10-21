@@ -1,0 +1,4 @@
+2026-10-21T13:56:02.089625Z  INFO neomemd::http: HTTP listening on 127.0.0.1:33081
+2026-10-21T13:56:02.090425Z  INFO neomemd: neomemd serving /tmp/neomemctl-8CVKze
+2026-10-21T13:56:02.091756Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-21T13:56:03.374476Z  INFO neomem_engine::maintenance: committed 20 vault changes

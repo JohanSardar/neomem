@@ -1,0 +1,5 @@
+2026-10-21T13:55:17.557165Z  INFO neomemd::http: HTTP listening on 127.0.0.1:39907
+2026-10-21T13:55:17.557789Z  INFO neomemd: neomemd serving /tmp/neomemctl-PHRQsG
+2026-10-21T13:55:17.558408Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-21T13:55:18.833555Z  INFO neomem_engine::maintenance: committed 10 vault changes
+2026-10-21T13:55:28.389606Z  INFO neomem_engine::maintenance: committed 69 vault changes
