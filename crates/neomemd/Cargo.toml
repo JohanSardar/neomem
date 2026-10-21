@@ -27,3 +27,6 @@ cuda = ["neomem-models/cuda"]
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

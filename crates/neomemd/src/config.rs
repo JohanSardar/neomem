@@ -3,7 +3,7 @@ use std::fs;
 use anyhow::Context;
 use neomem_core::SearchConfig;
 use neomem_engine::{CommitPolicy, NightlyAt, WorkerConfig};
-use neomem_models::{ModelsConfig, parse_duration};
+use neomem_models::parse_duration;
 use neomem_proto::Home;
 use serde::Deserialize;
 
@@ -37,8 +37,6 @@ pub struct DaemonConfig {
     pub worker: WorkerSection,
     #[serde(default)]
     pub dev: DevConfig,
-    #[serde(flatten)]
-    pub models: ModelsConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]

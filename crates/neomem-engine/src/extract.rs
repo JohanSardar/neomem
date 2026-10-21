@@ -177,9 +177,9 @@ impl Engine {
             }
         }
         let texts: Vec<&str> = records.iter().map(|logged| logged.record.content.as_str()).collect();
-        let vectors = self
-            .embedder
-            .as_ref()
+        let vectors = snapshot
+            .model()
+            .and_then(|model| self.models.embedder_for(model).ok())
             .and_then(|embedder| embedder.embed(&texts, Purpose::Query).ok())
             .unwrap_or_default();
         for vector in &vectors {
@@ -217,7 +217,7 @@ impl Engine {
         about.dedup();
         let snapshot = self.index.snapshot();
         let mut new_fact = self.new_fact(extracted, about, records, &snapshot, now)?;
-        let settlement = match self.embed_one(new_fact.content()) {
+        let settlement = match self.embed_one(&snapshot, new_fact.content()) {
             Some(vector) => self.settle(&snapshot, new_fact.content(), &vector),
             None => Settlement::Unclear,
         };
@@ -315,7 +315,7 @@ impl Engine {
             .chain(aliases.iter())
             .find_map(|candidate| snapshot.resolve(candidate).first().copied());
         let by_meaning = || {
-            let vector = self.embed_one(&format!("{name}, a {kind}"))?;
+            let vector = self.embed_one(&snapshot, &format!("{name}, a {kind}"))?;
             snapshot
                 .nearest_entities(&vector, 1)
                 .into_iter()

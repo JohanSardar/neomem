@@ -64,6 +64,10 @@ impl Snapshot {
         })
     }
 
+    pub fn dims(&self) -> Option<usize> {
+        self.fact_vectors.as_ref().map(|vectors| vectors.dims())
+    }
+
     pub fn model(&self) -> Option<&ModelId> {
         self.model.as_ref()
     }

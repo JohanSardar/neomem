@@ -38,5 +38,7 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - §13.5 `neomemctl bench models` measures the local models on release builds; the numbers live in `docs/models.md`. EmbeddingGemma-300m stays the default embedder (3-7x faster than Qwen3-Embedding-0.6B here).
 - Capture logs each transcript message or action envelope as a turn, drops raw tool result bodies, retains only result status, and uses byte offsets plus an atomic intake/position transaction; pi reads the persisted active ancestry and never retracts previously captured history after branching.
 - Isolated real-model proofs accept live keys only from environment variables; the control CLI never reads the real ~/.neomem to discover credentials.
-- Model tests are explicit read probes for idle timing; worker document embeddings do not extend the search/recall idle window.
+- Search, recall and model tests refresh idle timing; background worker model calls do not extend the read idle window.
+- Model selectors accept a bare model on the current provider, a configured provider/model prefix, or a local .gguf filename for the embedder, judge and checker.
+- index.db records active-model and staged-vector progress; model-history.json retains provider configurations, without secrets, so a restart can reopen the old embedder during a swap.
 - Capture hooks bound stdin to 4 MiB and give input/delivery 20 ms internally, leaving headroom inside the 50 ms process budget; folder watches and the sweep recover missed signals.

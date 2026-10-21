@@ -7,7 +7,6 @@ use neomem_core::{Clock, EpochMs, ModelError};
 #[derive(Debug)]
 pub(crate) struct LocalSlot<T> {
     state: Mutex<State<T>>,
-    clock: Arc<dyn Clock>,
     last_read: Arc<AtomicI64>,
 }
 
@@ -17,12 +16,8 @@ struct State<T> {
 }
 
 impl<T> LocalSlot<T> {
-    pub(crate) fn new(clock: Arc<dyn Clock>, last_read: Arc<AtomicI64>) -> Self {
-        Self { state: Mutex::new(State { loaded: None }), clock, last_read }
-    }
-
-    pub(crate) fn record_read(&self) {
-        self.last_read.store(self.clock.now().as_millis(), Ordering::SeqCst);
+    pub(crate) fn new(last_read: Arc<AtomicI64>) -> Self {
+        Self { state: Mutex::new(State { loaded: None }), last_read }
     }
 
     pub(crate) fn run<R>(
@@ -93,11 +88,12 @@ mod tests {
     #[test]
     fn idle_resources_are_released_and_reloaded_once() {
         let clock = Arc::new(TestClock::default());
-        let slot = LocalSlot::new(clock.clone(), Arc::new(AtomicI64::new(i64::MIN)));
+        let last_read = Arc::new(AtomicI64::new(i64::MIN));
+        let slot = LocalSlot::new(Arc::clone(&last_read));
         let loads = AtomicUsize::new(0);
         let drops = Arc::new(AtomicUsize::new(0));
         let use_model = || {
-            slot.record_read();
+            last_read.store(clock.now().as_millis(), Ordering::SeqCst);
             slot.run(
                 || {
                     loads.fetch_add(1, Ordering::SeqCst);
@@ -128,7 +124,7 @@ mod document_tests {
     #[test]
     fn background_use_does_not_extend_the_read_idle_window() {
         let last_read = Arc::new(AtomicI64::new(0));
-        let slot = LocalSlot::new(Arc::new(WallClock), last_read);
+        let slot = LocalSlot::new(last_read);
         slot.run(|| Ok(7), |value| Ok(*value)).unwrap();
         slot.maintain(EpochMs::from_millis(900_000), Duration::from_mins(15));
         assert!(!slot.is_loaded());

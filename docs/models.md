@@ -55,3 +55,9 @@ What follows:
 ## Idle unloading
 
 Local model weights and contexts load on the first request that needs them. `neomem models` shows `loaded` or `unloaded` for the embedder and reranker. The daemon releases both after `[models] idle_unload` (default `"15m"`) without a query or recall. The next request reloads transparently, including a previously cached query. Document embeddings from background work do not extend the read idle window. The maintenance tick uses the engine clock, so isolated proofs can advance time without waiting fifteen minutes.
+
+## Swapping assignments
+
+`neomem models use planner new-model` keeps the role's provider. `neomem models use planner openai/new-model` selects a configured provider, and `neomem models use embedder qwen3-embedding-0.6b-Q8_0.gguf` selects a local file. Direct config edits also take effect. Other roles use the new assignment on their next call.
+
+An embedder change rebuilds fact and entity vectors in background batches while searches keep using the previous model and snapshot. The daemon publishes the complete replacement snapshot in one step, then removes the old vector rows from the rebuildable index cache. New or edited memories invalidate their staged vectors before activation. A restart retains completed batches and resumes the remaining work. `neomem models` shows the desired assignment; `neomem status` reports the embedding model currently used by the index.

@@ -74,6 +74,40 @@ impl Engine {
         }
     }
 
+    pub(crate) fn advance_model_swap(&self) {
+        if let Err(error) = self.reembed_batch() {
+            tracing::error!("re-embedding a model swap failed: {error}");
+        }
+    }
+
+    fn reembed_batch(&self) -> Result<(), IndexingError> {
+        self.index.finish_activation()?;
+        let target = self.models.embedder()?;
+        let target_id = target.model_id();
+        let snapshot = self.index.snapshot();
+        let mut retained = vec![target_id.clone()];
+        retained.extend(snapshot.model().filter(|active| **active != target_id).cloned());
+        self.models.retain_embedders(&retained);
+        if snapshot.model() == Some(&target_id) {
+            return Ok(());
+        }
+        let _writing = self.lock_writer();
+        let mut batch = self.index.pending_vectors(&target.model_id(), EMBED_BATCH)?;
+        if batch.is_empty() {
+            self.index.activate_model(&target_id, target.dims())?;
+            self.models.retain_embedders(std::slice::from_ref(&target_id));
+            return Ok(());
+        }
+        let texts: Vec<String> = batch.iter().map(|change| change.memory.embedding_text()).collect();
+        let borrowed: Vec<&str> = texts.iter().map(String::as_str).collect();
+        let vectors = embed_documents(&target, &borrowed)?;
+        for (change, vector) in batch.iter_mut().zip(vectors) {
+            change.vector = Some(vector);
+        }
+        self.index.stage_vectors(&target.model_id(), &batch)?;
+        Ok(())
+    }
+
     pub(crate) fn index_report(&self) -> IndexReport {
         let snapshot = self.index.snapshot();
         let counts = snapshot.counts();
@@ -88,7 +122,9 @@ impl Engine {
     }
 
     pub(crate) fn embedded(&self, located: Vec<(Memory, PathBuf)>) -> Result<Vec<Change>, IndexingError> {
-        let Some(embedder) = &self.embedder else {
+        let snapshot = self.index.snapshot();
+        let embedder = snapshot.model().map(|model| self.models.embedder_for(model)).transpose()?;
+        let Some(embedder) = &embedder else {
             return Ok(located
                 .into_iter()
                 .map(|(memory, path)| Change { memory, path, vector: None })
@@ -114,9 +150,14 @@ fn embed_documents(
     texts: &[&str],
 ) -> Result<Vec<neomem_core::Vector>, ModelError> {
     let vectors = embedder.embed(texts, Purpose::Document)?;
-    if vectors.len() == texts.len() {
+    if vectors.len() == texts.len() && vectors.iter().all(|vector| vector.dims() == embedder.dims()) {
         Ok(vectors)
     } else {
-        Err(ModelError::InvalidOutput(format!("asked for {} vectors, got {}", texts.len(), vectors.len())))
+        Err(ModelError::InvalidOutput(format!(
+            "asked for {} vectors of {} dimensions, got dimensions {:?}",
+            texts.len(),
+            embedder.dims(),
+            vectors.iter().map(neomem_core::Vector::dims).collect::<Vec<_>>()
+        )))
     }
 }
