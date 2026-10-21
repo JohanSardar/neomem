@@ -222,6 +222,15 @@ impl Fact {
         Ok(true)
     }
 
+    pub fn link_entity(&mut self, entity: EntityId, now: EpochMs) -> bool {
+        if self.about.contains(&entity) {
+            return false;
+        }
+        self.about.push(entity);
+        self.updated_at = now;
+        true
+    }
+
     pub fn attach_source(&mut self, source: IntakeId, now: EpochMs) -> bool {
         if self.sources.contains(&source) {
             return false;
