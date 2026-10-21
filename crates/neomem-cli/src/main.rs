@@ -1,5 +1,6 @@
 mod args;
 mod connection;
+mod fallback;
 mod hook;
 mod intake_record;
 mod login;
@@ -70,7 +71,13 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
             source: source.as_deref().map(neomem_core::Source::new).transpose()?,
             from: from.as_deref().map(time_argument::parse).transpose()?,
         },
-        Command::Search(arguments) => Request::Search(intake_record::search_query(arguments)?),
+        Command::Search(arguments) => {
+            let query = intake_record::search_query(arguments)?;
+            return match DaemonConnection::open(&home) {
+                Ok(connection) => connection.call(Request::Search(query)).map(Outcome::Answered),
+                Err(down) => fallback::keyword_search(&home, &query, &down).map(Outcome::Answered),
+            };
+        }
         Command::Correct(arguments) => {
             Request::Correct { intake: arguments.intake.parse()?, reason: arguments.reason.clone() }
         }
