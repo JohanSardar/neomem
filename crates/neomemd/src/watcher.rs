@@ -105,4 +105,18 @@ mod tests {
         std::fs::write(created.join("ignored.txt"), "not a memory").unwrap();
         assert_eq!(settled_files(changed), BTreeSet::from([markdown, transcript]));
     }
+    #[test]
+    fn a_new_directory_is_scanned_after_its_events_settle() {
+        let directory = tempfile::tempdir().unwrap();
+        let mut changed = BTreeSet::new();
+        collect(
+            Event::new(EventKind::Create(CreateKind::Folder)).add_path(directory.path().to_path_buf()),
+            &mut changed,
+        );
+        let nested = directory.path().join("2026/10");
+        std::fs::create_dir_all(&nested).unwrap();
+        let fact = nested.join("late.md");
+        std::fs::write(&fact, "a file copied after the directory event").unwrap();
+        assert!(settled_files(changed).contains(&fact));
+    }
 }

@@ -106,9 +106,23 @@ pub struct Choice<'text> {
     pub meaning: &'text str,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct JudgeScores {
+    pub probabilities: Vec<f32>,
+    pub model: ModelId,
+}
+
 pub trait Judge: Send + Sync + Debug {
     fn decide(&self, context: &str, question: &str, options: &[Choice<'_>]) -> Result<Decision, ModelError>;
     fn score(&self, context: &str, question: &str, candidates: &[&str]) -> Result<Vec<f32>, ModelError>;
+    fn score_with_model(
+        &self,
+        context: &str,
+        question: &str,
+        candidates: &[&str],
+    ) -> Result<JudgeScores, ModelError> {
+        Ok(JudgeScores { probabilities: self.score(context, question, candidates)?, model: self.model_id() })
+    }
     fn model_id(&self) -> ModelId;
 }
 

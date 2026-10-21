@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "reply", content = "body", rename_all = "snake_case")]
 pub enum Response {
     Status(StatusReport),
+    Recalled(Vec<RecallMemory>),
     Captured,
     Added(AddReceipt),
     RawHits(Vec<RawHit>),
@@ -205,4 +206,10 @@ pub struct SearchTrace {
     pub seeds: usize,
     pub after_latest: usize,
     pub linked_kept: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RecallMemory {
+    pub id: FactId,
+    pub content: String,
 }

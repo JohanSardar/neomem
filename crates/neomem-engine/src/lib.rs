@@ -1,3 +1,5 @@
+mod recall;
+pub use recall::RecallConfig;
 mod capture;
 mod check;
 mod drift;

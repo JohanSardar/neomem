@@ -29,8 +29,8 @@ pub use intake::{IntakeRecord, InvalidIntake, LoggedIntake, Source, Span};
 pub use link::{Direction, LinkKind};
 pub use memory::Memory;
 pub use models::{
-    Choice, Decision, Effort, Embedder, Judge, JudgeRole, Llm, LlmMessage, LlmReply, LlmRequest, LlmRole,
-    ModelError, ModelId, ModelRole, ModelRoles, Purpose, RoleAssignment, ToolCall, ToolSpec, Vector,
+    Choice, Decision, Effort, Embedder, Judge, JudgeRole, JudgeScores, Llm, LlmMessage, LlmReply, LlmRequest,
+    LlmRole, ModelError, ModelId, ModelRole, ModelRoles, Purpose, RoleAssignment, ToolCall, ToolSpec, Vector,
 };
 pub use search_config::SearchConfig;
 pub use secrets::redact_secrets;

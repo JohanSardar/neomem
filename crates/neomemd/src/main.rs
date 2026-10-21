@@ -60,6 +60,7 @@ fn run() -> anyhow::Result<()> {
 fn open_engine(home: &Home, config: &DaemonConfig, clock: Arc<DaemonClock>) -> anyhow::Result<Engine> {
     let secrets = Secrets::load(&home.secrets_path());
     let models = ReloadingHost::open(home.config_path(), home.models_dir(), secrets, clock.clone())?;
+    let recall_config = config.recall_config()?;
     let parts = EngineParts {
         models: Arc::new(models),
         home: home.root().to_path_buf(),
@@ -69,6 +70,7 @@ fn open_engine(home: &Home, config: &DaemonConfig, clock: Arc<DaemonClock>) -> a
         clock,
         nightly_at: config.schedule.nightly_at()?,
         search_config: config.search,
+        recall_config,
         worker: config.worker.config()?,
         daemon_version: env!("CARGO_PKG_VERSION").to_owned(),
     };

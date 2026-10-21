@@ -30,6 +30,11 @@ pub fn print_spooled(path: &Path, json: bool) -> ExitCode {
 
 fn print_human(response: &Response) {
     match response {
+        Response::Recalled(memories) => {
+            for memory in memories {
+                println!("{}  {}", memory.id, memory.content);
+            }
+        }
         Response::Captured => {}
         Response::Status(report) => print_status(report),
         Response::ShuttingDown => println!("neomemd is shutting down"),
