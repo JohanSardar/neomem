@@ -44,3 +44,11 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - Capture hooks bound stdin to 4 MiB and give input/delivery 20 ms internally, leaving headroom inside the 50 ms process budget; folder watches and the sweep recover missed signals.
 - §8 Decay: activation is `ln Σ age_days^-d` over evidence events (written, a source attached again, `useful`), squashed with a logistic into [0.3, 1.5] (one event a day old gives 0.9). d is 0.5 for ordinary facts and 0.25 for preferences, and it shrinks by up to half as importance rises; stable facts are always 1. Ages under a minute count as a minute.
 - Pi branch reactivation checkpoints emitted transcript entry references together with intake records and byte positions, so previously skipped ancestors can be captured once when selected.
+
+- Recall CLI switches use project, then agent, then global precedence; direct Recall protocol calls explicitly request a run, while the CLI honors off by default. Combined switch scope uses project precedence.
+- Recall CLI accepts `--session`, `--message` and `--error`; absent session uses `NEOMEM_SESSION_ID` or a fresh CLI timestamp and process ID, and free gate labels correlate optional `NEOMEM_AGENT`/`NEOMEM_SESSION_ID`/`NEOMEM_TURN_ID` metadata on agent searches.
+- Recall caps input slices and messages at 16K characters each and planner output at 16K characters; incomplete or fewer than three planner lines use the same model-free fallback as planner failure.
+- Recall reserves 10 ms of its deadline for a nonblocking state transaction (SQLite lock wait capped at 5 ms); a busy writer fails open without injection.
+- A daemon runs one recall pipeline at a time; overlapping recalls fail open, and an expired pipeline cannot mark facts injected after its caller has returned.
+- Recall gates on the new error when one is supplied; model-free name queries consider both the new message and error.
+- Recall project switch keys use canonical absolute paths when they exist, and absolute paths otherwise.

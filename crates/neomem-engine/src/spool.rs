@@ -3,7 +3,7 @@ use neomem_proto::{Home, Response, spool};
 use crate::Engine;
 
 impl Engine {
-    pub(crate) fn drain_spool(&self) {
+    pub(crate) fn drain_spool(self: &std::sync::Arc<Self>) {
         let home = Home::at(&self.home);
         for spooled in spool::spooled(&home) {
             match spooled

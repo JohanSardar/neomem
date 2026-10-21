@@ -94,6 +94,7 @@ fn latency_benches(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> {
         BenchResult::from("client_add_end_to_end", 200, Some(50.0), add),
     ];
     results.extend(search_benches(binaries)?);
+    results.extend(recall_benches(binaries)?);
     Ok(results)
 }
 
@@ -259,5 +260,46 @@ fn local_judge_benches(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> 
             Some(LOCAL_JUDGE_BUDGET_MS),
             timing::percentiles(&mut score),
         ),
+    ])
+}
+
+fn recall_benches(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> {
+    use crate::scenarios::recall_support::{planner, rule};
+    use neomem_proto::RecallQuery;
+    use neomem_testkit::FakeRules;
+    let neomem = IsolatedNeomem::start(binaries)?;
+    seed::copy_vault_fixture("workspace", neomem.home().root())?;
+    wait_for_facts(&neomem, 13)?;
+    neomem.add_fake_rules(&FakeRules {
+        judge: vec![rule("long-term memory", None, 0.49)],
+        ..FakeRules::default()
+    })?;
+    let mut client = neomem.client()?;
+    let mut serial = 0;
+    let mut measure = || {
+        serial += 1;
+        match client.call(Request::Recall(RecallQuery {
+            agent: "codex".to_owned(),
+            session: format!("bench-{serial}"),
+            turn: None,
+            slice: "Edge release failed".to_owned(),
+            message: "Edge signing error again".to_owned(),
+            error: None,
+            project: None,
+        }))? {
+            Response::Recalled(_) => Ok(()),
+            other => bail!("recall answered {other:?}"),
+        }
+    };
+    let skipped = timing::measure(20, &mut measure)?;
+    neomem.add_fake_rules(&FakeRules {
+        judge: vec![rule("long-term memory", None, 0.9), rule("this memory", None, 0.9)],
+        llm: vec![planner(0, 0)],
+        ..FakeRules::default()
+    })?;
+    let full = timing::measure(20, measure)?;
+    Ok(vec![
+        BenchResult::from("recall_gated_out_fake", 20, Some(600.0), skipped),
+        BenchResult::from("recall_full_fake", 20, Some(3500.0), full),
     ])
 }

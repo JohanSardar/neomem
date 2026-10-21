@@ -14,6 +14,8 @@ pub enum StateError {
     Corrupt(String),
     #[error("the state.db writer lock was poisoned by a panic")]
     Poisoned,
+    #[error("the state.db writer is busy")]
+    Busy,
 }
 
 #[derive(Debug)]
@@ -38,6 +40,13 @@ impl StateDb {
 
     pub(crate) fn writer(&self) -> Result<MutexGuard<'_, Connection>, StateError> {
         self.writer.lock().map_err(|_| StateError::Poisoned)
+    }
+
+    pub(crate) fn try_writer(&self) -> Result<MutexGuard<'_, Connection>, StateError> {
+        self.writer.try_lock().map_err(|error| match error {
+            std::sync::TryLockError::Poisoned(_) => StateError::Poisoned,
+            std::sync::TryLockError::WouldBlock => StateError::Busy,
+        })
     }
 
     pub(crate) fn read<T>(

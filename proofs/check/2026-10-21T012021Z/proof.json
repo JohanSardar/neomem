@@ -1,0 +1,47 @@
+{
+  "feature": "check",
+  "scenario": "check",
+  "passed": true,
+  "started_at": "2026-10-21T012021Z",
+  "duration_ms": 12621,
+  "code_version": "14c6de77235b-dirty",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "an update links the new fact to the old one, and a query worded like the old fact returns the new version",
+      "passed": true,
+      "detail": "Edge's ship date is December 3, 2026."
+    },
+    {
+      "claim": "the old version is kept with invalid_at set, never deleted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "the same fact stated again adds a source and evidence instead of a duplicate",
+      "passed": true,
+      "detail": "1 copies, 2 sources"
+    },
+    {
+      "claim": "an extension links to the fact it adds detail to, and both stay valid",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "a contradiction is linked, both facts stay valid, and search flags the conflict",
+      "passed": true,
+      "detail": "2 flagged"
+    },
+    {
+      "claim": "each new fact is checked with one typed choice over at most the 5 closest facts",
+      "passed": true,
+      "detail": "5 checks"
+    },
+    {
+      "claim": "an answer below 0.6 is unclear: the fact is written as new and the run counts it",
+      "passed": true,
+      "detail": "1"
+    }
+  ]
+}

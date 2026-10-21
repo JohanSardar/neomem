@@ -53,6 +53,9 @@ impl Lap {
 
 impl Engine {
     pub(crate) fn search(&self, query: &SearchQuery) -> Response {
+        if let Some(turn) = &query.recall_turn {
+            let _ = self.state.label_skipped_recall(self.clock.now(), &turn.agent, &turn.session, &turn.turn);
+        }
         match self.run_search(query) {
             Ok(results) => Response::SearchResults(Box::new(results)),
             Err(SearchError::UnknownEntity(name)) => {
