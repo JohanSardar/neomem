@@ -1,0 +1,56 @@
+{
+  "feature": "drift",
+  "scenario": "drift",
+  "passed": true,
+<<<<<<<< HEAD:proofs/drift/2026-10-21T040356Z/proof.json
+  "started_at": "2026-10-21T040356Z",
+  "duration_ms": 625,
+  "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035633Z",
+  "duration_ms": 474,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/drift/2026-10-21T035633Z/proof.json
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "changes made while the daemon was down leave the index stale until the drift check",
+      "passed": true,
+      "detail": "Some(IndexReport { facts: 2, entities: 1, links: 3, names: 2, vectors: 3, model: Some(\"openai:hash-256\") })"
+    },
+    {
+      "claim": "neomemctl set clock moves the isolated daemon's clock a day ahead",
+      "passed": true,
+<<<<<<<< HEAD:proofs/drift/2026-10-21T040356Z/proof.json
+      "detail": "1792641836589"
+========
+      "detail": "1792641393853"
+>>>>>>>> origin/main:proofs/drift/2026-10-21T035633Z/proof.json
+    },
+    {
+      "claim": "the nightly drift check indexes the new file, the edited fact and the lost row",
+      "passed": true,
+      "detail": "Some(IndexReport { facts: 3, entities: 2, links: 5, names: 3, vectors: 5, model: Some(\"openai:hash-256\") })"
+    },
+    {
+      "claim": "index.db now holds the edited fact's new text",
+      "passed": true,
+      "detail": "Some(\"Edge's ship date is November 8, 2026.\")"
+    },
+    {
+      "claim": "the run log records the check with its counts and no memory content",
+      "passed": true,
+      "detail": "{\"added\":2,\"changed\":1,\"differences\":3,\"missing_files\":0,\"unreadable\":0}"
+    },
+    {
+      "claim": "checking again finds no differences",
+      "passed": true,
+<<<<<<<< HEAD:proofs/drift/2026-10-21T040356Z/proof.json
+      "detail": "Some(DriftReport { differences: 0, added: 0, changed: 0, missing_files: 0, unreadable: 0, took_ms: 12 })"
+========
+      "detail": "Some(DriftReport { differences: 0, added: 0, changed: 0, missing_files: 0, unreadable: 0, took_ms: 3 })"
+>>>>>>>> origin/main:proofs/drift/2026-10-21T035633Z/proof.json
+    }
+  ]
+}

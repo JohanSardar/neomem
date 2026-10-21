@@ -7,6 +7,9 @@ use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
 use neomem_proto::{Home, IncomingEnvelope, Response, publish_file};
+use rmcp::transport::streamable_http_server::{
+    StreamableHttpServerConfig, StreamableHttpService, session::never::NeverSessionManager,
+};
 use tokio::net::TcpListener;
 use tokio::signal::unix::{SignalKind, signal};
 
@@ -40,7 +43,16 @@ async fn bind(port: u16) -> anyhow::Result<TcpListener> {
 async fn run(dispatcher: Arc<Dispatcher>, listener: Option<TcpListener>) {
     tokio::spawn(stop_on_terminate(Arc::clone(&dispatcher)));
     if let Some(listener) = listener {
-        let routes = Router::new().route("/v1/request", post(handle_request)).with_state(dispatcher);
+        let mcp_dispatcher = Arc::clone(&dispatcher);
+        let mcp = StreamableHttpService::new(
+            move || Ok(crate::mcp::McpServer(Arc::clone(&mcp_dispatcher))),
+            Arc::new(NeverSessionManager::default()),
+            StreamableHttpServerConfig::default().with_legacy_session_mode(false).with_json_response(true),
+        );
+        let routes = Router::new()
+            .route("/v1/request", post(handle_request))
+            .nest_service("/mcp", mcp)
+            .with_state(dispatcher);
         if let Err(error) = axum::serve(listener, routes).await {
             tracing::error!("HTTP server stopped: {error}");
         }

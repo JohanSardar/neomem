@@ -2,9 +2,15 @@
   "feature": "links",
   "scenario": "links",
   "passed": true,
+<<<<<<<< HEAD:proofs/links/2026-10-21T040455Z/proof.json
   "started_at": "2026-10-21T040455Z",
   "duration_ms": 460,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035722Z",
+  "duration_ms": 420,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/links/2026-10-21T035722Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [

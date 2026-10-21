@@ -2,9 +2,15 @@
   "feature": "reconcile",
   "scenario": "reconcile",
   "passed": true,
+<<<<<<<< HEAD:proofs/reconcile/2026-10-21T040456Z/proof.json
   "started_at": "2026-10-21T040456Z",
   "duration_ms": 20445,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035723Z",
+  "duration_ms": 20653,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/reconcile/2026-10-21T035723Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
@@ -16,12 +22,20 @@
     {
       "claim": "an update link from the reconciler leaves only the newer ship date in search",
       "passed": true,
+<<<<<<<< HEAD:proofs/reconcile/2026-10-21T040456Z/proof.json
       "detail": "[FactId(Ulid(2167066405621402916062610179458334723))]"
+========
+      "detail": "[FactId(Ulid(2167065858089227806040139921633574915))]"
+>>>>>>>> origin/main:proofs/reconcile/2026-10-21T035723Z/proof.json
     },
     {
       "claim": "an invented fact number and a tool outside the reconciler's set are both rejected",
       "passed": true,
+<<<<<<<< HEAD:proofs/reconcile/2026-10-21T040456Z/proof.json
       "detail": "Some(DreamReport { trigger: \"manual\", reconciler: SpecialistReport { focus: 4, rounds: 2, writes: 2, rejected: 2 }, entity_keeper: SpecialistReport { focus: 1, rounds: 2, writes: 0, rejected: 0 }, took_ms: 100 })"
+========
+      "detail": "Some(DreamReport { trigger: \"manual\", reconciler: SpecialistReport { focus: 4, rounds: 2, writes: 2, rejected: 2 }, entity_keeper: SpecialistReport { focus: 1, rounds: 2, writes: 0, rejected: 0 }, took_ms: 80 })"
+>>>>>>>> origin/main:proofs/reconcile/2026-10-21T035723Z/proof.json
     },
     {
       "claim": "the reconciler is offered exactly its tools: reads plus link, invalidate and merge, and no delete",

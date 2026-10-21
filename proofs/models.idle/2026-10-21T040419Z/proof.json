@@ -2,9 +2,15 @@
   "feature": "models.idle",
   "scenario": "models-idle",
   "passed": true,
+<<<<<<<< HEAD:proofs/models.idle/2026-10-21T040419Z/proof.json
   "started_at": "2026-10-21T040419Z",
   "duration_ms": 7719,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035650Z",
+  "duration_ms": 4300,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/models.idle/2026-10-21T035650Z/proof.json
   "models": "real llama.cpp models",
   "failure": null,
   "checks": [
@@ -41,7 +47,11 @@
     {
       "claim": "the next search transparently reloads and preserves its answer; reload latency recorded",
       "passed": true,
+<<<<<<<< HEAD:proofs/models.idle/2026-10-21T040419Z/proof.json
       "detail": "reload 962.21 ms; Some([\"Edge's ship date is November 1, 2026.\"])"
+========
+      "detail": "reload 591.80 ms; Some([\"Edge's ship date is November 1, 2026.\"])"
+>>>>>>>> origin/main:proofs/models.idle/2026-10-21T035650Z/proof.json
     },
     {
       "claim": "a configured idle_unload overrides the fifteen-minute default without restarting",

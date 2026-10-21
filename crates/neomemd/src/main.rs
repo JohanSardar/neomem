@@ -3,6 +3,7 @@ mod daemon_clock;
 mod dispatch;
 mod http;
 mod instance;
+mod mcp;
 mod socket;
 mod watcher;
 

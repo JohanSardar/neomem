@@ -3,6 +3,7 @@ mod connection;
 mod hook;
 mod intake_record;
 mod login;
+mod mcp;
 mod recall;
 mod render;
 mod time_argument;
@@ -27,6 +28,7 @@ fn main() -> ExitCode {
     }
     let cli = Cli::parse();
     match run(&cli) {
+        Ok(Outcome::Relayed) => ExitCode::SUCCESS,
         Ok(Outcome::Answered(response)) => render::print(&response, cli.json),
         Ok(Outcome::Spooled(path)) => render::print_spooled(&path, cli.json),
         Err(error) => {
@@ -37,6 +39,7 @@ fn main() -> ExitCode {
 }
 
 enum Outcome {
+    Relayed,
     Answered(Response),
     Spooled(PathBuf),
 }
@@ -46,6 +49,7 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
     let request = match &cli.command {
         Command::Recall(arguments) => return recall::run(&home, arguments).map(Outcome::Answered),
         Command::Hook { .. } => return Ok(Outcome::Answered(Response::Captured)),
+        Command::Mcp => return mcp::run().map(|()| Outcome::Relayed),
         Command::Tags { new } => Request::Tags { new: new.clone() },
         Command::Link { external, to, kind } => Request::Link {
             external: external.parse()?,

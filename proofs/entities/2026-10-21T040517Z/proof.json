@@ -2,9 +2,15 @@
   "feature": "entities",
   "scenario": "entities",
   "passed": true,
+<<<<<<<< HEAD:proofs/entities/2026-10-21T040517Z/proof.json
   "started_at": "2026-10-21T040517Z",
   "duration_ms": 279,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035744Z",
+  "duration_ms": 370,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/entities/2026-10-21T035744Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [

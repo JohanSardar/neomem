@@ -11,6 +11,8 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
+    #[command(about = "Serve neomem's tools over MCP on stdio, relayed to the daemon")]
+    Mcp,
     #[command(about = "List the tag registry, or add a tag after checking it is not a near-duplicate")]
     Tags {
         #[arg(long)]

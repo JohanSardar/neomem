@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use neomem_core::{Clock, EpochMs};
 use neomem_engine::Engine;
 use neomem_proto::{Failure, FailureKind, IncomingEnvelope, PROTOCOL_VERSION, Request, Response};
 
@@ -14,6 +15,10 @@ pub struct Dispatcher {
 impl Dispatcher {
     pub fn new(engine: Arc<Engine>, clock: Arc<DaemonClock>) -> Self {
         Self { engine, clock }
+    }
+
+    pub fn now(&self) -> EpochMs {
+        self.clock.now()
     }
 
     pub fn engine(&self) -> &Arc<Engine> {

@@ -2,26 +2,44 @@
   "feature": "capture.codex",
   "scenario": "capture-codex",
   "passed": true,
+<<<<<<<< HEAD:proofs/capture.codex/2026-10-21T040519Z/proof.json
   "started_at": "2026-10-21T040519Z",
   "duration_ms": 1711,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035746Z",
+  "duration_ms": 1754,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/capture.codex/2026-10-21T035746Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "hook with stalled stdin still exits zero silently within 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.codex/2026-10-21T040519Z/proof.json
       "detail": "21.667 ms"
+========
+      "detail": "22.002 ms"
+>>>>>>>> origin/main:proofs/capture.codex/2026-10-21T035746Z/proof.json
     },
     {
       "claim": "large hook payload is spooled silently within 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.codex/2026-10-21T040519Z/proof.json
       "detail": "3.096 ms"
+========
+      "detail": "5.659 ms"
+>>>>>>>> origin/main:proofs/capture.codex/2026-10-21T035746Z/proof.json
     },
     {
       "claim": "offline hook exits zero silently within 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.codex/2026-10-21T040519Z/proof.json
       "detail": "1.190 ms"
+========
+      "detail": "1.995 ms"
+>>>>>>>> origin/main:proofs/capture.codex/2026-10-21T035746Z/proof.json
     },
     {
       "claim": "offline signal is spooled",
@@ -51,7 +69,7 @@
     {
       "claim": "spooled signal drains after daemon startup",
       "passed": true,
-      "detail": "spool drained"
+      "detail": "0 files pending"
     },
     {
       "claim": "session extraction waits five minutes after the last message",
@@ -71,7 +89,11 @@
     {
       "claim": "online hook p95 stays below 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.codex/2026-10-21T040519Z/proof.json
       "detail": "p95 1.427 ms"
+========
+      "detail": "p95 1.984 ms"
+>>>>>>>> origin/main:proofs/capture.codex/2026-10-21T035746Z/proof.json
     },
     {
       "claim": "path aliases cannot duplicate captured turns",

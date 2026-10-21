@@ -2,9 +2,15 @@
   "feature": "decay",
   "scenario": "decay",
   "passed": true,
+<<<<<<<< HEAD:proofs/decay/2026-10-21T040456Z/proof.json
   "started_at": "2026-10-21T040456Z",
   "duration_ms": 494,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035723Z",
+  "duration_ms": 448,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/decay/2026-10-21T035723Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [

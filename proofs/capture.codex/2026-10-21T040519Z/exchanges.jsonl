@@ -1,1 +1,5 @@
+<<<<<<<< HEAD:proofs/capture.codex/2026-10-21T040519Z/exchanges.jsonl
 {"request":{"protocol":1,"request":{"arguments":{"agent":"codex","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-ToRwnU/capture/codex/sessions/./rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":0.309676}
+========
+{"request":{"protocol":1,"request":{"arguments":{"agent":"codex","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-yPlmF6/capture/codex/sessions/./rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":0.5172990000000001}
+>>>>>>>> origin/main:proofs/capture.codex/2026-10-21T035746Z/exchanges.jsonl

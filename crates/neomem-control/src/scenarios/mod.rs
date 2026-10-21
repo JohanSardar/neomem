@@ -16,6 +16,7 @@ mod index;
 mod intake;
 mod latest;
 mod links;
+pub(crate) mod mcp;
 pub(crate) mod models_embed;
 mod models_idle;
 mod models_judge;
@@ -43,6 +44,7 @@ pub struct Scenario {
 }
 
 pub const ALL: &[Scenario] = &[
+    Scenario { name: "mcp", run: mcp::prove },
     Scenario { name: "contract", run: contract::prove },
     Scenario { name: "recall-gate", run: recall_gate::prove },
     Scenario { name: "recall-plan", run: recall_plan::prove },

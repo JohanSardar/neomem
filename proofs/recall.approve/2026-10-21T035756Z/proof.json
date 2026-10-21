@@ -1,0 +1,61 @@
+{
+  "feature": "recall.approve",
+  "scenario": "recall-approve",
+  "passed": true,
+<<<<<<<< HEAD:proofs/recall.approve/2026-10-21T040528Z/proof.json
+  "started_at": "2026-10-21T040528Z",
+  "duration_ms": 348,
+  "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035756Z",
+  "duration_ms": 347,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/recall.approve/2026-10-21T035756Z/proof.json
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "one approval call keeps P >= 0.7 and drops P < 0.7",
+      "passed": true,
+<<<<<<<< HEAD:proofs/recall.approve/2026-10-21T040528Z/proof.json
+      "detail": "1 memories; 9.5 ms"
+========
+      "detail": "1 memories; 9.9 ms"
+>>>>>>>> origin/main:proofs/recall.approve/2026-10-21T035756Z/proof.json
+    },
+    {
+      "claim": "a fact is never injected twice in the same session, even after restarting",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "claim": "at most five approved facts are injected",
+      "passed": true,
+      "detail": "5"
+    },
+    {
+      "claim": "a replaced fact is never injected",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "claim": "a locked state writer fails open without waiting past the deadline",
+      "passed": true,
+<<<<<<<< HEAD:proofs/recall.approve/2026-10-21T040528Z/proof.json
+      "detail": "11.4 ms"
+========
+      "detail": "10.5 ms"
+>>>>>>>> origin/main:proofs/recall.approve/2026-10-21T035756Z/proof.json
+    },
+    {
+      "claim": "a failed state transaction does not mark any fact as injected",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "claim": "recall log stores IDs, scores, counts, model IDs and timings without content",
+      "passed": true,
+      "detail": "5 typed metadata records; boundary score found: true"
+    }
+  ]
+}

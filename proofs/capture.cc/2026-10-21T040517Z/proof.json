@@ -2,26 +2,44 @@
   "feature": "capture.cc",
   "scenario": "capture-cc",
   "passed": true,
+<<<<<<<< HEAD:proofs/capture.cc/2026-10-21T040517Z/proof.json
   "started_at": "2026-10-21T040517Z",
   "duration_ms": 1714,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035744Z",
+  "duration_ms": 1925,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/capture.cc/2026-10-21T035744Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "hook with stalled stdin still exits zero silently within 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.cc/2026-10-21T040517Z/proof.json
       "detail": "21.691 ms"
+========
+      "detail": "25.224 ms"
+>>>>>>>> origin/main:proofs/capture.cc/2026-10-21T035744Z/proof.json
     },
     {
       "claim": "large hook payload is spooled silently within 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.cc/2026-10-21T040517Z/proof.json
       "detail": "3.843 ms"
+========
+      "detail": "8.309 ms"
+>>>>>>>> origin/main:proofs/capture.cc/2026-10-21T035744Z/proof.json
     },
     {
       "claim": "offline hook exits zero silently within 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.cc/2026-10-21T040517Z/proof.json
       "detail": "1.547 ms"
+========
+      "detail": "2.814 ms"
+>>>>>>>> origin/main:proofs/capture.cc/2026-10-21T035744Z/proof.json
     },
     {
       "claim": "offline signal is spooled",
@@ -46,7 +64,7 @@
     {
       "claim": "spooled signal drains after daemon startup",
       "passed": true,
-      "detail": "spool drained"
+      "detail": "0 files pending"
     },
     {
       "claim": "session extraction waits five minutes after the last message",
@@ -66,7 +84,11 @@
     {
       "claim": "online hook p95 stays below 50 ms",
       "passed": true,
+<<<<<<<< HEAD:proofs/capture.cc/2026-10-21T040517Z/proof.json
       "detail": "p95 1.436 ms"
+========
+      "detail": "p95 8.354 ms"
+>>>>>>>> origin/main:proofs/capture.cc/2026-10-21T035744Z/proof.json
     },
     {
       "claim": "path aliases cannot duplicate captured turns",

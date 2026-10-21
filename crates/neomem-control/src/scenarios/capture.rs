@@ -73,7 +73,7 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries, agent: &str) -> anyhow::
     proof.claim(
         "spooled signal drains after daemon startup",
         neomem_proto::spool::spooled(isolated.home()).is_empty(),
-        "spool drained",
+        format!("{} files pending", neomem_proto::spool::spooled(isolated.home()).len()),
     );
     let db = Connection::open(isolated.home().state_db_path())?;
     let delayed: i64 =
@@ -357,10 +357,10 @@ fn count_intake(isolated: &IsolatedNeomem) -> anyhow::Result<i64> {
 fn wait_for(isolated: &IsolatedNeomem, text: &str) -> anyhow::Result<()> {
     let deadline = Instant::now() + Duration::from_secs(5);
     while Instant::now() < deadline {
-        if contents(isolated)?.contains(text) {
+        if contents(isolated)?.contains(text) && neomem_proto::spool::spooled(isolated.home()).is_empty() {
             return Ok(());
         }
         thread::sleep(Duration::from_millis(20));
     }
-    anyhow::bail!("capture did not log {text}")
+    anyhow::bail!("capture did not log {text} and drain the spool")
 }

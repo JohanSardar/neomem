@@ -2,9 +2,15 @@
   "feature": "contract",
   "scenario": "contract",
   "passed": true,
+<<<<<<<< HEAD:proofs/contract/2026-10-21T040528Z/proof.json
   "started_at": "2026-10-21T040528Z",
   "duration_ms": 196,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035756Z",
+  "duration_ms": 190,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/contract/2026-10-21T035756Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [

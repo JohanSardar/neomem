@@ -2,21 +2,35 @@
   "feature": "recall.plan",
   "scenario": "recall-plan",
   "passed": true,
+<<<<<<<< HEAD:proofs/recall.plan/2026-10-21T040524Z/proof.json
   "started_at": "2026-10-21T040524Z",
   "duration_ms": 3718,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035752Z",
+  "duration_ms": 3727,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/recall.plan/2026-10-21T035752Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "streamed lines enter search before the planner finishes",
       "passed": true,
+<<<<<<<< HEAD:proofs/recall.plan/2026-10-21T040524Z/proof.json
       "detail": "first search Some(122.011576) ms; total 966.7 ms"
+========
+      "detail": "first search Some(122.541942) ms; total 968.0 ms"
+>>>>>>>> origin/main:proofs/recall.plan/2026-10-21T035752Z/proof.json
     },
     {
       "claim": "a slow planner falls back at 2.5 s and recall finishes under 3.5 s",
       "passed": true,
+<<<<<<<< HEAD:proofs/recall.plan/2026-10-21T040524Z/proof.json
       "detail": "3 queries; 2506.5 ms"
+========
+      "detail": "3 queries; 2507.1 ms"
+>>>>>>>> origin/main:proofs/recall.plan/2026-10-21T035752Z/proof.json
     }
   ]
 }

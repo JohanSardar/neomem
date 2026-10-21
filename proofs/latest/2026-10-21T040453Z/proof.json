@@ -2,9 +2,15 @@
   "feature": "latest",
   "scenario": "latest",
   "passed": true,
+<<<<<<<< HEAD:proofs/latest/2026-10-21T040453Z/proof.json
   "started_at": "2026-10-21T040453Z",
   "duration_ms": 1370,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035720Z",
+  "duration_ms": 1483,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/latest/2026-10-21T035720Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [

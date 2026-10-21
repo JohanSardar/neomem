@@ -2,16 +2,26 @@
   "feature": "models.swap",
   "scenario": "models-swap",
   "passed": true,
+<<<<<<<< HEAD:proofs/models.swap/2026-10-21T040416Z/proof.json
   "started_at": "2026-10-21T040416Z",
   "duration_ms": 2848,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035648Z",
+  "duration_ms": 2052,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/models.swap/2026-10-21T035648Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "swapping the planner changes its very next call",
       "passed": true,
+<<<<<<<< HEAD:proofs/models.swap/2026-10-21T040416Z/proof.json
       "detail": "ModelTested(ModelTestReport { role: Planner, model: \"openai:new-planner\", latency_ms: 4.582336000000001, first_text_ms: Some(4.482658), answer: \"OK\", scores: [] })"
+========
+      "detail": "ModelTested(ModelTestReport { role: Planner, model: \"openai:new-planner\", latency_ms: 6.357099, first_text_ms: Some(6.285086), answer: \"OK\", scores: [] })"
+>>>>>>>> origin/main:proofs/models.swap/2026-10-21T035648Z/proof.json
     },
     {
       "claim": "models use persists the new embedder assignment",
@@ -56,7 +66,11 @@
     {
       "claim": "a direct config edit also reloads a role on its next call",
       "passed": true,
+<<<<<<<< HEAD:proofs/models.swap/2026-10-21T040416Z/proof.json
       "detail": "ModelTested(ModelTestReport { role: Planner, model: \"openai:edited-planner\", latency_ms: 10.74316, first_text_ms: Some(10.478587), answer: \"OK\", scores: [] })"
+========
+      "detail": "ModelTested(ModelTestReport { role: Planner, model: \"openai:edited-planner\", latency_ms: 2.705734, first_text_ms: Some(2.613303), answer: \"OK\", scores: [] })"
+>>>>>>>> origin/main:proofs/models.swap/2026-10-21T035648Z/proof.json
     }
   ]
 }

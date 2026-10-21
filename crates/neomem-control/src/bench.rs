@@ -121,7 +121,23 @@ fn search_benches(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> {
         neomem.neomem(&["search", &format!("{text} end to end")])?;
         Ok(())
     })?;
+    let mut mcp = crate::scenarios::mcp::StdioClient::open(&neomem)?;
+    mcp.call("initialize", serde_json::json!({"protocolVersion":"2025-03-26", "capabilities":{}, "clientInfo":{"name":"bench","version":"1"}}))?;
+    let mut asked = queries.iter().cycle();
+    let mcp_latency = timing::measure(60, || {
+        let text = asked.next().map_or("Edge", String::as_str);
+        let response = mcp.call(
+            "tools/call",
+            serde_json::json!({"name":"search","arguments":{"text":format!("{text} MCP")}}),
+        )?;
+        anyhow::ensure!(
+            response["result"]["isError"] != true && response["error"].is_null(),
+            "MCP search failed: {response}"
+        );
+        Ok(())
+    })?;
     Ok(vec![
+        BenchResult::from("mcp_search_stdio_real_embedder", 60, Some(30.0), mcp_latency),
         BenchResult::from("search_socket_real_embedder", 60, Some(30.0), socket),
         BenchResult::from("search_end_to_end_real_embedder", 60, Some(30.0), end_to_end),
     ])

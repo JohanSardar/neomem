@@ -2,36 +2,62 @@
   "feature": "daemon",
   "scenario": "daemon",
   "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-21T040326Z/proof.json
   "started_at": "2026-10-21T040326Z",
   "duration_ms": 164,
   "code_version": "1d4c609e9d76",
+========
+  "started_at": "2026-10-21T035546Z",
+  "duration_ms": 420,
+  "code_version": "765a9c6a03c0-dirty",
+>>>>>>>> origin/main:proofs/daemon/2026-10-21T035546Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "status over the socket names the current protocol and the isolated home",
       "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-21T040326Z/proof.json
       "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-IICarZ\", pid: 352712, uptime_ms: 14, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+========
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-czxQ9J\", pid: 274659, uptime_ms: 54, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+>>>>>>>> origin/main:proofs/daemon/2026-10-21T035546Z/proof.json
     },
     {
       "claim": "a socket request and reply takes under 0.5 ms at the median",
       "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-21T040326Z/proof.json
       "detail": "p50 0.036 ms, p95 0.041 ms, max 0.095 ms"
+========
+      "detail": "p50 0.063 ms, p95 0.285 ms, max 3.727 ms"
+>>>>>>>> origin/main:proofs/daemon/2026-10-21T035546Z/proof.json
     },
     {
       "claim": "neomem status --json prints the daemon's status",
       "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-21T040326Z/proof.json
       "detail": "{\"reply\":\"status\",\"body\":{\"daemon_version\":\"0.1.0\",\"protocol\":1,\"home\":\"/tmp/neomemctl-IICarZ\",\"pid\":352712,\"uptime_ms\":24,\"index\":{\"facts\":0,\"entities\":0,\"links\":0,\"names\":0,\"vectors\":0,\"model\":\"openai:hash-256\"}}}\n"
+========
+      "detail": "{\"reply\":\"status\",\"body\":{\"daemon_version\":\"0.1.0\",\"protocol\":1,\"home\":\"/tmp/neomemctl-czxQ9J\",\"pid\":274659,\"uptime_ms\":89,\"index\":{\"facts\":0,\"entities\":0,\"links\":0,\"names\":0,\"vectors\":0,\"model\":\"openai:hash-256\"}}}\n"
+>>>>>>>> origin/main:proofs/daemon/2026-10-21T035546Z/proof.json
     },
     {
       "claim": "neomem status answers end to end within 25 ms at the median (the 2-5 ms budget is checked by neomemctl bench on release builds)",
       "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-21T040326Z/proof.json
       "detail": "p50 2.040 ms, p95 2.347 ms, max 2.389 ms"
+========
+      "detail": "p50 7.159 ms, p95 9.643 ms, max 10.213 ms"
+>>>>>>>> origin/main:proofs/daemon/2026-10-21T035546Z/proof.json
     },
     {
       "claim": "HTTP POST /v1/request answers status with the same handler",
       "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-21T040326Z/proof.json
       "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-IICarZ\", pid: 352712, uptime_ms: 68, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+========
+      "detail": "Status(StatusReport { daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-czxQ9J\", pid: 274659, uptime_ms: 242, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+>>>>>>>> origin/main:proofs/daemon/2026-10-21T035546Z/proof.json
     },
     {
       "claim": "a client on another protocol version gets version_mismatch",
@@ -46,12 +72,20 @@
     {
       "claim": "neomem status starts a stopped daemon and answers within 2 seconds",
       "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-21T040326Z/proof.json
       "detail": "23.058099ms"
+========
+      "detail": "40.989838ms"
+>>>>>>>> origin/main:proofs/daemon/2026-10-21T035546Z/proof.json
     },
     {
       "claim": "a home too long for a Unix socket path still gets a working socket elsewhere",
       "passed": true,
+<<<<<<<< HEAD:proofs/daemon/2026-10-21T040326Z/proof.json
       "detail": "/run/user/1000/neomem-6e9de4f7610702ef.sock"
+========
+      "detail": "/run/user/1000/neomem-40c0e91e018decad.sock"
+>>>>>>>> origin/main:proofs/daemon/2026-10-21T035546Z/proof.json
     }
   ]
 }
