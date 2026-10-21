@@ -117,6 +117,8 @@ impl Engine {
             Request::Resolve { name } => self.resolve(&name),
             Request::Entity { name } => self.entity(&name),
             Request::Show { id } => self.show(id),
+            Request::History { id } => self.history(id),
+            Request::Useful { id } => self.mark_useful(id),
             Request::Models => self.model_roster(),
             Request::ModelsTest { role, source, structured, inputs } => {
                 self.test_model(ModelProbe { role, source: source.as_ref(), structured, inputs: &inputs })
