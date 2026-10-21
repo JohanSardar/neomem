@@ -3,6 +3,7 @@ use std::fs;
 use std::io;
 use std::os::unix::fs::symlink;
 use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
 
 use neomem_proto::{Home, InstallOutcome, InstallReport, InstallStep, Response, publish_file};
 
@@ -47,6 +48,10 @@ const TEMPLATES: &[Template] = &[
         path: "agents-plugin/hooks/codex.json",
         text: include_str!("../../../integrations/agents-plugin/hooks/codex.json"),
     },
+    Template { path: "pi/package.json", text: include_str!("../../../integrations/pi/package.json") },
+    Template { path: "pi/index.js", text: include_str!("../../../integrations/pi/index.js") },
+    Template { path: "pi/socket.js", text: include_str!("../../../integrations/pi/socket.js") },
+    Template { path: "pi/README.md", text: include_str!("../../../integrations/pi/README.md") },
     Template {
         path: "skills/neomem/SKILL.md",
         text: include_str!("../../../integrations/skills/neomem/SKILL.md"),
@@ -83,6 +88,7 @@ pub fn run(home: &Home) -> anyhow::Result<Response> {
     steps.push(link_skill("skill for Claude Code", &places.claude.join("skills/neomem"), &root));
     steps.push(claude_code(&root));
     steps.push(codex(&root, &places.user_home));
+    steps.push(pi(&root));
     steps.push(service(home));
     Ok(Response::Installed(InstallReport { steps }))
 }
@@ -217,6 +223,27 @@ fn codex(root: &Path, user_home: &Path) -> InstallStep {
     match codex_hooks::trust(PLUGIN, user_home) {
         Ok(count) => step("Codex", InstallOutcome::Done, format!("plugin {PLUGIN}, {count} hooks trusted")),
         Err(problem) => step("Codex", InstallOutcome::Failed, problem),
+    }
+}
+
+fn pi(root: &Path) -> InstallStep {
+    if !installed("pi") {
+        return step("pi", InstallOutcome::Skipped, "pi is not installed");
+    }
+    let package = root.join("pi");
+    let dependencies = Command::new("npm")
+        .args(["install", "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund"])
+        .current_dir(&package)
+        .stdin(Stdio::null())
+        .output();
+    if !succeeded(&dependencies) {
+        return step("pi", InstallOutcome::Failed, format!("npm install: {}", described(&dependencies)));
+    }
+    let added = quietly("pi", &["install", &package.display().to_string()]);
+    if succeeded(&added) {
+        step("pi", InstallOutcome::Done, format!("package {}", package.display()))
+    } else {
+        step("pi", InstallOutcome::Failed, described(&added))
     }
 }
 
