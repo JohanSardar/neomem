@@ -20,7 +20,7 @@ pub(crate) struct ExtractionInput {
 impl ExtractionInput {
     pub(crate) fn request(&self) -> LlmRequest {
         LlmRequest {
-            system: INSTRUCTIONS.to_owned(),
+            system: INSTRUCTIONS.replace("{schema}", OUTPUT_SCHEMA),
             messages: vec![LlmMessage::User(self.message())],
             response_schema: Some(OUTPUT_SCHEMA.to_owned()),
             tools: Vec::new(),

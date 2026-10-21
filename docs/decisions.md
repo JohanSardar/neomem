@@ -61,5 +61,9 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - Eval uses SHA-256(seed:question ID) ordering within question types, round-robin development sampling (abstentions separate), the unselected IDs as held-out, and source-session coverage for retrieval recall; abstentions have no retrieval denominator.
 - Eval uses a JSON model manifest containing daemon TOML and fixed OpenAI-compatible reader/judge endpoints, caps memory context in characters, and reports the provider's actual prompt-token usage.
 - Eval replaces only capture paths, HTTP binding and intake debounce (one second, large batch) inside temporary daemon configs; it waits for zero pending/claimed jobs, rejects failed jobs, then awaits serialized manual consolidation before searching.
+- Extraction includes its output schema in the model-visible prompt as well as the wire response format: local OpenAI-compatible grammar servers constrain decoding without teaching the model the required object shape.
+- Eval interprets offset-free benchmark dates as UTC and starts each daemon with TZ=UTC so model-visible dates preserve the benchmark calendar.
+- LongMemEval abstention variants retain original positive evidence-session IDs; eval excludes those IDs from retrieval denominators while grading abstention with the official prompt.
+- The consolidation proof seeds 69 records (50-fact trigger plus the largest deferred 19-record intake batch) so intake batching cannot hide the consolidation trigger.
 - recall.hooks: empty recall slices use the adapter’s last 16 active-branch transcript turns, located through the daemon’s capture cursor (at most 16,000 characters); pi ships plain JavaScript and uses the same TOML switch precedence and framed socket/spool envelopes as the CLI.
 - The pi smoke proof follows npm’s installed global bin/pi entrypoint instead of hardcoding either pi package name.

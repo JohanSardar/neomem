@@ -47,6 +47,10 @@ fn answer_text<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Stri
 }
 
 impl BenchmarkItem {
+    pub fn evidence_sessions(&self) -> &[String] {
+        if self.category() == "abstention" { &[] } else { &self.answer_session_ids }
+    }
+
     pub fn category(&self) -> &str {
         if self.question_id.ends_with("_abs") { "abstention" } else { &self.question_type }
     }
@@ -149,6 +153,15 @@ mod tests {
         fixture[0]["answer"] = serde_json::json!(3);
         let questions: Vec<BenchmarkItem> = serde_json::from_value(fixture).unwrap();
         assert_eq!(questions[0].answer, "3");
+    }
+
+    #[test]
+    fn abstentions_ignore_retained_positive_evidence_ids() {
+        let fixture = include_str!("../../../.agents/skills/neomem-control/fixtures/eval/questions.json");
+        let questions: Vec<BenchmarkItem> = serde_json::from_str(fixture).unwrap();
+        let abstention = questions.iter().find(|q| q.category() == "abstention").unwrap();
+        assert_ne!(abstention.answer_session_ids, [] as [String; 0]);
+        assert_eq!(abstention.evidence_sessions(), [] as [String; 0]);
     }
 
     #[test]
