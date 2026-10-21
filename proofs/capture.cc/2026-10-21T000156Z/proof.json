@@ -2,26 +2,26 @@
   "feature": "capture.cc",
   "scenario": "capture-cc",
   "passed": true,
-  "started_at": "2026-10-20T235820Z",
-  "duration_ms": 2006,
-  "code_version": "6885eef50c57-dirty",
+  "started_at": "2026-10-21T000156Z",
+  "duration_ms": 2254,
+  "code_version": "12d30ac0b343-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "hook with stalled stdin still exits zero silently within 50 ms",
       "passed": true,
-      "detail": "28.387 ms"
+      "detail": "45.655 ms"
     },
     {
       "claim": "large hook payload is spooled silently within 50 ms",
       "passed": true,
-      "detail": "11.857 ms"
+      "detail": "33.773 ms"
     },
     {
       "claim": "offline hook exits zero silently within 50 ms",
       "passed": true,
-      "detail": "7.913 ms"
+      "detail": "7.879 ms"
     },
     {
       "claim": "offline signal is spooled",
@@ -66,7 +66,7 @@
     {
       "claim": "online hook p95 stays below 50 ms",
       "passed": true,
-      "detail": "p95 8.179 ms"
+      "detail": "p95 14.025 ms"
     },
     {
       "claim": "path aliases cannot duplicate captured turns",
