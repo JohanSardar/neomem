@@ -37,6 +37,8 @@ pub enum Response {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct StatusReport {
+    #[serde(default)]
+    pub extraction: Option<(usize, usize)>,
     pub daemon_version: String,
     pub protocol: u32,
     pub home: String,

@@ -62,6 +62,25 @@ const READY_BATCH: &str = "SELECT batch_key FROM jobs
     LIMIT 1";
 
 impl StateDb {
+    pub fn extraction_counts(&self) -> Result<(usize, usize), StateError> {
+        self.read(|connection| {
+            let pending: i64 = connection.query_row(
+                "SELECT count(*) FROM jobs WHERE kind = 'extract' AND state IN ('pending', 'claimed')",
+                [],
+                |row| row.get(0),
+            )?;
+            let failed: i64 = connection.query_row(
+                "SELECT count(*) FROM jobs WHERE kind = 'extract' AND state = 'failed'",
+                [],
+                |row| row.get(0),
+            )?;
+            Ok((
+                usize::try_from(pending).unwrap_or(usize::MAX),
+                usize::try_from(failed).unwrap_or(usize::MAX),
+            ))
+        })
+    }
+
     pub fn pending_in_batch(&self, batch: &BatchKey) -> Result<usize, StateError> {
         self.read(|connection| {
             let count: i64 = connection.query_row(

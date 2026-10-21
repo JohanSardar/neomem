@@ -121,5 +121,6 @@ fn completion(answer: &ScriptedAnswer, body: &Value) -> Value {
             .collect();
     }
     json!({ "id": "chatcmpl-fake", "object": "chat.completion", "model": body["model"],
-        "choices": [{ "index": 0, "message": message, "finish_reason": "stop" }] })
+        "choices": [{ "index": 0, "message": message, "finish_reason": "stop" }],
+        "usage": { "prompt_tokens": 12, "completion_tokens": answer.deltas.len() } })
 }

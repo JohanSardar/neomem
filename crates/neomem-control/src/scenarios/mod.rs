@@ -10,6 +10,7 @@ mod decay;
 mod drift;
 mod entities;
 mod entity;
+mod eval;
 mod extract;
 mod history;
 mod index;
@@ -44,6 +45,7 @@ pub struct Scenario {
 }
 
 pub const ALL: &[Scenario] = &[
+    Scenario { name: "eval", run: eval::prove },
     Scenario { name: "mcp", run: mcp::prove },
     Scenario { name: "contract", run: contract::prove },
     Scenario { name: "recall-gate", run: recall_gate::prove },

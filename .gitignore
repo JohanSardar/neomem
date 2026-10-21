@@ -5,3 +5,4 @@ models/
 diagram/video/
 .DS_Store
 .claude/
+eval-data/
