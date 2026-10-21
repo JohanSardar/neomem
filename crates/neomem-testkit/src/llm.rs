@@ -110,6 +110,9 @@ impl ScriptedLlm {
                 delta_delay_ms: rule.delta_delay_ms,
             };
         }
+        if let Some(LlmMessage::ToolResult { content, .. }) = request.messages.last() {
+            return ScriptedAnswer::of_text(&format!("The tool answered: {content}"));
+        }
         if let Some(tool) = request.tools.first() {
             let schema = serde_json::from_str(&tool.parameters_schema).unwrap_or(Value::Null);
             let call = ToolCall {
@@ -118,9 +121,6 @@ impl ScriptedLlm {
                 arguments: example_for(&schema).to_string(),
             };
             return ScriptedAnswer { tool_calls: vec![call], ..ScriptedAnswer::default() };
-        }
-        if let Some(LlmMessage::ToolResult { content, .. }) = request.messages.last() {
-            return ScriptedAnswer::of_text(&format!("The tool answered: {content}"));
         }
         if request.system.contains(EXTRACTOR_MARKER) {
             return ScriptedAnswer::of_text(&default_extraction(&last_user_text(request)).to_string());
