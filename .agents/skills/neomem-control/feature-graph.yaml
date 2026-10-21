@@ -5,7 +5,7 @@
   depends_on: []
   proof: daemon
   status: proven
-  last_proof: proofs/daemon/2026-10-21T050500Z
+  last_proof: proofs/daemon/2026-10-21T054033Z
 - id: intake
   does: copies every intake record into the intake log with an int_ ID before any processing and queues its extraction job
   reached_via: [neomem add]
@@ -13,7 +13,7 @@
   depends_on: [daemon]
   proof: intake
   status: proven
-  last_proof: proofs/intake/2026-10-21T050500Z
+  last_proof: proofs/intake/2026-10-21T054038Z
 - id: spool
   does: writes capture signals and adds to spool/ while the daemon is down and drains them when it is back
   reached_via: [neomem add]
@@ -21,7 +21,7 @@
   depends_on: [intake]
   proof: spool
   status: proven
-  last_proof: proofs/spool/2026-10-21T050500Z
+  last_proof: proofs/spool/2026-10-21T054038Z
 - id: raw
   does: keyword and date search over the raw intake log, without decay; search falls back to it when the daemon cannot start
   reached_via: [neomem raw, neomem search]
@@ -29,7 +29,7 @@
   depends_on: [intake]
   proof: raw
   status: proven
-  last_proof: proofs/raw/2026-10-21T050500Z
+  last_proof: proofs/raw/2026-10-21T054038Z
 - id: correct
   does: marks an intake record as logged incorrectly, hides facts drawn only from it and queues them for re-checking
   reached_via: [neomem correct]
@@ -37,7 +37,7 @@
   depends_on: [intake]
   proof: correct
   status: proven
-  last_proof: proofs/correct/2026-10-21T050525Z
+  last_proof: proofs/correct/2026-10-21T054056Z
 - id: vault
   does: keeps every fact and entity as a Markdown file with a YAML header, written atomically and committed to a local git repository with no remote
   reached_via: [daemon writer, daemon vault watcher]
@@ -45,7 +45,7 @@
   depends_on: [daemon]
   proof: vault
   status: proven
-  last_proof: proofs/vault/2026-10-21T050526Z
+  last_proof: proofs/vault/2026-10-21T054056Z
 - id: index
   does: keeps index.db and the in-memory snapshot (vectors, links, latest map, names) in step with the files and rebuilds them on demand
   reached_via: [neomem rebuild]
@@ -53,7 +53,7 @@
   depends_on: [vault]
   proof: index
   status: proven
-  last_proof: proofs/index/2026-10-21T050533Z
+  last_proof: proofs/index/2026-10-21T054104Z
 - id: drift
   does: the nightly drift check finds differences between the files and index.db and repairs them
   reached_via: [daemon nightly drift check]
@@ -61,7 +61,7 @@
   depends_on: [index]
   proof: drift
   status: proven
-  last_proof: proofs/drift/2026-10-21T050536Z
+  last_proof: proofs/drift/2026-10-21T054104Z
 - id: models.embed
   does: embeds text locally with llama.cpp (Vulkan, CUDA, CPU or Metal) or any OpenAI-compatible embeddings endpoint, with a small query cache
   reached_via: [neomem models, neomem models test]
@@ -69,7 +69,7 @@
   depends_on: [daemon]
   proof: models-embed
   status: proven
-  last_proof: proofs/models.embed/2026-10-21T050536Z
+  last_proof: proofs/models.embed/2026-10-21T054105Z
 - id: models.judge
   does: typed decisions with probabilities from Jev, falling back to a local llama.cpp reranker when Jev is missing, slow or down
   reached_via: [neomem models test]
@@ -77,8 +77,7 @@
   depends_on: [daemon]
   proof: models-judge
   status: proven
-  last_proof: proofs/models.judge/2026-10-21T050543Z
-  blocked: "needs-user: live Jev verification requires JEV_API_KEY in the environment; fake Jev and the local fallback are proven"
+  last_proof: proofs/models.judge/2026-10-21T054107Z
 - id: models.llm
   does: structured completions from every provider kind (openai, anthropic, chatgpt, codex, command) with effort levels and one retry on invalid output
   reached_via: [neomem models test, neomem login]
@@ -86,7 +85,7 @@
   depends_on: [daemon]
   proof: models-llm
   status: proven
-  last_proof: proofs/models.llm/2026-10-21T050600Z
+  last_proof: proofs/models.llm/2026-10-21T054119Z
   blocked: "needs-user: live provider checks need the user: neomem login chatgpt needs a browser sign-in, openai and anthropic need API keys (none on this machine), and codex needs Codex's own login, which neomem must not use; every kind is proven against fakes"
 - id: models.swap
   does: swapping the embedder re-embeds every memory into a second vector set in the background and switches search over in one step
@@ -95,7 +94,7 @@
   depends_on: [models.embed, index]
   proof: models-swap
   status: proven
-  last_proof: proofs/models.swap/2026-10-21T050604Z
+  last_proof: proofs/models.swap/2026-10-21T054122Z
 - id: models.idle
   does: unloads local models after 15 minutes without a search or recall and reloads them on the next use
   reached_via: [neomem models, neomem models test]
@@ -103,7 +102,7 @@
   depends_on: [models.embed]
   proof: models-idle
   status: proven
-  last_proof: proofs/models.idle/2026-10-21T050606Z
+  last_proof: proofs/models.idle/2026-10-21T054124Z
 - id: extract
   does: the worker batches intake (5 minutes of session silence, compaction or session end), extracts facts and entities with one model call and writes them through the writer
   reached_via: [daemon worker, neomem reextract]
@@ -111,7 +110,7 @@
   depends_on: [intake, vault, index, models.llm]
   proof: extract
   status: proven
-  last_proof: proofs/extract/2026-10-21T050619Z
+  last_proof: proofs/extract/2026-10-21T054127Z
 - id: check
   does: checks each new fact against its 5 closest facts as same, extends, updates, contradicts or new, attaching evidence instead of duplicating
   reached_via: [daemon worker]
@@ -119,7 +118,7 @@
   depends_on: [extract, models.judge]
   proof: check
   status: proven
-  last_proof: proofs/check/2026-10-21T050631Z
+  last_proof: proofs/check/2026-10-21T054140Z
 - id: search
   does: the fixed search pipeline from query embedding through vector seeds, latest swap, one hop and ranking, with no model call besides the embedding
   reached_via: [neomem search]
@@ -127,7 +126,7 @@
   depends_on: [index, models.embed]
   proof: search
   status: proven
-  last_proof: proofs/search/2026-10-21T050644Z
+  last_proof: proofs/search/2026-10-21T054152Z
 - id: latest
   does: search only returns the newest version of a fact and puts the newer of two conflicting facts first, flagged
   reached_via: [neomem search]
@@ -135,7 +134,7 @@
   depends_on: [search, check]
   proof: latest
   status: proven
-  last_proof: proofs/latest/2026-10-21T050645Z
+  last_proof: proofs/latest/2026-10-21T054153Z
 - id: links
   does: adds useful linked facts and the entities a seed is about, scored without a model call
   reached_via: [neomem search]
@@ -143,7 +142,7 @@
   depends_on: [search]
   proof: links
   status: proven
-  last_proof: proofs/links/2026-10-21T050646Z
+  last_proof: proofs/links/2026-10-21T054153Z
 - id: history
   does: shows a fact's full update chain and answers as-of and include-invalid queries without decay
   reached_via: [neomem history, neomem search]
@@ -151,7 +150,7 @@
   depends_on: [latest]
   proof: history
   status: proven
-  last_proof: proofs/history/2026-10-21T050646Z
+  last_proof: proofs/history/2026-10-21T054153Z
 - id: entity
   does: shows an entity with aliases, facts, linked entities and external references, shows any memory file with its sources, and resolves names to entity IDs
   reached_via: [neomem entity, neomem show, neomem resolve]
@@ -159,7 +158,7 @@
   depends_on: [index]
   proof: entity
   status: proven
-  last_proof: proofs/entity/2026-10-21T050647Z
+  last_proof: proofs/entity/2026-10-21T054154Z
 - id: decay
   does: ranks facts by ACT-R activation over evidence events, squashed into 0.3 to 1.5, with per-kind rates and an explicit useful signal
   reached_via: [neomem useful, neomem search]
@@ -167,7 +166,7 @@
   depends_on: [search]
   proof: decay
   status: proven
-  last_proof: proofs/decay/2026-10-21T050647Z
+  last_proof: proofs/decay/2026-10-21T054154Z
 - id: reconcile
   does: the fact reconciler settles conflicts, updates and duplicate facts with capped tool rounds and real source IDs only
   reached_via: [neomem dream, daemon consolidation trigger]
@@ -175,7 +174,7 @@
   depends_on: [check]
   proof: reconcile
   status: proven
-  last_proof: proofs/reconcile/2026-10-21T050647Z
+  last_proof: proofs/reconcile/2026-10-21T054154Z
 - id: entities
   does: the entity keeper creates recurring entities, merges duplicates with aliases and merged_from, and records possibly_same
   reached_via: [neomem dream]
@@ -183,7 +182,7 @@
   depends_on: [reconcile]
   proof: entities
   status: proven
-  last_proof: proofs/entities/2026-10-21T050708Z
+  last_proof: proofs/entities/2026-10-21T054215Z
 - id: capture.cc
   does: reads Claude Code transcripts from their stored position into one intake record per turn after a hook signal (spooled while the daemon is down), folder change or sweep
   reached_via: [neomem hook, hook cc prompt, hook cc tool, hook cc stop, hook cc subagent-stop, hook cc compact, hook cc end]
@@ -191,7 +190,7 @@
   depends_on: [intake]
   proof: capture-cc
   status: proven
-  last_proof: proofs/capture.cc/2026-10-21T050709Z
+  last_proof: proofs/capture.cc/2026-10-21T054215Z
 - id: capture.codex
   does: reads Codex rollouts from their stored position, finding the file by session ID when the hook has no transcript path
   reached_via: [hook codex prompt, hook codex tool, hook codex stop, hook codex subagent-stop, hook codex compact, hook codex end]
@@ -199,7 +198,7 @@
   depends_on: [intake]
   proof: capture-codex
   status: proven
-  last_proof: proofs/capture.codex/2026-10-21T050711Z
+  last_proof: proofs/capture.codex/2026-10-21T054217Z
 - id: capture.pi
   does: reads pi session trees along the active branch after the extension's signals
   reached_via: [hook pi prompt, hook pi tool, hook pi stop, hook pi subagent-stop, hook pi compact, hook pi end]
@@ -207,7 +206,7 @@
   depends_on: [intake]
   proof: capture-pi
   status: proven
-  last_proof: proofs/capture.pi/2026-10-21T050713Z
+  last_proof: proofs/capture.pi/2026-10-21T054218Z
 - id: mcp
   does: serves the same tools over MCP on stdio (relayed to the daemon) and Streamable HTTP
   reached_via: [neomem mcp, http /mcp, mcp search, mcp add, mcp raw, mcp entity, mcp show, mcp history, mcp resolve, mcp tags, mcp link, mcp useful]
@@ -215,7 +214,7 @@
   depends_on: [search, intake]
   proof: mcp
   status: proven
-  last_proof: proofs/mcp/2026-10-21T050715Z
+  last_proof: proofs/mcp/2026-10-21T054221Z
 - id: skill
   does: the neomem skill teaches agents the command-line tool
   reached_via: [skill neomem]
@@ -223,7 +222,7 @@
   depends_on: [search]
   proof: skill
   status: proven
-  last_proof: proofs/skill/2026-10-21T050715Z
+  last_proof: proofs/skill/2026-10-21T054221Z
 - id: install
   does: wires Claude Code, Codex and pi (plugin, pi package, skill, MCP) and the systemd or launchd service
   reached_via: [neomem install]
@@ -239,7 +238,7 @@
   depends_on: [search, models.judge]
   proof: recall-gate
   status: proven
-  last_proof: proofs/recall.gate/2026-10-21T050715Z
+  last_proof: proofs/recall.gate/2026-10-21T054221Z
 - id: recall.plan
   does: rewrites the session slice into 3 to 5 fact-shaped queries, streamed, with model-free queries after 2.5 seconds
   reached_via: [neomem recall]
@@ -247,7 +246,7 @@
   depends_on: [models.llm]
   proof: recall-plan
   status: proven
-  last_proof: proofs/recall.plan/2026-10-21T050717Z
+  last_proof: proofs/recall.plan/2026-10-21T054223Z
 - id: recall.approve
   does: searches every planned query, scores all candidates in one judge call, keeps P >= 0.7 and injects at most 5 never-injected memories within 3.5 seconds
   reached_via: [neomem recall]
@@ -255,7 +254,7 @@
   depends_on: [recall.gate, recall.plan]
   proof: recall-approve
   status: proven
-  last_proof: proofs/recall.approve/2026-10-21T050720Z
+  last_proof: proofs/recall.approve/2026-10-21T054226Z
 - id: recall.hooks
   does: recall mode switched per agent or project, answered through the blocking prompt hooks and pi's before_agent_start, failing open
   reached_via: [neomem recall on, neomem recall off, hook cc prompt, hook codex prompt, pi before_agent_start, pi turn_end, pi agent_end, pi session_shutdown]
@@ -263,7 +262,7 @@
   depends_on: [recall.approve, capture.cc, capture.codex, capture.pi]
   proof: recall-hooks
   status: proven
-  last_proof: proofs/recall.hooks/2026-10-21T050721Z
+  last_proof: proofs/recall.hooks/2026-10-21T054227Z
 - id: contract
   does: publishes IDs, the tag registry, link types and external references for other systems (CONTRACT.md plus JSON Schema)
   reached_via: [neomem tags, neomem link, neomem entity, mcp tags, mcp link, http POST /v1/request, CONTRACT.md, contract/neomem.schema.json]
@@ -271,7 +270,7 @@
   depends_on: [entity]
   proof: contract
   status: proven
-  last_proof: proofs/contract/2026-10-21T050730Z
+  last_proof: proofs/contract/2026-10-21T054235Z
 - id: eval
   does: runs LongMemEval-S and the own coding set through the real daemon and reports retrieval and end-to-end scores
   reached_via: [neomem-eval run, neomem-eval report]
@@ -279,4 +278,4 @@
   depends_on: [search, extract]
   proof: eval
   status: proven
-  last_proof: proofs/eval/2026-10-21T050730Z
+  last_proof: proofs/eval/2026-10-21T054236Z

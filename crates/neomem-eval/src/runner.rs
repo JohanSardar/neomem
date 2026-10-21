@@ -44,7 +44,7 @@ pub fn run(options: &Options) -> anyhow::Result<()> {
     std::fs::create_dir_all(&options.out)?;
     let manifest = json!({"dataset_sha256":checksum,"seed":options.seed,"arm":options.arm,
         "selected":sample.iter().map(|q| &q.question_id).collect::<Vec<_>>(),"held_out":held_out,
-        "models":settings,"k":10,"reader_prompt":include_str!("../prompts/reader.md"),
+        "models":settings,"k":10,"timezone":"UTC","reader_prompt":include_str!("../prompts/reader.md"),
         "judge_prompts":include_str!("../prompts/judge.json"),"git_revision":std::process::Command::new("git").args(["rev-parse","HEAD"]).output().ok().map(|o|String::from_utf8_lossy(&o.stdout).trim().to_owned())});
     std::fs::write(options.out.join("manifest.json"), serde_json::to_vec_pretty(&manifest)?)?;
     let mut items = Vec::new();
@@ -113,7 +113,7 @@ fn evaluate(question: &BenchmarkItem, arm: Arm, settings: &Settings) -> anyhow::
     let verdict = judge_answer.trim().trim_end_matches('.').to_lowercase();
     ensure!(verdict == "yes" || verdict == "no", "invalid judge verdict: {judge_answer}");
     let (recall5, recall10, precision5) =
-        crate::score::retrieval(results.as_deref(), &evidence, &question.answer_session_ids);
+        crate::score::retrieval(results.as_deref(), &evidence, question.evidence_sessions());
     Ok(Item {
         id: question.question_id.clone(),
         category: question.category().to_owned(),

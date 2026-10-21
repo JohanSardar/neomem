@@ -22,3 +22,7 @@ For each fact give:
 For each entity the facts are about, give a `ref` (E1, E2, ...), its `name`, its `kind` (person, organization, project, codebase, product, place, event, agent, thing, idea, ...), extra `aliases` seen in the records, and `existing`: the number of the matching known entity, or null when it is new. Prefer a known entity when the name or meaning matches.
 
 The related facts and earlier turns are context only: do not repeat a related fact unless a new record states it again.
+
+Return one JSON object matching this schema. Use null for an entity's existing field unless its number appears under Known entities.
+
+{schema}
