@@ -1,4 +1,0 @@
-2026-10-21T20:16:52.114599Z  INFO neomemd::http: HTTP listening on 127.0.0.1:46321
-2026-10-21T20:16:52.114916Z  INFO neomemd: neomemd serving /tmp/neomemctl-NCpWLb
-2026-10-21T20:16:52.115652Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
-2026-10-21T20:16:53.394097Z  INFO neomem_engine::maintenance: committed 20 vault changes
