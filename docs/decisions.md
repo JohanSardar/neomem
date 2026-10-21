@@ -52,3 +52,4 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - A daemon runs one recall pipeline at a time; overlapping recalls fail open, and an expired pipeline cannot mark facts injected after its caller has returned.
 - Recall gates on the new error when one is supplied; model-free name queries consider both the new message and error.
 - Recall project switch keys use canonical absolute paths when they exist, and absolute paths otherwise.
+- External references accept only `mentions` initially; systems use lowercase ASCII kebab names (1–48 characters) and opaque ASCII alphanumeric, underscore, hyphen or period IDs (1–256 characters, excluding `.` and `..`).

@@ -3,6 +3,7 @@ mod clock;
 mod decay;
 mod entity;
 mod env_file;
+mod external;
 mod fact;
 mod filter;
 mod ids;
@@ -39,3 +40,5 @@ pub use time::EpochMs;
 pub use ulid::{InvalidUlid, Ulid};
 
 pub use capture::{AgentAdapter, CaptureAgent, CaptureError, CaptureEvent, CaptureSignal, Captured};
+
+pub use external::{ExternalLink, ExternalLinkKind, ExternalRef, InvalidExternalRef};
