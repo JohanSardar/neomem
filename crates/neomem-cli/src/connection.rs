@@ -6,6 +6,8 @@ use std::time::{Duration, Instant};
 
 use anyhow::{Context, bail};
 use neomem_proto::{Client, Home, Request, Response};
+
+use crate::service::Service;
 use std::os::unix::process::CommandExt;
 
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(30);
@@ -49,15 +51,28 @@ impl DaemonConnection {
 
 fn restart(home: &Home, client: &mut Client) -> anyhow::Result<()> {
     let _ = client.call(Request::Shutdown);
+    wait_until_gone(home);
+    start_and_connect(home).map(drop)
+}
+
+pub(crate) fn stop_daemon(home: &Home) {
+    if let Ok(mut client) = Client::connect(home, REQUEST_TIMEOUT) {
+        let _ = client.call(Request::Shutdown);
+        wait_until_gone(home);
+    }
+}
+
+fn wait_until_gone(home: &Home) {
     let deadline = Instant::now() + START_WAIT;
     while Client::connect(home, REQUEST_TIMEOUT).is_ok() && Instant::now() < deadline {
         thread::sleep(START_POLL);
     }
-    start_and_connect(home).map(drop)
 }
 
 fn start_and_connect(home: &Home) -> anyhow::Result<Client> {
-    spawn_daemon(home)?;
+    if !Service::serving(home).is_some_and(|service| service.start()) {
+        spawn_daemon(home)?;
+    }
     let deadline = Instant::now() + START_WAIT;
     loop {
         match Client::connect(home, REQUEST_TIMEOUT) {
@@ -86,7 +101,7 @@ fn spawn_daemon(home: &Home) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn daemon_binary() -> PathBuf {
+pub(crate) fn daemon_binary() -> PathBuf {
     std::env::current_exe()
         .ok()
         .map(|exe| exe.with_file_name("neomemd"))

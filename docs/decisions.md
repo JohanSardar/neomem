@@ -58,3 +58,4 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - JSON Schema generation reads the real core and proto wire definitions at build time, preserving core’s serde/thiserror-only dependency boundary.
 - Tag proposals compare the eight nearest registry tags in one numbered judge choice; exact existing names bypass the models.
 - Submitted intake tags stay intact in the log and are canonicalized with extractor proposals when writing facts, keeping capture off the model path.
+- `neomem install` trusts neomem's own Codex plugin hooks (hooks/list, then config/batchWrite of hooks.state trusted_hash through codex app-server): running install is the user's consent, and Codex skips untrusted plugin hooks.

@@ -1,0 +1,14 @@
+{
+  "name": "neomem",
+  "owner": {
+    "name": "JohanSardar"
+  },
+  "description": "neomem's plugin for Claude Code",
+  "plugins": [
+    {
+      "name": "neomem",
+      "source": "./agents-plugin",
+      "description": "Long-term memory for agents: capture hooks, optional recall and the neomem MCP server"
+    }
+  ]
+}
