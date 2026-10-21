@@ -256,12 +256,12 @@ fn the_run_log_names_the_model_and_counts(
 }
 
 fn the_owner_speaks_in_user_turns(proof: &mut ProofRun, neomem: &IsolatedNeomem) -> anyhow::Result<()> {
-    let owned = r#"{"facts":[{"content":"The user is allergic to peanuts.","sources":[1],"about":["E1"],"valid_from":null,"importance":8,"durability":"stable","tags":["health"]}],"entities":[{"ref":"E1","name":"me","kind":"person","aliases":[],"existing":0}]}"#;
+    let scripted = r#"{"facts":[{"content":"The user is allergic to peanuts.","sources":[1],"about":["E1"],"valid_from":null,"importance":8,"durability":"stable","tags":["health"]}],"entities":[{"ref":"E1","name":"me","kind":"person","aliases":[],"existing":0}]}"#;
     neomem.add_fake_rules(&FakeRules {
         llm: vec![LlmRule {
             system_contains: Some(EXTRACTOR.to_owned()),
             user_contains: Some("allergic to peanuts".to_owned()),
-            reply: owned.to_owned(),
+            reply: scripted.to_owned(),
             ..LlmRule::default()
         }],
         ..FakeRules::default()
