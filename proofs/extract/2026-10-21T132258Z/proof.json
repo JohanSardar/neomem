@@ -2,9 +2,9 @@
   "feature": "extract",
   "scenario": "extract",
   "passed": true,
-  "started_at": "2026-10-21T054127Z",
-  "duration_ms": 12203,
-  "code_version": "2b2f1e688883-dirty",
+  "started_at": "2026-10-21T132258Z",
+  "duration_ms": 15066,
+  "code_version": "ca7b1f87ae11-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
@@ -62,6 +62,11 @@
       "claim": "every extraction run is logged with its model and counts, never content, and the rejection is counted",
       "passed": true,
       "detail": "4 runs"
+    },
+    {
+      "claim": "the extractor is told who speaks in user turns, and a fact it gives to the owner lands on the owner entity",
+      "passed": true,
+      "detail": "introduced true, on the owner true"
     }
   ]
 }
