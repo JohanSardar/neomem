@@ -29,6 +29,7 @@ mod recall_plan;
 pub(crate) mod recall_support;
 mod reconcile;
 mod search;
+mod skill;
 mod spool;
 pub mod support;
 mod vault;
@@ -74,6 +75,7 @@ pub const ALL: &[Scenario] = &[
     Scenario { name: "decay", run: decay::prove },
     Scenario { name: "reconcile", run: reconcile::prove },
     Scenario { name: "entities", run: entities::prove },
+    Scenario { name: "skill", run: skill::prove },
 ];
 
 pub fn find(name: &str) -> Option<Scenario> {

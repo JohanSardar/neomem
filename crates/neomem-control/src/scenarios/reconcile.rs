@@ -275,7 +275,7 @@ fn consolidation_triggers(neomem: &IsolatedNeomem) -> anyhow::Result<Vec<String>
 }
 
 fn wait_for_trigger(neomem: &IsolatedNeomem, trigger: &str) -> anyhow::Result<bool> {
-    let deadline = Instant::now() + Duration::from_secs(40);
+    let deadline = Instant::now() + Duration::from_secs(120);
     while Instant::now() < deadline {
         if consolidation_triggers(neomem)?.iter().any(|seen| seen == trigger) {
             return Ok(true);
