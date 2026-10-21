@@ -41,6 +41,10 @@ pub enum Request {
         id: neomem_core::FactId,
     },
     Models,
+    ModelsUse {
+        role: ModelRole,
+        model: String,
+    },
     ModelsTest {
         role: ModelRole,
         #[serde(default, skip_serializing_if = "Option::is_none")]

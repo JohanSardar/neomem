@@ -1,0 +1,54 @@
+{
+  "feature": "models.judge",
+  "scenario": "models-judge",
+  "passed": true,
+<<<<<<<< HEAD:proofs/models.judge/2026-10-21T011021Z/proof.json
+  "started_at": "2026-10-21T011021Z",
+  "duration_ms": 6033,
+  "code_version": "1efe50ecaa14-dirty",
+========
+  "started_at": "2026-10-21T010148Z",
+  "duration_ms": 9796,
+  "code_version": "9b0a4922ac15-dirty",
+>>>>>>>> origin/main:proofs/models.judge/2026-10-21T010148Z/proof.json
+  "models": "fake Jev with the real llama.cpp reranker as fallback, live Jev",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "neomem models test judge answers through the Jev API (the fake) without touching the fallback",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.judge/2026-10-21T011021Z/proof.json
+      "detail": "jev:jev-fake answered \"yes (0.93)\" in 4.0 ms, scores []; 1 Jev calls"
+========
+      "detail": "jev:jev-fake answered \"yes (0.93)\" in 6.3 ms, scores []; 1 Jev calls"
+>>>>>>>> origin/main:proofs/models.judge/2026-10-21T010148Z/proof.json
+    },
+    {
+      "claim": "when Jev answers slower than the 600 ms role timeout, the local reranker answers each call instead, long before the slow Jev would",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.judge/2026-10-21T011021Z/proof.json
+      "detail": "Jev delayed 2000 ms; 6 fallbacks logged; first call (loads the reranker) jev:jev-fake answered \"yes (0.65)\" in 1146.4 ms, scores []; then p50 721.417 ms, p95 800.910 ms, max 800.910 ms"
+========
+      "detail": "Jev delayed 2000 ms; 6 fallbacks logged; first call (loads the reranker) jev:jev-fake answered \"yes (0.65)\" in 1735.0 ms, scores []; then p50 835.185 ms, p95 857.499 ms, max 857.499 ms"
+>>>>>>>> origin/main:proofs/models.judge/2026-10-21T010148Z/proof.json
+    },
+    {
+      "claim": "with no Jev key the local reranker answers by itself, never calling Jev",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.judge/2026-10-21T011021Z/proof.json
+      "detail": "0 Jev calls; first call llama.cpp:qwen3-reranker-0.6b-Q8_0 answered \"yes (0.65)\" in 409.8 ms, scores []; then p50 62.620 ms, p95 63.441 ms, max 63.441 ms"
+========
+      "detail": "0 Jev calls; first call llama.cpp:qwen3-reranker-0.6b-Q8_0 answered \"yes (0.65)\" in 1541.0 ms, scores []; then p50 214.231 ms, p95 226.142 ms, max 226.142 ms"
+>>>>>>>> origin/main:proofs/models.judge/2026-10-21T010148Z/proof.json
+    },
+    {
+      "claim": "the local reranker scores the memory that helps right now above an unrelated one",
+      "passed": true,
+<<<<<<<< HEAD:proofs/models.judge/2026-10-21T011021Z/proof.json
+      "detail": "llama.cpp:qwen3-reranker-0.6b-Q8_0 answered \"2 candidates scored\" in 68.6 ms, scores [0.6342686, 5.62275e-6]"
+========
+      "detail": "llama.cpp:qwen3-reranker-0.6b-Q8_0 answered \"2 candidates scored\" in 236.5 ms, scores [0.6342686, 5.62275e-6]"
+>>>>>>>> origin/main:proofs/models.judge/2026-10-21T010148Z/proof.json
+    }
+  ]
+}

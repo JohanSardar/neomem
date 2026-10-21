@@ -2,11 +2,12 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use neomem_core::ModelRole;
-use neomem_proto::{Request, Response};
+use neomem_proto::{Request, Response, SearchQuery};
 
 use crate::binaries::Binaries;
 use crate::isolated::{IsolatedNeomem, Models};
 use crate::proof::ProofRun;
+use crate::seed;
 
 pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     "real llama.cpp models".clone_into(&mut proof.models);
@@ -26,7 +27,17 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     std::fs::write(neomem.home().config_path(), config)?;
     neomem.start_daemon()?;
     let before = roster(&neomem, proof)?;
-    proof.claim("local models start unloaded", before.contains("unloaded"), &before);
+    proof.claim(
+        "local models start unloaded",
+        before.contains("embedder:unloaded") && before.contains("judge:unloaded"),
+        &before,
+    );
+    seed::copy_vault_fixture("edge-ship-date", neomem.home().root())?;
+    let rebuilt = neomem.call(proof, Request::Rebuild)?;
+    anyhow::ensure!(
+        matches!(&rebuilt, Response::Rebuilt(report) if report.index.facts == 2 && report.index.entities == 2 && report.unreadable_files == 0),
+        "idle fixture was not fully indexed: {rebuilt:?}"
+    );
     let first = probe(&neomem, proof)?;
     let judge = neomem.call(
         proof,
@@ -39,8 +50,9 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
         &loaded,
     );
     proof.claim(
-        "a query loads the local embedder",
-        loaded.contains("embedder:loaded") && first.is_some(),
+        "a search loads the local embedder and finds the current ship date",
+        loaded.contains("embedder:loaded")
+            && first.as_ref().is_some_and(|facts| facts.iter().any(|fact| fact.contains("November 1"))),
         loaded,
     );
     let now = match neomem.call(proof, Request::Status)? {
@@ -77,9 +89,20 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
     let reloaded = probe(&neomem, proof)?;
     let reload_ms = started.elapsed().as_secs_f64() * 1000.0;
     proof.claim(
-        "the next query transparently reloads and preserves its answer; reload latency recorded",
+        "the next search transparently reloads and preserves its answer; reload latency recorded",
         reloaded == first && reloaded.is_some(),
         format!("reload {reload_ms:.2} ms; {reloaded:?}"),
+    );
+    let config = std::fs::read_to_string(neomem.home().config_path())?
+        .replace("[models]\n", "[models]\nidle_unload = \"30s\"\n");
+    std::fs::write(neomem.home().config_path(), config)?;
+    neomem.set_clock(now.plus_millis(18 * 60_000))?;
+    thread::sleep(Duration::from_millis(500));
+    let configured_idle = roster(&neomem, proof)?;
+    proof.claim(
+        "a configured idle_unload overrides the fifteen-minute default without restarting",
+        configured_idle.contains("embedder:unloaded"),
+        configured_idle,
     );
     proof.attach_logs(&neomem.logs());
     Ok(())
@@ -96,18 +119,15 @@ fn roster(neomem: &IsolatedNeomem, proof: &mut ProofRun) -> anyhow::Result<Strin
     })
 }
 
-fn probe(neomem: &IsolatedNeomem, proof: &mut ProofRun) -> anyhow::Result<Option<Vec<f32>>> {
+fn probe(neomem: &IsolatedNeomem, proof: &mut ProofRun) -> anyhow::Result<Option<Vec<String>>> {
     Ok(
         match neomem.call(
             proof,
-            Request::ModelsTest {
-                role: ModelRole::Embedder,
-                source: None,
-                structured: false,
-                inputs: vec!["when does Edge ship".to_owned(), "Edge ships on November 1".to_owned()],
-            },
+            Request::Search(SearchQuery { text: "when does Edge ship".to_owned(), ..SearchQuery::default() }),
         )? {
-            Response::ModelTested(report) => Some(report.scores),
+            Response::SearchResults(results) => {
+                Some(results.hits.iter().map(|hit| hit.fact.content().to_owned()).collect())
+            }
             _ => None,
         },
     )

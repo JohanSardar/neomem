@@ -2,9 +2,15 @@
   "feature": "search",
   "scenario": "search",
   "passed": true,
+<<<<<<<< HEAD:proofs/search/2026-10-21T011058Z/proof.json
   "started_at": "2026-10-21T011058Z",
   "duration_ms": 642,
   "code_version": "1efe50ecaa14-dirty",
+========
+  "started_at": "2026-10-21T010236Z",
+  "duration_ms": 268,
+  "code_version": "9b0a4922ac15-dirty",
+>>>>>>>> origin/main:proofs/search/2026-10-21T010236Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
@@ -66,7 +72,11 @@
     {
       "claim": "a search through the socket answers within 30 ms at p95 (fake embedder; the budget with the real model is checked by bench)",
       "passed": true,
+<<<<<<<< HEAD:proofs/search/2026-10-21T011058Z/proof.json
       "detail": "p50 5.489 ms, p95 7.567 ms, max 7.993 ms"
+========
+      "detail": "p50 1.145 ms, p95 1.656 ms, max 2.207 ms"
+>>>>>>>> origin/main:proofs/search/2026-10-21T010236Z/proof.json
     }
   ]
 }

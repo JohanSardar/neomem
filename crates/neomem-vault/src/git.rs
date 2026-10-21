@@ -3,8 +3,7 @@ use std::process::Command;
 
 use crate::VaultError;
 
-const IGNORED: &str =
-    "state.db\nstate.db-*\nindex.db\nindex.db-*\nmodels/\nrun/\nspool/\nlogs/\nsecrets.env\n*.env\n*.tmp\n";
+const IGNORED: &str = "state.db\nstate.db-*\nindex.db\nindex.db-*\nmodel-history.json\nmodels/\nrun/\nspool/\nlogs/\nsecrets.env\n*.env\n*.tmp\n";
 const TRACKED: &[&str] = &["facts", "entities", "config.toml", ".gitignore"];
 
 pub fn ensure_repository(root: &Path) -> Result<(), VaultError> {

@@ -96,6 +96,10 @@ pub struct ModelsArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum ModelsAction {
+    Use {
+        role: RoleArgument,
+        model: String,
+    },
     Test {
         role: RoleArgument,
         #[arg(long)]

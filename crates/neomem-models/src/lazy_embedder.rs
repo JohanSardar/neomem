@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicI64;
 use std::time::Duration;
 
-use neomem_core::{Clock, Embedder, EpochMs, ModelError, ModelId, Purpose, Vector};
+use neomem_core::{Embedder, EpochMs, ModelError, ModelId, Purpose, Vector};
 
 use crate::llama::local_model_id;
 use crate::local_slot::LocalSlot;
@@ -18,12 +18,8 @@ pub(crate) struct LazyEmbedder {
 }
 
 impl LazyEmbedder {
-    pub(crate) fn at(
-        path: PathBuf,
-        clock: Arc<dyn Clock>,
-        last_read: Arc<AtomicI64>,
-    ) -> Result<Self, ModelError> {
-        Ok(Self { dims: gguf::embedding_dims(&path)?, path, loaded: LocalSlot::new(clock, last_read) })
+    pub(crate) fn at(path: PathBuf, last_read: Arc<AtomicI64>) -> Result<Self, ModelError> {
+        Ok(Self { dims: gguf::embedding_dims(&path)?, path, loaded: LocalSlot::new(last_read) })
     }
 
     pub(crate) fn maintain(&self, now: EpochMs, timeout: Duration) {
@@ -39,9 +35,6 @@ impl Embedder for LazyEmbedder {
     fn embed(&self, texts: &[&str], purpose: Purpose) -> Result<Vec<Vector>, ModelError> {
         if texts.is_empty() {
             return Ok(Vec::new());
-        }
-        if purpose == Purpose::Query {
-            self.loaded.record_read();
         }
         self.loaded.run(
             || Ok(QueryCache::around(Arc::new(LlamaEmbedder::open(&self.path)?), QUERY_CACHE_ENTRIES)),

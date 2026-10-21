@@ -2,16 +2,26 @@
   "feature": "correct",
   "scenario": "correct",
   "passed": true,
+<<<<<<<< HEAD:proofs/correct/2026-10-21T011010Z/proof.json
   "started_at": "2026-10-21T011010Z",
   "duration_ms": 39,
   "code_version": "1efe50ecaa14-dirty",
+========
+  "started_at": "2026-10-21T010135Z",
+  "duration_ms": 48,
+  "code_version": "9b0a4922ac15-dirty",
+>>>>>>>> origin/main:proofs/correct/2026-10-21T010135Z/proof.json
   "models": "fake",
   "failure": null,
   "checks": [
     {
       "claim": "neomem correct records a correction for the intake record",
       "passed": true,
+<<<<<<<< HEAD:proofs/correct/2026-10-21T011010Z/proof.json
       "detail": "{\"reply\":\"corrected\",\"body\":{\"intake\":\"int_01M5E04CRA4JZF6TAAAVJAFTNN\",\"recorded_at\":1792545010444}}"
+========
+      "detail": "{\"reply\":\"corrected\",\"body\":{\"intake\":\"int_01M5DZMNP09J18419P5ABN8ZQP\",\"recorded_at\":1792544495299}}"
+>>>>>>>> origin/main:proofs/correct/2026-10-21T010135Z/proof.json
     },
     {
       "claim": "the intake record is kept exactly as it was logged",

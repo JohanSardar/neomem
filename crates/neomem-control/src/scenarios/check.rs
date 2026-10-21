@@ -16,9 +16,12 @@ const NOVEMBER: &str = "fct_01M59NY2N09AC5V7E9Z0C1HT0H";
 const DECEMBER: &str = "Edge's ship date is December 3, 2026.";
 
 pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
-    let neomem = IsolatedNeomem::start(binaries)?;
-    seed::copy_vault_fixture("edge-ship-date", neomem.home().root())?;
-    support::wait_for_index(&neomem, proof, 2, 2)?;
+    let neomem = seed::start_with_vault_fixture("edge-ship-date", binaries)?;
+    let ready = support::wait_for_index(&neomem, proof, 2, 2)?;
+    anyhow::ensure!(
+        ready.as_ref().is_some_and(|report| report.facts == 2 && report.entities == 2),
+        "checker fixture did not initialize: {ready:?}"
+    );
     neomem.add_fake_rules(&FakeRules { judge: rules(), ..FakeRules::default() })?;
     let mut minutes = 0;
     extract(&neomem, &mut minutes, "planning", DECEMBER)?;

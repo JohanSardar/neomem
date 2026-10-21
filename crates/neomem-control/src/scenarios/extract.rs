@@ -16,8 +16,7 @@ const EXTRACTOR: &str = "You are neomem's memory extractor";
 const WAIT: Duration = Duration::from_secs(10);
 
 pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
-    let neomem = IsolatedNeomem::start(binaries)?;
-    seed::copy_vault_fixture("edge-ship-date", neomem.home().root())?;
+    let neomem = seed::start_with_vault_fixture("edge-ship-date", binaries)?;
     support::wait_for_index(&neomem, proof, 2, 2)?;
     let turn = add(
         &neomem,
