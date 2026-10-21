@@ -32,6 +32,10 @@ impl Label {
     pub fn as_str(&self) -> &str {
         &self.0
     }
+
+    pub fn thing() -> Self {
+        Self("thing".to_owned())
+    }
 }
 
 impl TryFrom<String> for Label {

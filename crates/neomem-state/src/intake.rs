@@ -56,6 +56,32 @@ impl StateDb {
     }
 }
 
+impl StateDb {
+    pub fn session_turns_before(
+        &self,
+        source: &Source,
+        session: &str,
+        before: EpochMs,
+        limit: usize,
+    ) -> Result<Vec<LoggedIntake>, StateError> {
+        let limit = i64::try_from(limit).unwrap_or(i64::MAX);
+        self.read(|connection| {
+            let mut statement = connection.prepare_cached(&format!(
+                "SELECT {INTAKE_COLUMNS} FROM intake WHERE source = ?1 AND session = ?2 AND recorded_at < ?3
+                 ORDER BY recorded_at DESC LIMIT ?4"
+            ))?;
+            let rows = statement
+                .query_map(params![source.as_str(), session, before.as_millis(), limit], |row| {
+                    Ok(logged_from(row))
+                })?;
+            let mut turns =
+                rows.collect::<Result<Vec<_>, _>>()?.into_iter().collect::<Result<Vec<_>, _>>()?;
+            turns.reverse();
+            Ok(turns)
+        })
+    }
+}
+
 pub(crate) fn logged_from(row: &Row<'_>) -> Result<LoggedIntake, StateError> {
     let text = |index: usize| -> Result<String, StateError> { Ok(row.get::<_, String>(index)?) };
     let millis = |index: usize| -> Result<EpochMs, StateError> { Ok(EpochMs::from_millis(row.get(index)?)) };

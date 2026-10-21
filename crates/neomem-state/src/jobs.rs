@@ -1,6 +1,6 @@
 use std::fmt;
 
-use neomem_core::{EpochMs, IntakeId, LoggedIntake};
+use neomem_core::{EpochMs, IntakeId, LoggedIntake, Source};
 use rusqlite::{OptionalExtension, params};
 
 use crate::{StateDb, StateError};
@@ -139,6 +139,27 @@ impl StateDb {
                 connection.query_row("SELECT attempts FROM jobs WHERE id = ?1", [job.0], |row| row.get(0))?;
             Ok(u32::try_from(attempts).unwrap_or(u32::MAX))
         })
+    }
+
+    pub fn requeue_extraction(
+        &self,
+        source: Option<&Source>,
+        from: Option<EpochMs>,
+        now: EpochMs,
+    ) -> Result<usize, StateError> {
+        let queued = self.writer()?.execute(
+            "INSERT INTO jobs (kind, batch_key, intake_id, state, not_before, created_at)
+             SELECT 'extract',
+                    CASE WHEN session IS NULL THEN source ELSE source || '/' || session END,
+                    id, 'pending', ?3, ?3
+             FROM intake
+             WHERE (?1 IS NULL OR source = ?1)
+               AND (?2 IS NULL OR occurred_end >= ?2)
+               AND NOT EXISTS (SELECT 1 FROM corrections c WHERE c.intake_id = intake.id)
+               AND NOT EXISTS (SELECT 1 FROM jobs j WHERE j.intake_id = intake.id AND j.kind = 'extract' AND j.state IN ('pending', 'claimed'))",
+            params![source.map(Source::as_str), from.map(EpochMs::as_millis), now.as_millis()],
+        )?;
+        Ok(queued)
     }
 
     pub fn reclaim_expired_leases(&self, now: EpochMs) -> Result<usize, StateError> {
