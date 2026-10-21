@@ -1,0 +1,47 @@
+{
+  "feature": "models.embed",
+  "scenario": "models-embed",
+  "passed": true,
+  "started_at": "2026-10-21T041335Z",
+  "duration_ms": 4393,
+  "code_version": "da694b7d130c",
+  "models": "real llama.cpp embedder, fake OpenAI-compatible embedder",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "neomem models test embedder answers from EmbeddingGemma-300m in-process through llama.cpp with 768 dimensions",
+      "passed": true,
+      "detail": "{\"reply\":\"model_tested\",\"body\":{\"role\":\"embedder\",\"model\":\"llama.cpp:embeddinggemma-300m-Q8_0\",\"latency_ms\":610.209448,\"answer\":\"768 dimensions\"}}"
+    },
+    {
+      "claim": "a query scores a related fact clearly higher than an unrelated one",
+      "passed": true,
+      "detail": "llama.cpp:embeddinggemma-300m-Q8_0 answered \"768 dimensions\" in 155.55 ms, scores [0.78686297, 0.0990538]"
+    },
+    {
+      "claim": "the same texts embed the same across calls and across a daemon restart",
+      "passed": true,
+      "detail": "[0.78686297, 0.0990538] / [0.78686297, 0.0990538] / after restart [0.78686297, 0.0990538]"
+    },
+    {
+      "claim": "30 distinct 16-32 token queries embed in-process (p50 and p95 recorded; §13.5 budgets 5-20 ms on a release build)",
+      "passed": true,
+      "detail": "p50 76.977 ms, p95 99.776 ms, max 100.898 ms; 0 failures, first None"
+    },
+    {
+      "claim": "a repeated query is answered from the query cache, far faster than the model",
+      "passed": true,
+      "detail": "llama.cpp:embeddinggemma-300m-Q8_0 answered \"768 dimensions\" in 0.09 ms, scores []; uncached p50 76.98 ms"
+    },
+    {
+      "claim": "an OpenAI-compatible embeddings endpoint answers through the same command",
+      "passed": true,
+      "detail": "openai:hash-256 answered \"256 dimensions\" in 1.70 ms, scores [0.50572175, 0.0]"
+    },
+    {
+      "claim": "the query cache wraps any embedder: a repeated query reaches the OpenAI-compatible endpoint once",
+      "passed": true,
+      "detail": "1 endpoint calls; openai:hash-256 answered \"256 dimensions\" in 0.04 ms, scores []"
+    }
+  ]
+}
