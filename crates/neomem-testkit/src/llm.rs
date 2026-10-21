@@ -6,7 +6,9 @@ use neomem_core::{Llm, LlmMessage, LlmReply, LlmRequest, ModelError, ModelId, To
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+use crate::extractor::{EXTRACTOR_MARKER, default_extraction};
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LlmRule {
     #[serde(default)]
     pub system_contains: Option<String>,
@@ -93,6 +95,9 @@ impl ScriptedLlm {
                 arguments: example_for(&schema).to_string(),
             };
             return ScriptedAnswer { tool_calls: vec![call], ..ScriptedAnswer::default() };
+        }
+        if request.system.contains(EXTRACTOR_MARKER) {
+            return ScriptedAnswer::of_text(&default_extraction(&last_user_text(request)).to_string());
         }
         if let Some(schema) = &request.response_schema {
             let schema = serde_json::from_str(schema).unwrap_or(Value::Null);

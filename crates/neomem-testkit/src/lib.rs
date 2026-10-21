@@ -2,6 +2,7 @@
 
 mod contract;
 mod embedder;
+mod extractor;
 pub mod fake_process;
 mod judge;
 mod llm;
