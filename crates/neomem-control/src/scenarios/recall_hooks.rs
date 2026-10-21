@@ -61,6 +61,7 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
             && elapsed < Duration::from_millis(3600),
         closed.status,
     );
+    super::recall_hooks_pi::prove(proof, &neomem)?;
     oversized_context(proof, &neomem)?;
     neomem.add_fake_rules(&neomem_testkit::FakeRules {
         llm: vec![support::planner(10_000, 0)],

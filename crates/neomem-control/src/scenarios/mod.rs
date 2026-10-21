@@ -27,6 +27,7 @@ mod raw;
 mod recall_approve;
 mod recall_gate;
 mod recall_hooks;
+mod recall_hooks_pi;
 mod recall_plan;
 pub(crate) mod recall_support;
 mod reconcile;
