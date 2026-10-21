@@ -102,6 +102,9 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries, agent: &str) -> anyhow::
             "",
         );
     }
+    if agent == "cc" {
+        temporary_homes_leave_the_user_s_agent_folders_alone(proof, &isolated, &fixture)?;
+    }
     storm_and_restart(proof, &mut isolated, agent, &payload, &transcript, count)?;
     partial_and_sweep(proof, &mut isolated, agent, &payload, &fixture, &transcript, count)
 }
@@ -370,4 +373,63 @@ fn wait_for(isolated: &IsolatedNeomem, text: &str) -> anyhow::Result<()> {
         thread::sleep(Duration::from_millis(20));
     }
     anyhow::bail!("capture did not log {text} and drain the spool")
+}
+
+fn captured_from_a_fake_user_home(
+    isolated: &IsolatedNeomem,
+    user_home: &Path,
+    neomem_home: &Path,
+) -> anyhow::Result<i64> {
+    fs::create_dir_all(neomem_home)?;
+    fs::write(
+        neomem_home.join("config.toml"),
+        "[capture]\nsweep_every = \"200ms\"\n\n[http]\nenabled = false\n",
+    )?;
+    let mut daemon = Command::new(&isolated.binaries().neomemd)
+        .env_clear()
+        .env("PATH", "/usr/bin:/bin")
+        .env("HOME", user_home)
+        .env("NEOMEM_HOME", neomem_home)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()?;
+    let home = neomem_proto::Home::at(neomem_home);
+    let deadline = Instant::now() + Duration::from_secs(10);
+    let mut captured = 0;
+    while Instant::now() < deadline {
+        thread::sleep(Duration::from_millis(250));
+        if let Ok(db) = Connection::open(home.state_db_path()) {
+            captured = db.query_row("SELECT count(*) FROM intake", [], |row| row.get(0)).unwrap_or(0);
+            if captured > 0 {
+                break;
+            }
+        }
+    }
+    if let Ok(mut client) = neomem_proto::Client::connect(&home, Duration::from_secs(5)) {
+        let _ = client.call(neomem_proto::Request::Shutdown);
+    }
+    let _ = daemon.wait();
+    Ok(captured)
+}
+
+fn temporary_homes_leave_the_user_s_agent_folders_alone(
+    proof: &mut ProofRun,
+    isolated: &IsolatedNeomem,
+    fixture: &Path,
+) -> anyhow::Result<()> {
+    let user_home = tempfile::tempdir()?;
+    let project = user_home.path().join(".claude/projects/-work-project");
+    fs::create_dir_all(&project)?;
+    fs::copy(fixture.join("session.jsonl"), project.join("capture-session.jsonl"))?;
+    let temporary =
+        captured_from_a_fake_user_home(isolated, user_home.path(), &user_home.path().join("elsewhere"))?;
+    let default =
+        captured_from_a_fake_user_home(isolated, user_home.path(), &user_home.path().join(".neomem"))?;
+    proof.claim(
+        "a daemon on a temporary NEOMEM_HOME reads no agent folders unless [capture] names them, while the default home captures them",
+        temporary == 0 && default > 0,
+        format!("temporary home captured {temporary}, default home captured {default}"),
+    );
+    Ok(())
 }

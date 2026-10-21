@@ -201,6 +201,21 @@ pub struct CaptureConfig {
     pub sweep_every: String,
 }
 
+struct AgentFolder<'config> {
+    configured: &'config Option<std::path::PathBuf>,
+    default: &'static str,
+    sessions: &'static str,
+    adapter: std::sync::Arc<dyn neomem_core::AgentAdapter>,
+}
+
+fn is_the_default_home(neomem_home: &neomem_proto::Home, user_home: &std::path::Path) -> bool {
+    let default = user_home.join(".neomem");
+    match (std::fs::canonicalize(neomem_home.root()), std::fs::canonicalize(&default)) {
+        (Ok(chosen), Ok(default)) => chosen == default,
+        _ => neomem_home.root() == default,
+    }
+}
+
 fn default_capture_sweep() -> String {
     "60s".to_owned()
 }
@@ -212,22 +227,46 @@ impl Default for CaptureConfig {
 }
 
 impl CaptureConfig {
-    pub fn sources(&self) -> Vec<neomem_engine::CaptureSource> {
+    pub fn sources(&self, neomem_home: &neomem_proto::Home) -> Vec<neomem_engine::CaptureSource> {
         let home = std::env::var_os("HOME").map(std::path::PathBuf::from).unwrap_or_default();
-        vec![
-            neomem_engine::CaptureSource {
-                root: self.claude_dir.clone().unwrap_or_else(|| home.join(".claude")).join("projects"),
+        let defaults_allowed = is_the_default_home(neomem_home, &home);
+        let agents = [
+            AgentFolder {
+                configured: &self.claude_dir,
+                default: ".claude",
+                sessions: "projects",
                 adapter: std::sync::Arc::new(neomem_capture::ClaudeCode),
             },
-            neomem_engine::CaptureSource {
-                root: self.codex_dir.clone().unwrap_or_else(|| home.join(".codex")).join("sessions"),
+            AgentFolder {
+                configured: &self.codex_dir,
+                default: ".codex",
+                sessions: "sessions",
                 adapter: std::sync::Arc::new(neomem_capture::Codex),
             },
-            neomem_engine::CaptureSource {
-                root: self.pi_dir.clone().unwrap_or_else(|| home.join(".pi/agent")).join("sessions"),
+            AgentFolder {
+                configured: &self.pi_dir,
+                default: ".pi/agent",
+                sessions: "sessions",
                 adapter: std::sync::Arc::new(neomem_capture::Pi),
             },
-        ]
+        ];
+        agents
+            .into_iter()
+            .filter_map(|agent| {
+                let root = match agent.configured {
+                    Some(directory) => directory.clone(),
+                    None if defaults_allowed => home.join(agent.default),
+                    None => {
+                        tracing::info!(
+                            "not capturing {}: NEOMEM_HOME is not ~/.neomem and [capture] names no folder for it",
+                            agent.default
+                        );
+                        return None;
+                    }
+                };
+                Some(neomem_engine::CaptureSource { root: root.join(agent.sessions), adapter: agent.adapter })
+            })
+            .collect()
     }
 
     pub fn every(&self) -> anyhow::Result<std::time::Duration> {
