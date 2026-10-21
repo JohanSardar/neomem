@@ -1,6 +1,0 @@
-2026-10-21T03:37:41.895399Z  INFO neomemd::http: HTTP listening on 127.0.0.1:43333
-2026-10-21T03:37:41.896193Z  INFO neomemd: neomemd serving /tmp/neomemctl-FCAuBD
-2026-10-21T03:37:41.902342Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
-2026-10-21T03:37:43.203895Z  INFO neomem_engine::maintenance: committed 10 vault changes
-2026-10-21T03:37:53.560929Z  INFO neomem_engine::maintenance: committed 48 vault changes
-2026-10-21T03:37:54.614814Z  INFO neomem_engine::maintenance: committed 12 vault changes

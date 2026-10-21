@@ -1,0 +1,57 @@
+{
+  "feature": "intake",
+  "scenario": "intake",
+  "passed": true,
+  "started_at": "2026-10-21T040326Z",
+  "duration_ms": 180,
+  "code_version": "1d4c609e9d76",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "neomem add returns an int_ ID",
+      "passed": true,
+      "detail": "int_01M5EA1NCG95PNEM32D9Z6XDTR"
+    },
+    {
+      "claim": "the intake log holds the record exactly as it was sent",
+      "passed": true,
+      "detail": "Some(IntakeRecord { source: Source(\"oura-digest\"), occurred: Span { start: EpochMs(1792449600000), end: EpochMs(1792479120000) }, tags: [Tag(\"health\"), Tag(\"sleep\")], content: \"Slept 7h 12m, readiness 84. Woke once at 03:10.\", entity_hints: [\"Johan\", \"Oura\"], source_ref: Some(\"oura://sleep/2026-10-20\"), session: None })"
+    },
+    {
+      "claim": "an extraction job is queued for the record",
+      "passed": true,
+      "detail": "Some(\"pending\")"
+    },
+    {
+      "claim": "the same record sent twice is logged twice with two IDs (no dedupe keys)",
+      "passed": true,
+      "detail": "int_01M5EA1NCN4AS9JMSNZT9SRDKN int_01M5EA1NCR25S2NJC7JG1TM4RQ, 1 -> 3"
+    },
+    {
+      "claim": "empty content, a backwards span and a malformed source are refused and nothing is logged",
+      "passed": true,
+      "detail": "3 -> 3"
+    },
+    {
+      "claim": "an API key in the content is removed before it is logged",
+      "passed": true,
+      "detail": "Set OPENAI_API_KEY=[redacted] in the deploy env"
+    },
+    {
+      "claim": "40 parallel adds all land with 40 distinct IDs",
+      "passed": true,
+      "detail": "40 distinct"
+    },
+    {
+      "claim": "neomem add returns well inside the 50 ms capture budget at p95",
+      "passed": true,
+      "detail": "p50 3.158 ms, p95 3.414 ms, max 3.499 ms"
+    },
+    {
+      "claim": "every logged record is still there after a restart",
+      "passed": true,
+      "detail": "64 -> 64"
+    }
+  ]
+}

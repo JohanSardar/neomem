@@ -1,7 +1,0 @@
-<<<<<<<< HEAD:proofs/capture.pi/2026-10-21T035121Z/exchanges.jsonl
-{"request":{"protocol":1,"request":{"arguments":{"agent":"pi","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-Zh9LuQ/capture/pi/sessions/./rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":1.213512}
-{"request":{"protocol":1,"request":{"arguments":{"agent":"pi","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-Zh9LuQ/capture/pi/sessions/rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":4.292567}
-========
-{"request":{"protocol":1,"request":{"arguments":{"agent":"pi","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-MlyGja/capture/pi/sessions/./rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":2.621398}
-{"request":{"protocol":1,"request":{"arguments":{"agent":"pi","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-MlyGja/capture/pi/sessions/rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":4.675676}
->>>>>>>> origin/main:proofs/capture.pi/2026-10-21T033807Z/exchanges.jsonl

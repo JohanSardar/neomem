@@ -1,0 +1,52 @@
+{
+  "feature": "entities",
+  "scenario": "entities",
+  "passed": true,
+  "started_at": "2026-10-21T040517Z",
+  "duration_ms": 279,
+  "code_version": "1d4c609e9d76",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "merge_entities keeps every name as an alias, records merged_from, and the old name and ID resolve to the survivor",
+      "passed": true,
+      "detail": "[EntityId(Ulid(2163977217110186222724055040000000004))]"
+    },
+    {
+      "claim": "the survivor now lists the facts that were about the duplicate",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "the duplicate's file is kept, marked merged into the survivor",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "add_alias makes the new name resolve",
+      "passed": true,
+      "detail": "[EntityId(Ulid(2163977217110186222724055040000000002))]"
+    },
+    {
+      "claim": "link_entity records part_of, and possibly_same stays a weak link rather than a merge",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "create_entity makes an entity for a recurring name and links the cited facts to it",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "an entity that cites no fact is not created",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "an invented entity number, a creation without facts and a fact-writing tool are all rejected, within 8 rounds",
+      "passed": true,
+      "detail": "Some(SpecialistReport { focus: 5, rounds: 3, writes: 5, rejected: 3 })"
+    }
+  ]
+}

@@ -1,6 +1,0 @@
-2026-10-21T03:50:56.370555Z  INFO neomemd::http: HTTP listening on 127.0.0.1:39925
-2026-10-21T03:50:56.373948Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
-2026-10-21T03:50:56.377606Z  INFO neomemd: neomemd serving /tmp/neomemctl-MPuGv9
-2026-10-21T03:50:57.664805Z  INFO neomem_engine::maintenance: committed 10 vault changes
-2026-10-21T03:51:07.999506Z  INFO neomem_engine::maintenance: committed 55 vault changes
-2026-10-21T03:51:09.034173Z  INFO neomem_engine::maintenance: committed 5 vault changes

@@ -1,9 +1,0 @@
-2026-10-21T03:36:37.801632Z  INFO neomemd::http: HTTP listening on 127.0.0.1:33263
-2026-10-21T03:36:37.804133Z  INFO neomemd: neomemd serving /tmp/neomemctl-86Eqsz
-2026-10-21T03:36:37.812361Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
-2026-10-21T03:36:37.911136Z  INFO neomem_engine::engine: engine flushed
-2026-10-21T03:36:37.911202Z  INFO neomemd::dispatch: neomemd shutting down on request
-2026-10-21T03:36:37.938260Z  INFO neomemd::http: HTTP listening on 127.0.0.1:43171
-2026-10-21T03:36:37.939143Z  INFO neomemd: neomemd serving /tmp/neomemctl-86Eqsz
-2026-10-21T03:36:37.939206Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-86Eqsz/run/neomemd.sock
-2026-10-21T03:36:38.201038Z  INFO neomem_engine::maintenance: nightly drift check: 3 differences repaired
