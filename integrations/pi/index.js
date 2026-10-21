@@ -45,7 +45,16 @@ export default function neomem(pi) {
       } }, remaining);
       if (response?.reply !== "recalled" || !Array.isArray(response.body)) return;
       if (!response.body.every(memory => typeof memory.id === "string" && typeof memory.content === "string")) return;
-      const content = [...response.body.map(memory => `${memory.id}: ${memory.content}\n`).join("")].slice(0, 10000).join("");
+      let content = "";
+      let charactersLeft = 10000;
+      for (const memory of response.body) {
+        const prefix = `${memory.id}: `;
+        const budget = charactersLeft - [...prefix].length - 1;
+        if (budget <= 0) break;
+        const body = [...memory.content].slice(0, budget);
+        content += `${prefix}${body.join("")}\n`;
+        charactersLeft -= [...prefix].length + body.length + 1;
+      }
       if (content) return { message: { customType: "neomem-recall", content, display: false } };
     }
   });

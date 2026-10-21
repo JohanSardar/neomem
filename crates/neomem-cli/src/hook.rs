@@ -151,3 +151,21 @@ fn additional_context(memories: Vec<RecallMemory>) -> String {
     context
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn context_never_truncates_a_fact_id() {
+        let first: neomem_core::FactId = "fct_01M55FJ500000000000000000D".parse().unwrap();
+        let second: neomem_core::FactId = "fct_01M5D6RA00000000000000000B".parse().unwrap();
+        let content = "x".repeat(10_000 - first.to_string().len() - 10);
+        let result = additional_context(vec![
+            RecallMemory { id: first, content },
+            RecallMemory { id: second, content: "second memory".to_owned() },
+        ]);
+        assert!(result.ends_with('\n'));
+        assert_eq!(result.lines().count(), 1);
+        assert!(result.chars().count() < 10_000);
+    }
+}

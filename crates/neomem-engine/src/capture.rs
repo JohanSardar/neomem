@@ -90,7 +90,7 @@ impl Engine {
         }
     }
 
-    fn capture_sources(&self) -> Vec<CaptureSource> {
+    pub(crate) fn capture_sources(&self) -> Vec<CaptureSource> {
         self.capture.lock().map(|capture| capture.sources.clone()).unwrap_or_default()
     }
 

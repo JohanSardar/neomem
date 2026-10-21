@@ -77,11 +77,7 @@ fn spirv_headers() -> anyhow::Result<Vec<(String, OsString)>> {
     if !prefix.join("share/cmake/SPIRV-Headers/SPIRV-HeadersConfig.cmake").is_file() {
         install_spirv_headers(&prefix)?;
     }
-    let mut include_path = prefix.join("include").into_os_string();
-    if let Some(existing) = std::env::var_os("CPLUS_INCLUDE_PATH") {
-        include_path.push(":");
-        include_path.push(existing);
-    }
+    let include_path = header_include_path(&prefix.join("include"), std::env::var_os("CPLUS_INCLUDE_PATH"));
     Ok(vec![
         ("CMAKE_PREFIX_PATH".to_owned(), prefix.into_os_string()),
         ("CPLUS_INCLUDE_PATH".to_owned(), include_path),
@@ -122,4 +118,35 @@ fn cache_dir() -> anyhow::Result<PathBuf> {
     let dir = base.join("neomem");
     fs::create_dir_all(&dir)?;
     Ok(dir)
+}
+
+fn header_include_path(include: &Path, inherited: Option<OsString>) -> OsString {
+    if let Some(existing) = &inherited
+        && std::env::split_paths(existing).any(|path| path == include)
+    {
+        return existing.clone();
+    }
+    let mut path = include.as_os_str().to_owned();
+    if let Some(existing) = inherited {
+        path.push(":");
+        path.push(existing);
+    }
+    path
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn an_existing_header_path_is_preserved_without_invalidating_native_builds() {
+        let include = Path::new("/cache/spirv/include");
+        let existing = OsString::from("/other/include:/cache/spirv/include");
+        assert_eq!(header_include_path(include, Some(existing.clone())), existing);
+        assert_eq!(header_include_path(include, None), include.as_os_str());
+        assert_eq!(
+            header_include_path(include, Some(OsString::from("/other/include"))),
+            OsString::from("/cache/spirv/include:/other/include")
+        );
+    }
 }

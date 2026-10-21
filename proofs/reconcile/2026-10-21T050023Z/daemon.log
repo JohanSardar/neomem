@@ -1,5 +1,0 @@
-2026-10-21T05:00:23.261361Z  INFO neomemd::http: HTTP listening on 127.0.0.1:37865
-2026-10-21T05:00:23.261738Z  INFO neomemd: neomemd serving /tmp/neomemctl-nDwFye
-2026-10-21T05:00:23.262191Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
-2026-10-21T05:00:24.535336Z  INFO neomem_engine::maintenance: committed 10 vault changes
-2026-10-21T05:00:34.076013Z  INFO neomem_engine::maintenance: committed 60 vault changes
