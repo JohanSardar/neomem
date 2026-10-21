@@ -81,7 +81,7 @@ impl Engine {
     }
 
     pub(crate) fn consolidate_when_due(&self) {
-        let rechecks = self.state.pending_rechecks().map(|pending| !pending.is_empty()).unwrap_or(false);
+        let rechecks = self.state.pending_rechecks().is_ok_and(|pending| !pending.is_empty());
         let trigger = if rechecks {
             "late data or a correction"
         } else if self.facts_since_last_dream() >= NEW_FACTS_TRIGGER {
@@ -131,15 +131,12 @@ impl Engine {
                 tool_calls: reply.tool_calls.clone(),
             });
             for call in reply.tool_calls {
-                let result = match Tool::named(&call.name, specialist.tools) {
-                    Some(tool) => {
-                        let arguments = serde_json::from_str(&call.arguments).unwrap_or_default();
-                        bench.run(tool, &arguments)
-                    }
-                    None => {
-                        bench.tally.rejected += 1;
-                        format!("rejected: the {} has no tool named {}", specialist.name, call.name)
-                    }
+                let result = if let Some(tool) = Tool::named(&call.name, specialist.tools) {
+                    let arguments = serde_json::from_str(&call.arguments).unwrap_or_default();
+                    bench.run(tool, &arguments)
+                } else {
+                    bench.tally.rejected += 1;
+                    format!("rejected: the {} has no tool named {}", specialist.name, call.name)
                 };
                 messages.push(LlmMessage::ToolResult { call_id: call.id, content: result });
             }
@@ -199,7 +196,7 @@ impl Engine {
             .map(|entity| Entity::clone(entity))
             .collect();
         let mut recent: Vec<&Entity> = active.iter().filter(|entity| entity.updated_at() > since).collect();
-        recent.sort_by(|left, right| left.name().to_lowercase().cmp(&right.name().to_lowercase()));
+        recent.sort_by_key(|entity| entity.name().to_lowercase());
         let mut text = String::from("Entities that are new or changed since the last run:\n");
         for entity in &recent {
             let line = bench.describe_entity(entity);

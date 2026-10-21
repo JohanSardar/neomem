@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fmt::Write as _;
 
 use neomem_core::{
@@ -38,7 +39,7 @@ impl Workbench<'_> {
             Tool::Link => self.link(arguments),
             Tool::Invalidate => self.invalidate(number(arguments, "fact"), number(arguments, "replaced_by")),
             Tool::MergeFacts => self.merge_facts(number(arguments, "keep"), number(arguments, "duplicate")),
-            Tool::SearchEntities => self.search_entities(text(arguments, "query")),
+            Tool::SearchEntities => Ok(self.search_entities(text(arguments, "query"))),
             Tool::EntityFacts => self.entity_facts(number(arguments, "entity")),
             Tool::CreateEntity => self.create_entity(arguments),
             Tool::MergeEntities => {
@@ -238,13 +239,14 @@ impl Workbench<'_> {
         Ok("merged".to_owned())
     }
 
-    fn search_entities(&mut self, query: &str) -> Outcome {
+    fn search_entities(&mut self, query: &str) -> String {
         let snapshot = self.engine.index.snapshot();
         let mut found: Vec<EntityId> = snapshot.resolve(query);
         if let Some(vector) = self.engine.embed_one_as(&snapshot, query, Purpose::Query) {
             found.extend(snapshot.nearest_entities(&vector, READ_LIMIT).into_iter().map(|(id, _)| id));
         }
-        found.dedup();
+        let mut seen = HashSet::new();
+        found.retain(|id| seen.insert(*id));
         let mut text = String::new();
         for id in found.into_iter().take(READ_LIMIT) {
             if let Some(entity) = snapshot.entity(id) {
@@ -252,7 +254,7 @@ impl Workbench<'_> {
                 let _ = writeln!(text, "{line}");
             }
         }
-        Ok(if text.is_empty() { "nothing found".to_owned() } else { text })
+        if text.is_empty() { "nothing found".to_owned() } else { text }
     }
 
     fn entity_facts(&mut self, entity: Option<i64>) -> Outcome {
