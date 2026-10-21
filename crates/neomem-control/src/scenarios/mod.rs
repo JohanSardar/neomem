@@ -13,6 +13,7 @@ mod entity;
 mod extract;
 mod history;
 mod index;
+mod install;
 mod intake;
 mod latest;
 mod links;
@@ -76,6 +77,7 @@ pub const ALL: &[Scenario] = &[
     Scenario { name: "reconcile", run: reconcile::prove },
     Scenario { name: "entities", run: entities::prove },
     Scenario { name: "skill", run: skill::prove },
+    Scenario { name: "install", run: install::prove },
 ];
 
 pub fn find(name: &str) -> Option<Scenario> {
