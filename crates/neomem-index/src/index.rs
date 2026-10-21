@@ -23,6 +23,10 @@ pub struct Opened {
 }
 
 impl Index {
+    pub fn register_external_links(&self, links: &[neomem_core::ExternalLink]) -> Result<(), IndexError> {
+        self.db.lock().unwrap_or_else(PoisonError::into_inner).register_external_links(links)
+    }
+
     pub fn open(path: &Path, model: Option<(ModelId, usize)>) -> Result<Opened, IndexError> {
         let (mut db, fresh) = IndexDb::open(path)?;
         let model = db.active_model()?.or(model);

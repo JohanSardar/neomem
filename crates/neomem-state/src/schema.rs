@@ -107,6 +107,20 @@ CREATE TABLE recall_injected (
     PRIMARY KEY (agent, session, fact)
 ) STRICT;
 ",
+    r"
+CREATE TABLE tags (name TEXT PRIMARY KEY) STRICT;
+INSERT INTO tags (name) VALUES
+('conversation'), ('agent-session'), ('work-session'), ('code'), ('health'),
+('sleep'), ('money'), ('purchase'), ('calendar'), ('social'), ('school'),
+('travel'), ('place'), ('media'), ('raw'), ('system');
+CREATE TABLE external_links (
+    external TEXT NOT NULL,
+    target TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    recorded_at INTEGER NOT NULL,
+    PRIMARY KEY (external, target, kind)
+) STRICT;
+",
 ];
 
 pub fn migrate(connection: &mut Connection) -> Result<(), StateError> {

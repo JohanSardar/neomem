@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "reply", content = "body", rename_all = "snake_case")]
 pub enum Response {
+    Tags(Vec<Tag>),
+    Linked(neomem_core::ExternalLink),
     Status(StatusReport),
     Recalled(Vec<RecallMemory>),
     Captured,
@@ -129,6 +131,8 @@ pub struct EntityView {
     pub entity: Entity,
     pub facts: Vec<Fact>,
     pub linked: Vec<LinkedEntity>,
+    #[serde(default)]
+    pub external: Vec<neomem_core::ExternalLink>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

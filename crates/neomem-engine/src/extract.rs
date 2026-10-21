@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use neomem_core::{
     Entity, EntityId, EpochMs, Fact, FactLink, FactLinkKind, Filter, LlmRole, LoggedIntake, Memory,
-    ModelError, NewEntity, NewFact, Purpose, STARTING_TAGS, Tag,
+    ModelError, NewEntity, NewFact, Purpose, Tag,
 };
 use neomem_index::Snapshot;
 use neomem_state::{ClaimedBatch, JobId, JobOutcome, RunRecord, StateError};
@@ -25,6 +25,8 @@ const RETRY_AFTER_MS: i64 = 60_000;
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum ExtractError {
+    #[error(transparent)]
+    Contract(#[from] crate::contract::ContractError),
     #[error("the extractor failed: {0}")]
     Model(#[from] ModelError),
     #[error("the extractor's answer is not the expected JSON: {0}")]
@@ -152,7 +154,7 @@ impl Engine {
             earlier,
             entities,
             facts,
-            tags: known_tags(snapshot),
+            tags: self.state.tags()?,
             today: self.clock.now(),
         })
     }
@@ -216,7 +218,7 @@ impl Engine {
         }
         about.dedup();
         let snapshot = self.index.snapshot();
-        let mut new_fact = self.new_fact(extracted, about, records, &snapshot, now)?;
+        let mut new_fact = self.new_fact(extracted, about, records, now)?;
         let settlement = match self.embed_one(&snapshot, new_fact.content()) {
             Some(vector) => self.settle(&snapshot, new_fact.content(), &vector),
             None => Settlement::Unclear,
@@ -265,7 +267,6 @@ impl Engine {
         extracted: &ExtractedFact,
         about: Vec<EntityId>,
         records: &[LoggedIntake],
-        snapshot: &Snapshot,
         now: EpochMs,
     ) -> Result<Fact, ExtractError> {
         let cited: Vec<&LoggedIntake> =
@@ -274,12 +275,11 @@ impl Engine {
             .valid_from
             .or_else(|| cited.iter().map(|logged| logged.record.occurred.start).min())
             .unwrap_or(now);
-        let known = known_tags(snapshot);
         let mut tags: BTreeSet<Tag> =
             cited.iter().flat_map(|logged| logged.record.tags.iter().cloned()).collect();
-        tags.extend(
-            extracted.tags.iter().filter_map(|tag| Tag::new(tag).ok()).filter(|tag| known.contains(tag)),
-        );
+        for tag in &extracted.tags {
+            tags.insert(self.canonical_tag(tag)?);
+        }
         Fact::new(NewFact {
             id: self.ids.fact(now),
             content: extracted.content.clone(),
@@ -367,12 +367,6 @@ impl Engine {
             tracing::error!("recording the extraction run failed: {error}");
         }
     }
-}
-
-fn known_tags(snapshot: &Snapshot) -> Vec<Tag> {
-    let mut tags: BTreeSet<Tag> = STARTING_TAGS.iter().filter_map(|tag| Tag::new(tag).ok()).collect();
-    tags.extend(snapshot.facts().flat_map(|fact| fact.tags().iter().cloned()));
-    tags.into_iter().collect()
 }
 
 fn without_fences(text: &str) -> &str {
