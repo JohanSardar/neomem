@@ -21,6 +21,7 @@ pub enum Request {
         from: Option<EpochMs>,
     },
     CheckDrift,
+    Dream,
     Search(SearchQuery),
     SetClock {
         now: EpochMs,

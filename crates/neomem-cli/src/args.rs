@@ -20,6 +20,7 @@ pub enum Command {
     Raw(RawArgs),
     Correct(CorrectArgs),
     Rebuild,
+    Dream,
     Reextract {
         #[arg(long)]
         source: Option<String>,

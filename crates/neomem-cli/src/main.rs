@@ -53,6 +53,7 @@ fn run(cli: &Cli) -> anyhow::Result<Outcome> {
         Command::History { id } => Request::History { id: id.parse()? },
         Command::Useful { id } => Request::Useful { id: id.parse()? },
         Command::Rebuild => Request::Rebuild,
+        Command::Dream => Request::Dream,
         Command::Reextract { source, from } => Request::Reextract {
             source: source.as_deref().map(neomem_core::Source::new).transpose()?,
             from: from.as_deref().map(time_argument::parse).transpose()?,

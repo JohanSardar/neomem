@@ -4,8 +4,8 @@ use std::process::ExitCode;
 use crate::time_argument;
 
 use neomem_proto::{
-    EntityView, HistoryView, IndexReport, RawHit, RebuildReport, Response, SearchResults, ShownMemory,
-    StatusReport,
+    DreamReport, EntityView, HistoryView, IndexReport, RawHit, RebuildReport, Response, SearchResults,
+    ShownMemory, StatusReport,
 };
 
 pub fn print(response: &Response, json: bool) -> ExitCode {
@@ -38,6 +38,7 @@ fn print_human(response: &Response) {
         Response::RawHits(hits) => print_raw_hits(hits),
         Response::Corrected(receipt) => println!("{} is marked as logged incorrectly", receipt.intake),
         Response::Rebuilt(report) => print_rebuilt(report),
+        Response::Dreamed(report) => print_dream(report),
         Response::Reextracting { queued } => println!("queued {queued} intake records for extraction"),
         Response::SearchResults(results) => print_search(results),
         Response::DriftChecked(report) => println!(
@@ -213,5 +214,16 @@ fn print_history(view: &HistoryView) {
     }
     for fact in &view.extensions {
         println!("  extended by {}  {}", fact.id(), fact.content());
+    }
+}
+
+fn print_dream(report: &DreamReport) {
+    for (name, specialist) in
+        [("fact reconciler", report.reconciler), ("entity keeper", report.entity_keeper)]
+    {
+        println!(
+            "{name:<16} {} in focus, {} rounds, {} writes, {} rejected",
+            specialist.focus, specialist.rounds, specialist.writes, specialist.rejected
+        );
     }
 }

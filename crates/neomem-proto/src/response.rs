@@ -15,6 +15,7 @@ pub enum Response {
     Rebuilt(RebuildReport),
     Reextracting { queued: usize },
     DriftChecked(DriftReport),
+    Dreamed(DreamReport),
     SearchResults(Box<SearchResults>),
     ClockSet { now: EpochMs },
     Resolved(Vec<ResolvedEntity>),
@@ -214,4 +215,20 @@ pub struct HistoryView {
     pub versions: Vec<Fact>,
     pub current: FactId,
     pub extensions: Vec<Fact>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DreamReport {
+    pub trigger: String,
+    pub reconciler: SpecialistReport,
+    pub entity_keeper: SpecialistReport,
+    pub took_ms: i64,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SpecialistReport {
+    pub focus: usize,
+    pub rounds: usize,
+    pub writes: usize,
+    pub rejected: usize,
 }
