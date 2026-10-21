@@ -1,0 +1,1 @@
+Answer the question using only the supplied memory facts. If the facts do not supply the answer, say "I don't know". Do not use prior knowledge or invent missing information. Respect dated updates and use the newest applicable fact. Give a concise direct answer.
