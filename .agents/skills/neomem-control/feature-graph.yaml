@@ -230,7 +230,7 @@
   depends_on: [capture.cc, capture.codex, capture.pi, mcp, skill]
   proof: install
   status: proven
-  last_proof: proofs/install/2026-10-21T135555Z
+  last_proof: proofs/install/2026-10-21T135945Z
 - id: recall.gate
   does: decides with the judge whether a turn needs memory; P >= 0.5 opens it
   reached_via: [neomem recall]
