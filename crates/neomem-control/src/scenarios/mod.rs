@@ -26,6 +26,8 @@ mod models_swap;
 mod raw;
 mod recall_approve;
 mod recall_gate;
+mod recall_hooks;
+mod recall_hooks_pi;
 mod recall_plan;
 pub(crate) mod recall_support;
 mod reconcile;
@@ -45,6 +47,7 @@ pub struct Scenario {
 }
 
 pub const ALL: &[Scenario] = &[
+    Scenario { name: "recall-hooks", run: recall_hooks::prove },
     Scenario { name: "eval", run: eval::prove },
     Scenario { name: "mcp", run: mcp::prove },
     Scenario { name: "contract", run: contract::prove },

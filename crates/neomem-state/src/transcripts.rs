@@ -12,6 +12,20 @@ pub struct TranscriptPosition<'a> {
 }
 
 impl StateDb {
+    pub fn transcript_paths(
+        &self,
+        agent: &str,
+        session: &str,
+    ) -> Result<Vec<std::path::PathBuf>, StateError> {
+        self.read(|connection| {
+            let mut statement = connection.prepare_cached(
+                "SELECT path FROM transcript_positions WHERE agent = ?1 AND session = ?2 ORDER BY path",
+            )?;
+            let rows = statement.query_map(params![agent, session], |row| row.get::<_, String>(0))?;
+            Ok(rows.collect::<Result<Vec<_>, _>>()?.into_iter().map(std::path::PathBuf::from).collect())
+        })
+    }
+
     pub fn transcript_position(&self, agent: &str, path: &str) -> Result<u64, StateError> {
         self.read(|connection| {
             connection
