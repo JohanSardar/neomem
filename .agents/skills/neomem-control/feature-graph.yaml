@@ -230,8 +230,8 @@
   module: neomem-cli (install)
   depends_on: [capture.cc, capture.codex, capture.pi, mcp, skill]
   proof: install
-  status: planned
-  last_proof: null
+  status: proven
+  last_proof: proofs/install/2026-10-21T131026Z
 - id: recall.gate
   does: decides with the judge whether a turn needs memory; P >= 0.5 opens it
   reached_via: [neomem recall]
