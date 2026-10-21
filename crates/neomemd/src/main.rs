@@ -41,7 +41,7 @@ fn run() -> anyhow::Result<()> {
     let config = DaemonConfig::load_or_create(&home)?;
     let clock = Arc::new(DaemonClock::new(config.dev.settable_clock));
     let engine = Arc::new(open_engine(&home, &config, Arc::clone(&clock))?);
-    let sources = config.capture.sources();
+    let sources = config.capture.sources(&home);
     let mut directories = vec![home.root().join("facts"), home.root().join("entities")];
     for source in &sources {
         std::fs::create_dir_all(&source.root)?;

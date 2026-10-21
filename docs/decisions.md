@@ -70,3 +70,4 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - recall.hooks: empty recall slices use the adapter’s last 16 active-branch transcript turns, located through the daemon’s capture cursor (at most 16,000 characters); pi ships plain JavaScript and uses the same TOML switch precedence and framed socket/spool envelopes as the CLI.
 - The pi smoke proof follows npm’s installed global bin/pi entrypoint instead of hardcoding either pi package name.
 - pi has no built-in MCP (its docs say so), so install gives pi the skill and the neomem-pi extension (capture and recall) but no MCP server; Claude Code and Codex get MCP through the plugin's .mcp.json.
+- A daemon whose NEOMEM_HOME is not ~/.neomem captures only the agent folders [capture] names; the default agent folders belong to the default home, so a test or eval home never reads the user's real sessions.
