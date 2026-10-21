@@ -1,0 +1,2 @@
+{"request":{"protocol":1,"request":{"arguments":{"agent":"pi","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-8X2aJs/capture/pi/sessions/./rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":0.5292549999999999}
+{"request":{"protocol":1,"request":{"arguments":{"agent":"pi","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-8X2aJs/capture/pi/sessions/rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":1.1737099999999998}
