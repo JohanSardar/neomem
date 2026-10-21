@@ -58,6 +58,7 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - JSON Schema generation reads the real core and proto wire definitions at build time, preserving core’s serde/thiserror-only dependency boundary.
 - Tag proposals compare the eight nearest registry tags in one numbered judge choice; exact existing names bypass the models.
 - Submitted intake tags stay intact in the log and are canonicalized with extractor proposals when writing facts, keeping capture off the model path.
+- `neomem install` trusts neomem's own Codex plugin hooks (hooks/list, then config/batchWrite of hooks.state trusted_hash through codex app-server): running install is the user's consent, and Codex skips untrusted plugin hooks.
 - Eval uses SHA-256(seed:question ID) ordering within question types, round-robin development sampling (abstentions separate), the unselected IDs as held-out, and source-session coverage for retrieval recall; abstentions have no retrieval denominator.
 - Eval uses a JSON model manifest containing daemon TOML and fixed OpenAI-compatible reader/judge endpoints, caps memory context in characters, and reports the provider's actual prompt-token usage.
 - Eval replaces only capture paths, HTTP binding and intake debounce (one second, large batch) inside temporary daemon configs; it waits for zero pending/claimed jobs, rejects failed jobs, then awaits serialized manual consolidation before searching.
@@ -69,3 +70,5 @@ Choices the spec leaves open, one line each, with the section they fill in.
 - recall.hooks: empty recall slices use the adapter’s last 16 active-branch transcript turns, located through the daemon’s capture cursor (at most 16,000 characters); pi ships plain JavaScript and uses the same TOML switch precedence and framed socket/spool envelopes as the CLI.
 - The pi smoke proof follows npm’s installed global bin/pi entrypoint instead of hardcoding either pi package name.
 - §5 The extractor is told who owns the memory: `[worker] owner` (default "the user") is listed as known entity [0], `user:` turns are the owner speaking, and facts given `existing: 0` land on the owner entity; the prompt's examples no longer use a real name the model could copy.
+- A local model used by background work stays loaded until two minutes (or the idle timeout, if shorter) after its last use, so a burst of writes loads it once instead of once per write; only reads extend the 15-minute idle window.
+- pi has no built-in MCP (its docs say so), so install gives pi the skill and the neomem-pi extension (capture and recall) but no MCP server; Claude Code and Codex get MCP through the plugin's .mcp.json.

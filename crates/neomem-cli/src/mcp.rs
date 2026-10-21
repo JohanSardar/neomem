@@ -47,6 +47,11 @@ pub fn run() -> anyhow::Result<()> {
 }
 
 fn forward(agent: &ureq::Agent, home: &Home, message: &Value, protocol: &str) -> anyhow::Result<Value> {
+    let protocol = if message["method"] == "initialize" {
+        message["params"]["protocolVersion"].as_str().unwrap_or(protocol)
+    } else {
+        protocol
+    };
     let address = std::fs::read_to_string(home.http_address_path())?;
     let address: std::net::SocketAddr = address.trim().parse()?;
     anyhow::ensure!(address.ip().is_loopback(), "MCP daemon address must be loopback");

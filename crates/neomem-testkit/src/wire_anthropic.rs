@@ -23,6 +23,7 @@ pub fn reply(llm: &ScriptedLlm, incoming: &Incoming) -> Reply {
 }
 
 pub fn request(body: &Value) -> LlmRequest {
+    let mut system = vec![content_text(&body["system"])];
     let mut messages = Vec::new();
     for message in body["messages"].as_array().into_iter().flatten() {
         let blocks = match &message["content"] {
@@ -30,24 +31,26 @@ pub fn request(body: &Value) -> LlmRequest {
             Value::Array(blocks) => blocks.clone(),
             _ => Vec::new(),
         };
-        if message["role"] == "assistant" {
-            messages.push(assistant(&blocks));
-            continue;
-        }
-        for block in &blocks {
-            if block["type"] == "tool_result" {
-                messages.push(LlmMessage::ToolResult {
-                    call_id: block["tool_use_id"].as_str().unwrap_or_default().to_owned(),
-                    content: content_text(&block["content"]),
-                });
-            } else if let Some(text) = block["text"].as_str() {
-                messages.push(LlmMessage::User(text.to_owned()));
+        let texts: Vec<&str> = blocks.iter().filter_map(|block| block["text"].as_str()).collect();
+        match message["role"].as_str() {
+            Some("assistant") => messages.push(assistant(&blocks)),
+            Some("system") => system.push(texts.join("\n")),
+            _ => {
+                messages.extend(blocks.iter().filter(|block| block["type"] == "tool_result").map(|block| {
+                    LlmMessage::ToolResult {
+                        call_id: block["tool_use_id"].as_str().unwrap_or_default().to_owned(),
+                        content: content_text(&block["content"]),
+                    }
+                }));
+                if !texts.is_empty() {
+                    messages.push(LlmMessage::User(texts.join("\n")));
+                }
             }
         }
     }
     let schema = &body["output_config"]["format"]["schema"];
     LlmRequest {
-        system: content_text(&body["system"]),
+        system: system.join("\n"),
         messages,
         response_schema: (!schema.is_null()).then(|| schema.to_string()),
         tools: body["tools"]

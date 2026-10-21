@@ -1,3 +1,0 @@
-2026-10-21T05:42:21.501807Z  INFO neomemd::http: HTTP listening on 127.0.0.1:39747
-2026-10-21T05:42:21.502621Z  INFO neomemd: neomemd serving /tmp/neomemctl-OGkThd
-2026-10-21T05:42:21.527183Z  INFO neomem_engine::indexing: index rebuilt from the files: 13 facts, 7 entities

@@ -19,6 +19,7 @@ pub enum Response {
     Reextracting { queued: usize },
     DriftChecked(DriftReport),
     Dreamed(DreamReport),
+    Installed(InstallReport),
     SearchResults(Box<SearchResults>),
     ClockSet { now: EpochMs },
     Resolved(Vec<ResolvedEntity>),
@@ -236,6 +237,26 @@ pub struct HistoryView {
     pub versions: Vec<Fact>,
     pub current: FactId,
     pub extensions: Vec<Fact>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct InstallReport {
+    pub steps: Vec<InstallStep>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct InstallStep {
+    pub part: String,
+    pub outcome: InstallOutcome,
+    pub detail: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum InstallOutcome {
+    Done,
+    Skipped,
+    Failed,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

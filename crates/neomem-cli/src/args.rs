@@ -26,6 +26,8 @@ pub enum Command {
         #[arg(long = "type")]
         kind: String,
     },
+    #[command(about = "Set up Claude Code, Codex, pi, the skill and the background service")]
+    Install,
     #[command(about = "Show whether the daemon runs and what it holds")]
     Status,
     #[command(about = "Recall memories for an agent turn, or switch recall mode on or off")]

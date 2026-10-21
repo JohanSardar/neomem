@@ -4,8 +4,8 @@ use std::process::ExitCode;
 use crate::time_argument;
 
 use neomem_proto::{
-    DreamReport, EntityView, HistoryView, IndexReport, RawHit, RebuildReport, Response, SearchResults,
-    ShownMemory, StatusReport,
+    DreamReport, EntityView, HistoryView, IndexReport, InstallOutcome, InstallReport, RawHit, RebuildReport,
+    Response, SearchResults, ShownMemory, StatusReport,
 };
 
 pub fn print(response: &Response, json: bool) -> ExitCode {
@@ -16,6 +16,11 @@ pub fn print(response: &Response, json: bool) -> ExitCode {
     }
     match response {
         Response::Failed(_) | Response::VersionMismatch { .. } => ExitCode::FAILURE,
+        Response::Installed(report)
+            if report.steps.iter().any(|step| step.outcome == InstallOutcome::Failed) =>
+        {
+            ExitCode::FAILURE
+        }
         _ => ExitCode::SUCCESS,
     }
 }
@@ -50,6 +55,7 @@ fn print_human(response: &Response) {
         Response::Corrected(receipt) => println!("{} is marked as logged incorrectly", receipt.intake),
         Response::Rebuilt(report) => print_rebuilt(report),
         Response::Dreamed(report) => print_dream(report),
+        Response::Installed(report) => print_install(report),
         Response::Reextracting { queued } => println!("queued {queued} intake records for extraction"),
         Response::SearchResults(results) => print_search(results),
         Response::DriftChecked(report) => println!(
@@ -248,5 +254,16 @@ fn print_dream(report: &DreamReport) {
             "{name:<16} {} in focus, {} rounds, {} writes, {} rejected",
             specialist.focus, specialist.rounds, specialist.writes, specialist.rejected
         );
+    }
+}
+
+fn print_install(report: &InstallReport) {
+    for step in &report.steps {
+        let mark = match step.outcome {
+            InstallOutcome::Done => "done",
+            InstallOutcome::Skipped => "skipped",
+            InstallOutcome::Failed => "FAILED",
+        };
+        println!("{mark:<8} {:<24} {}", step.part, step.detail);
     }
 }

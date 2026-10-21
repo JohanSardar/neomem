@@ -1,3 +1,4 @@
+pub mod agents;
 pub mod bench;
 pub mod binaries;
 pub mod capture;
