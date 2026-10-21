@@ -15,6 +15,14 @@ pub fn in_code(root: &Path) -> anyhow::Result<BTreeSet<String>> {
     if surfaces.contains("neomem hook") {
         surfaces.extend(hook_surfaces(&root.join("crates/neomem-core/src/capture.rs"))?);
     }
+    let pi = root.join("integrations/pi/index.js");
+    if pi.is_file() {
+        let text = fs::read_to_string(pi)?;
+        surfaces.extend(text.lines().filter_map(|line| {
+            let event = line.trim().strip_prefix("pi.on(\"")?.split('"').next()?;
+            Some(format!("pi {event}"))
+        }));
+    }
     surfaces.extend(mcp_tools(&root.join("crates/neomemd/src/mcp/tools.rs"))?);
     surfaces.extend(http_routes(&root.join("crates/neomemd/src"))?);
     Ok(surfaces)

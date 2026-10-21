@@ -49,17 +49,7 @@ pub fn run(home: &Home, arguments: &RecallArgs) -> anyhow::Result<Response> {
         return Ok(Response::Recalled(Vec::new()));
     }
     let agent = arguments.agent.as_deref().ok_or_else(|| anyhow::anyhow!("recall needs --agent"))?;
-    let recall = config.get("recall");
-    let enabled = recall
-        .and_then(|recall| {
-            project
-                .as_deref()
-                .and_then(|project| recall.get("projects")?.get(project))
-                .or_else(|| recall.get("agents")?.get(agent))
-                .or_else(|| recall.get("enabled"))
-        })
-        .and_then(toml::Value::as_bool)
-        .unwrap_or(false);
+    let enabled = enabled(&config, agent, project.as_deref());
     if !enabled {
         return Ok(Response::Recalled(Vec::new()));
     }
@@ -106,7 +96,20 @@ pub fn run(home: &Home, arguments: &RecallArgs) -> anyhow::Result<Response> {
         ))
 }
 
-fn project_key(path: &str) -> anyhow::Result<String> {
+pub fn project_key(path: &str) -> anyhow::Result<String> {
     let path = fs::canonicalize(path).or_else(|_| std::path::absolute(path))?;
     Ok(path.to_string_lossy().into_owned())
+}
+
+pub fn enabled(config: &toml::Table, agent: &str, project: Option<&str>) -> bool {
+    config
+        .get("recall")
+        .and_then(|recall| {
+            project
+                .and_then(|project| recall.get("projects")?.get(project))
+                .or_else(|| recall.get("agents")?.get(agent))
+                .or_else(|| recall.get("enabled"))
+        })
+        .and_then(toml::Value::as_bool)
+        .unwrap_or(false)
 }

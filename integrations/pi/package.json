@@ -1,0 +1,10 @@
+{
+  "name": "neomem-pi",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Capture and optional recall for neomem in pi",
+  "license": "AGPL-3.0-only",
+  "files": ["index.js", "socket.js", "README.md"],
+  "pi": { "extensions": ["./index.js"] },
+  "dependencies": { "smol-toml": "1.9.1" }
+}
