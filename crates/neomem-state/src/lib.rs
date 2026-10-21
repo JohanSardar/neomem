@@ -1,3 +1,5 @@
+mod recall;
+pub use recall::{RecallLog, RecallScore};
 mod connection;
 mod corrections;
 mod errors;

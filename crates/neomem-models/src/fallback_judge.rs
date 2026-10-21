@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use neomem_core::{Choice, Decision, Judge, ModelError, ModelId};
+use neomem_core::{Choice, Decision, Judge, JudgeScores, ModelError, ModelId};
 
 #[derive(Debug)]
 pub struct FallbackJudge {
@@ -49,6 +49,15 @@ impl Judge for FallbackJudge {
         self.answer(|judge| judge.score(context, question, candidates))
     }
 
+    fn score_with_model(
+        &self,
+        context: &str,
+        question: &str,
+        candidates: &[&str],
+    ) -> Result<JudgeScores, ModelError> {
+        self.answer(|judge| judge.score_with_model(context, question, candidates))
+    }
+
     fn model_id(&self) -> ModelId {
         self.primary.as_ref().map_or_else(|_| self.fallback.model_id(), |primary| primary.model_id())
     }
@@ -92,6 +101,9 @@ mod tests {
         judge_contract(&judge);
         assert_eq!(judge.score("context", "question", &["one"]).unwrap(), vec![0.8]);
         assert_eq!(judge.model_id().as_str(), "jev:down");
+        let scored = judge.score_with_model("context", "question", &["one"]).unwrap();
+        assert_eq!(scored.model.as_str(), "fake:scripted-judge");
+        assert_eq!(scored.probabilities, vec![0.8]);
     }
 
     #[test]

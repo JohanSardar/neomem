@@ -3,6 +3,7 @@ mod connection;
 mod hook;
 mod intake_record;
 mod login;
+mod recall;
 mod render;
 mod time_argument;
 
@@ -43,6 +44,7 @@ enum Outcome {
 fn run(cli: &Cli) -> anyhow::Result<Outcome> {
     let home = Home::from_env().ok_or_else(|| anyhow::anyhow!("neither NEOMEM_HOME nor HOME is set"))?;
     let request = match &cli.command {
+        Command::Recall(arguments) => return recall::run(&home, arguments).map(Outcome::Answered),
         Command::Hook { .. } => return Ok(Outcome::Answered(Response::Captured)),
         Command::Status => Request::Status,
         Command::Add(arguments) => Request::Add(intake_record::from_arguments(arguments)?),

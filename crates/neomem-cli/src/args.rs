@@ -12,6 +12,7 @@ pub struct Cli {
 #[derive(Debug, Subcommand)]
 pub enum Command {
     Status,
+    Recall(RecallArgs),
     Hook {
         agent: String,
         event: String,
@@ -172,4 +173,22 @@ impl RoleArgument {
             Self::Consolidator => neomem_core::ModelRole::Consolidator,
         }
     }
+}
+
+#[derive(Debug, Args)]
+pub struct RecallArgs {
+    #[arg(value_parser = ["on", "off"])]
+    pub switch: Option<String>,
+    #[arg(long, value_parser = ["cc", "codex", "pi"])]
+    pub agent: Option<String>,
+    #[arg(long)]
+    pub project: Option<String>,
+    #[arg(long)]
+    pub slice: Option<std::path::PathBuf>,
+    #[arg(long)]
+    pub session: Option<String>,
+    #[arg(long, default_value = "")]
+    pub message: String,
+    #[arg(long)]
+    pub error: Option<String>,
 }

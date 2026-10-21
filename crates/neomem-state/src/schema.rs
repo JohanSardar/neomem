@@ -80,6 +80,33 @@ CREATE TABLE transcript_entries (
     PRIMARY KEY (agent, path, turn)
 ) STRICT;
 ",
+    r"
+CREATE TABLE recall_log (
+    id INTEGER PRIMARY KEY,
+    agent TEXT NOT NULL,
+    session TEXT NOT NULL,
+    turn TEXT,
+    at INTEGER NOT NULL,
+    gate REAL,
+    queries INTEGER NOT NULL,
+    source TEXT NOT NULL,
+    candidates TEXT NOT NULL,
+    injected TEXT NOT NULL,
+    timings TEXT NOT NULL,
+    models TEXT NOT NULL
+) STRICT;
+CREATE INDEX recall_by_turn ON recall_log (agent, session, turn, id);
+CREATE TABLE recall_search_labels (
+    recall_id INTEGER NOT NULL UNIQUE REFERENCES recall_log(id),
+    searched_at INTEGER NOT NULL
+) STRICT;
+CREATE TABLE recall_injected (
+    agent TEXT NOT NULL,
+    session TEXT NOT NULL,
+    fact TEXT NOT NULL,
+    PRIMARY KEY (agent, session, fact)
+) STRICT;
+",
 ];
 
 pub fn migrate(connection: &mut Connection) -> Result<(), StateError> {

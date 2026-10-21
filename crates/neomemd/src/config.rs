@@ -3,7 +3,7 @@ use std::fs;
 use anyhow::Context;
 use neomem_core::SearchConfig;
 use neomem_engine::{CommitPolicy, NightlyAt, WorkerConfig};
-use neomem_models::parse_duration;
+use neomem_models::{ModelsConfig, parse_duration};
 use neomem_proto::Home;
 use serde::Deserialize;
 
@@ -26,6 +26,8 @@ pub struct DaemonConfig {
     #[serde(default)]
     pub http: HttpConfig,
     #[serde(default)]
+    pub recall: RecallSection,
+    #[serde(default)]
     pub capture: CaptureConfig,
     #[serde(default)]
     pub vault: VaultConfig,
@@ -37,6 +39,8 @@ pub struct DaemonConfig {
     pub worker: WorkerSection,
     #[serde(default)]
     pub dev: DevConfig,
+    #[serde(flatten)]
+    pub models: ModelsConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -155,6 +159,29 @@ impl DaemonConfig {
         }
         let text = fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
         toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
+    }
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct RecallSection {
+    pub hard_timeout: Option<String>,
+}
+
+impl DaemonConfig {
+    pub fn recall_config(&self) -> anyhow::Result<neomem_engine::RecallConfig> {
+        let defaults = neomem_engine::RecallConfig::default();
+        let parse = |text: Option<&str>, default| {
+            text.map_or(Ok(default), |text| {
+                parse_duration(text).ok_or_else(|| anyhow::anyhow!("invalid recall duration"))
+            })
+        };
+        Ok(neomem_engine::RecallConfig {
+            planner_timeout: parse(
+                self.models.models.planner.as_ref().and_then(|role| role.timeout.as_deref()),
+                defaults.planner_timeout,
+            )?,
+            hard_timeout: parse(self.recall.hard_timeout.as_deref(), defaults.hard_timeout)?,
+        })
     }
 }
 

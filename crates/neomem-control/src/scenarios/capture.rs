@@ -5,6 +5,7 @@ use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
 
+use neomem_testkit::{FakeRules, LlmRule};
 use rusqlite::Connection;
 use serde_json::json;
 
@@ -14,6 +15,14 @@ use crate::proof::ProofRun;
 
 pub fn prove(proof: &mut ProofRun, binaries: &Binaries, agent: &str) -> anyhow::Result<()> {
     let mut isolated = IsolatedNeomem::prepared(binaries)?;
+    isolated.add_fake_rules(&FakeRules {
+        llm: vec![LlmRule {
+            system_contains: Some("You are neomem's memory extractor".to_owned()),
+            reply: json!({"facts": [], "entities": []}).to_string(),
+            ..LlmRule::default()
+        }],
+        ..FakeRules::default()
+    })?;
     let directory = isolated.home().root().join("capture").join(agent);
     let fixture =
         crate::repo::root()?.join(format!(".agents/skills/neomem-control/fixtures/transcripts/{agent}"));

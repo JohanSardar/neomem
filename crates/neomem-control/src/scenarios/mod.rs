@@ -21,6 +21,10 @@ mod models_judge;
 mod models_llm;
 mod models_swap;
 mod raw;
+mod recall_approve;
+mod recall_gate;
+mod recall_plan;
+pub(crate) mod recall_support;
 mod reconcile;
 mod search;
 mod spool;
@@ -37,6 +41,9 @@ pub struct Scenario {
 }
 
 pub const ALL: &[Scenario] = &[
+    Scenario { name: "recall-gate", run: recall_gate::prove },
+    Scenario { name: "recall-plan", run: recall_plan::prove },
+    Scenario { name: "recall-approve", run: recall_approve::prove },
     Scenario { name: "capture-cc", run: capture_cc::prove },
     Scenario { name: "capture-codex", run: capture_codex::prove },
     Scenario { name: "capture-pi", run: capture_pi::prove },

@@ -50,6 +50,13 @@ pub fn raw_query(arguments: &RawArgs) -> anyhow::Result<RawQuery> {
 pub fn search_query(arguments: &SearchArgs) -> anyhow::Result<SearchQuery> {
     let moment = |text: &Option<String>| text.as_deref().map(time_argument::parse).transpose();
     Ok(SearchQuery {
+        recall_turn: std::env::var("NEOMEM_SESSION_ID").ok().zip(std::env::var("NEOMEM_TURN_ID").ok()).map(
+            |(session, turn)| neomem_proto::RecallTurn {
+                agent: std::env::var("NEOMEM_AGENT").unwrap_or_else(|_| "codex".to_owned()),
+                session,
+                turn,
+            },
+        ),
         text: arguments.text.clone(),
         k: arguments.k,
         tags: arguments.tags.iter().map(|tag| Tag::new(tag)).collect::<Result<_, _>>()?,

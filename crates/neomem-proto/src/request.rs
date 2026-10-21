@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "command", content = "arguments", rename_all = "snake_case")]
 pub enum Request {
     Status,
+    Recall(RecallQuery),
     Capture(neomem_core::CaptureSignal),
     Shutdown,
     Add(IntakeRecord),
@@ -65,6 +66,8 @@ pub enum Request {
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct SearchQuery {
+    #[serde(default)]
+    pub recall_turn: Option<RecallTurn>,
     pub text: String,
     #[serde(default)]
     pub k: Option<usize>,
@@ -107,4 +110,26 @@ impl Request {
     pub fn waits_in_spool_when_the_daemon_is_down(&self) -> bool {
         matches!(self, Self::Add(_) | Self::Capture(_))
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RecallQuery {
+    #[serde(default)]
+    pub turn: Option<String>,
+    pub agent: String,
+    pub session: String,
+    #[serde(default)]
+    pub slice: String,
+    pub message: String,
+    #[serde(default)]
+    pub error: Option<String>,
+    #[serde(default)]
+    pub project: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RecallTurn {
+    pub agent: String,
+    pub session: String,
+    pub turn: String,
 }

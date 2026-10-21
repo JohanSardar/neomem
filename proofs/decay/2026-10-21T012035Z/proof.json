@@ -1,0 +1,47 @@
+{
+  "feature": "decay",
+  "scenario": "decay",
+  "passed": true,
+  "started_at": "2026-10-21T012035Z",
+  "duration_ms": 280,
+  "code_version": "14c6de77235b-dirty",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "a fresh fact outranks an equally relevant 400-day-old one, and the old one is still shown",
+      "passed": true,
+      "detail": "decay fresh 1.30, old 0.36"
+    },
+    {
+      "claim": "decay stays inside [0.3, 1.5]",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "retrievals are not evidence: ten searches leave the old fact's decay unchanged",
+      "passed": true,
+      "detail": "0.357 -> 0.357"
+    },
+    {
+      "claim": "neomem useful is evidence: four marks raise the old fact's decay factor",
+      "passed": true,
+      "detail": "0.357 -> 1.492"
+    },
+    {
+      "claim": "a stable fact eight years old does not decay at all",
+      "passed": true,
+      "detail": "1.000"
+    },
+    {
+      "claim": "a strong match is never buried: an eight-year-old exact match stays in the top 3, with decay at the 0.3 floor or above",
+      "passed": true,
+      "detail": "0.322"
+    },
+    {
+      "claim": "history-style queries (--include-invalid) switch decay off",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

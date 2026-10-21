@@ -21,6 +21,7 @@ pub struct EngineParts {
     pub commit_policy: CommitPolicy,
     pub nightly_at: NightlyAt,
     pub search_config: SearchConfig,
+    pub recall_config: crate::recall::RecallConfig,
     pub worker: WorkerConfig,
     pub clock: Arc<dyn Clock>,
     pub models: Arc<dyn ModelRoles>,
@@ -39,6 +40,8 @@ pub struct Engine {
     pub(crate) commit_policy: CommitPolicy,
     pub(crate) nightly_at: NightlyAt,
     pub(crate) search_config: SearchConfig,
+    pub(crate) recall_busy: std::sync::atomic::AtomicBool,
+    pub(crate) recall_config: crate::recall::RecallConfig,
     pub(crate) worker: WorkerConfig,
     pub(crate) ids: IdMint,
     pub(crate) models: Arc<dyn ModelRoles>,
@@ -84,6 +87,8 @@ impl Engine {
             commit_policy: parts.commit_policy,
             nightly_at: parts.nightly_at,
             search_config: parts.search_config,
+            recall_config: parts.recall_config,
+            recall_busy: std::sync::atomic::AtomicBool::new(false),
             worker: parts.worker,
             clock: parts.clock,
             daemon_version: parts.daemon_version,
@@ -93,8 +98,9 @@ impl Engine {
         })
     }
 
-    pub fn handle(&self, request: Request) -> Response {
+    pub fn handle(self: &Arc<Self>, request: Request) -> Response {
         match request {
+            Request::Recall(query) => self.recall(query),
             Request::Capture(signal) => self.capture_signal(&signal),
             Request::Status => Response::Status(self.status()),
             Request::Shutdown => {
