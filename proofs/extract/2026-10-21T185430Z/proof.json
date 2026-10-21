@@ -2,9 +2,9 @@
   "feature": "extract",
   "scenario": "extract",
   "passed": true,
-  "started_at": "2026-10-21T182726Z",
-  "duration_ms": 15294,
-  "code_version": "3e525db80037",
+  "started_at": "2026-10-21T185430Z",
+  "duration_ms": 18161,
+  "code_version": "136a94ae8b47-dirty",
   "models": "fake",
   "failure": null,
   "checks": [
@@ -67,6 +67,16 @@
       "claim": "the extractor is told who speaks in user turns, and a fact it gives to the owner lands on the owner entity",
       "passed": true,
       "detail": "introduced true, on the owner true"
+    },
+    {
+      "claim": "a fact whose entity the extractor left out is kept on the owner instead of being dropped",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "claim": "an entity the extractor marks as the owner under another name becomes its own entity",
+      "passed": true,
+      "detail": ""
     }
   ]
 }
