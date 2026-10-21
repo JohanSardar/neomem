@@ -1,0 +1,74 @@
+2026-10-21T20:16:38.771558Z  INFO neomemd::http: HTTP listening on 127.0.0.1:33789
+2026-10-21T20:16:38.772810Z  INFO neomemd: neomemd serving /tmp/neomemctl-A4Z52B
+2026-10-21T20:16:38.774110Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-21T20:16:38.780427Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.782440Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.782720Z  WARN neomem_engine::capture: transcript capture failed: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.809874Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.810436Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.813895Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.814273Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.820133Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.820668Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.823657Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.824129Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.829776Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.830312Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.833129Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.833454Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.837275Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.837642Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.843199Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.843810Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.846585Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.846910Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.852650Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.853180Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.855936Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.856268Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.862412Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.862944Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.865610Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.865943Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.871550Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.871887Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.876880Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.877461Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.880001Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.880285Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.886144Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.886703Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.889077Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.889361Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.895171Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.895732Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:38.898530Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:38.898881Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:39.034006Z  WARN neomem_engine::capture: transcript capture failed: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:39.285849Z  WARN neomem_engine::capture: transcript capture failed: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:39.303149Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T20:16:39.303274Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T20:16:39.342851Z  INFO neomemd::http: HTTP listening on 127.0.0.1:39271
+2026-10-21T20:16:39.343302Z  INFO neomemd: neomemd serving /tmp/neomemctl-A4Z52B
+2026-10-21T20:16:39.343333Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-A4Z52B/run/neomemd.sock
+2026-10-21T20:16:39.345451Z  WARN neomem_engine::capture: transcript capture failed: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:39.596660Z  WARN neomem_engine::capture: transcript capture failed: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:39.766336Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:39.767107Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:39.848456Z  WARN neomem_engine::capture: transcript capture failed: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:40.100248Z  WARN neomem_engine::capture: transcript capture failed: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:40.169827Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T20:16:40.169953Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T20:16:40.208724Z  INFO neomemd::http: HTTP listening on 127.0.0.1:39985
+2026-10-21T20:16:40.209264Z  INFO neomemd: neomemd serving /tmp/neomemctl-A4Z52B
+2026-10-21T20:16:40.209286Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-A4Z52B/run/neomemd.sock
+2026-10-21T20:16:40.212619Z  WARN neomem_engine::capture: transcript capture failed: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:40.226428Z  WARN neomem_engine::capture: skipping an unreadable transcript during session lookup: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:40.227108Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-21T20:16:40.464412Z  WARN neomem_engine::capture: transcript capture failed: reading transcript failed: key must be a string at line 1 column 2
+2026-10-21T20:16:40.529149Z  INFO neomem_engine::engine: engine flushed
+2026-10-21T20:16:40.529289Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-21T20:16:40.562027Z  INFO neomemd::http: HTTP listening on 127.0.0.1:33079
+2026-10-21T20:16:40.562624Z  INFO neomemd: neomemd serving /tmp/neomemctl-A4Z52B
+2026-10-21T20:16:40.562656Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-A4Z52B/run/neomemd.sock
+2026-10-21T20:16:40.564615Z  WARN neomem_engine::capture: transcript capture failed: reading transcript failed: key must be a string at line 1 column 2

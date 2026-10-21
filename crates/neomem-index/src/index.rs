@@ -38,14 +38,13 @@ impl Index {
         db.finish_activation()?;
         let (model, dims) = model.map_or((None, None), |(model, dims)| (Some(model), Some(dims)));
         let mut snapshot = Snapshot::empty(model.clone(), dims)?;
-        let mut missing_vectors = Vec::new();
-        for row in db.load(model.as_ref())? {
-            let id = row.memory.id();
-            if row.vector.is_none() && dims.is_some() {
-                missing_vectors.push(id);
-            }
-            insert(&mut snapshot, row.memory, row.vector.as_ref())?;
-        }
+        let rows = db.load(model.as_ref())?;
+        let missing_vectors = rows
+            .iter()
+            .filter(|row| row.vector.is_none() && dims.is_some())
+            .map(|row| row.memory.id())
+            .collect();
+        insert_all(&mut snapshot, rows.into_iter().map(|row| (row.memory, row.vector)))?;
         snapshot.rederive();
         let index = Self { db: Mutex::new(db), current: ArcSwap::from_pointee(snapshot) };
         Ok(Opened { index, needs_rebuild: fresh, missing_vectors })
@@ -64,9 +63,7 @@ impl Index {
         let previous = self.current.load_full();
         db.write(changes, previous.model(), false)?;
         let mut next = Snapshot::clone(&previous);
-        for change in changes {
-            insert(&mut next, change.memory.clone(), change.vector.as_ref())?;
-        }
+        insert_all(&mut next, changes.iter().map(|change| (change.memory.clone(), change.vector.clone())))?;
         next.rederive();
         db.record_latest(&moved_heads(&previous, &next))?;
         self.current.store(Arc::new(next));
@@ -78,9 +75,7 @@ impl Index {
         let previous = self.current.load_full();
         db.write(changes, previous.model(), true)?;
         let mut next = Snapshot::empty(previous.model().cloned(), previous.dims())?;
-        for change in changes {
-            insert(&mut next, change.memory.clone(), change.vector.as_ref())?;
-        }
+        insert_all(&mut next, changes.iter().map(|change| (change.memory.clone(), change.vector.clone())))?;
         next.rederive();
         db.record_latest(&moved_heads(&Snapshot::empty(None, None)?, &next))?;
         let counts = next.counts();
@@ -103,12 +98,11 @@ impl Index {
     pub fn activate_model(&self, model: &ModelId, dims: usize) -> Result<(), IndexError> {
         let mut db = self.db.lock().unwrap_or_else(PoisonError::into_inner);
         let mut next = Snapshot::empty(Some(model.clone()), Some(dims))?;
-        for row in db.load(Some(model))? {
-            if row.vector.is_none() {
-                return Err(IndexError::Corrupt("cannot activate an incomplete vector set".to_owned()));
-            }
-            insert(&mut next, row.memory, row.vector.as_ref())?;
+        let rows = db.load(Some(model))?;
+        if rows.iter().any(|row| row.vector.is_none()) {
+            return Err(IndexError::Corrupt("cannot activate an incomplete vector set".to_owned()));
         }
+        insert_all(&mut next, rows.into_iter().map(|row| (row.memory, row.vector)))?;
         next.rederive();
         db.activate(model, dims)?;
         self.current.store(Arc::new(next));
@@ -121,30 +115,51 @@ impl Index {
     }
 }
 
-fn insert(
+fn insert_all(
     snapshot: &mut Snapshot,
-    memory: Memory,
-    vector: Option<&neomem_core::Vector>,
+    entries: impl IntoIterator<Item = (Memory, Option<neomem_core::Vector>)>,
 ) -> Result<(), IndexError> {
-    match memory {
-        Memory::Fact(fact) => {
-            let id = fact.id();
-            let slot = match (vector, &snapshot.fact_vectors) {
-                (Some(vector), Some(vectors)) => Some(vectors.add(vector)?),
-                _ => snapshot.facts.get(&id).and_then(|stored| stored.slot),
-            };
-            snapshot.facts.insert(id, Stored { memory: Arc::new(fact), slot });
-        }
-        Memory::Entity(entity) => {
-            let id = entity.id();
-            let slot = match (vector, &snapshot.entity_vectors) {
-                (Some(vector), Some(vectors)) => Some(vectors.add(vector)?),
-                _ => snapshot.entities.get(&id).and_then(|stored| stored.slot),
-            };
-            snapshot.entities.insert(id, Stored { memory: Arc::new(entity), slot });
+    let entries: Vec<(Memory, Option<neomem_core::Vector>)> = entries.into_iter().collect();
+    let fact_slots =
+        new_slots(snapshot.fact_vectors.as_deref(), &entries, |memory| matches!(memory, Memory::Fact(_)))?;
+    let entity_slots = new_slots(snapshot.entity_vectors.as_deref(), &entries, |memory| {
+        matches!(memory, Memory::Entity(_))
+    })?;
+    let (mut fact_slots, mut entity_slots) = (fact_slots.into_iter(), entity_slots.into_iter());
+    for (memory, vector) in entries {
+        let embedded = vector.is_some();
+        match memory {
+            Memory::Fact(fact) => {
+                let id = fact.id();
+                let fresh = if embedded { fact_slots.next().flatten() } else { None };
+                let slot = fresh.or_else(|| snapshot.facts.get(&id).and_then(|stored| stored.slot));
+                snapshot.facts.insert(id, Stored { memory: Arc::new(fact), slot });
+            }
+            Memory::Entity(entity) => {
+                let id = entity.id();
+                let fresh = if embedded { entity_slots.next().flatten() } else { None };
+                let slot = fresh.or_else(|| snapshot.entities.get(&id).and_then(|stored| stored.slot));
+                snapshot.entities.insert(id, Stored { memory: Arc::new(entity), slot });
+            }
         }
     }
     Ok(())
+}
+
+fn new_slots(
+    vectors: Option<&crate::vectors::VectorIndex>,
+    entries: &[(Memory, Option<neomem_core::Vector>)],
+    wanted: impl Fn(&Memory) -> bool,
+) -> Result<Vec<Option<crate::vectors::Slot>>, IndexError> {
+    let embedded: Vec<&neomem_core::Vector> = entries
+        .iter()
+        .filter(|(memory, _)| wanted(memory))
+        .filter_map(|(_, vector)| vector.as_ref())
+        .collect();
+    Ok(match vectors {
+        Some(vectors) => vectors.add_all(&embedded)?.into_iter().map(Some).collect(),
+        None => vec![None; embedded.len()],
+    })
 }
 
 fn moved_heads(previous: &Snapshot, next: &Snapshot) -> Vec<(FactId, FactId)> {

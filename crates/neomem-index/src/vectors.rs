@@ -10,6 +10,7 @@ const CONNECTIVITY: usize = 16;
 const EXPANSION_ADD: usize = 128;
 const EXPANSION_SEARCH: usize = 64;
 const FIRST_CAPACITY: usize = 1024;
+const VECTORS_PER_THREAD: usize = 512;
 
 pub type Slot = u64;
 
@@ -73,6 +74,51 @@ impl VectorIndex {
             .add(slot, vector.as_slice())
             .map_err(|error| IndexError::Vectors(error.to_string()))?;
         Ok(slot)
+    }
+
+    pub fn add_all(&self, vectors: &[&Vector]) -> Result<Vec<Slot>, IndexError> {
+        if let Some(wrong) = vectors.iter().find(|vector| vector.dims() != self.dims) {
+            return Err(IndexError::Vectors(format!(
+                "a {}-dim vector cannot join a {}-dim index",
+                wrong.dims(),
+                self.dims
+            )));
+        }
+        let cores = std::thread::available_parallelism().map_or(1, usize::from);
+        let threads = vectors.len().div_ceil(VECTORS_PER_THREAD).clamp(1, cores);
+        {
+            let hnsw = self.hnsw.write().unwrap_or_else(PoisonError::into_inner);
+            let needed = (hnsw.size() + vectors.len()).max(hnsw.capacity());
+            hnsw.reserve_capacity_and_threads(needed, threads)
+                .map_err(|error| IndexError::Vectors(error.to_string()))?;
+        }
+        let count = u64::try_from(vectors.len()).map_err(|error| IndexError::Vectors(error.to_string()))?;
+        let first = self.next_slot.fetch_add(count, Ordering::Relaxed);
+        let slots: Vec<Slot> = (first..first + count).collect();
+        let hnsw = self.hnsw.read().unwrap_or_else(PoisonError::into_inner);
+        let share = vectors.len().div_ceil(threads).max(1);
+        let failures: Vec<String> = std::thread::scope(|scope| {
+            let workers: Vec<_> = vectors
+                .chunks(share)
+                .zip(slots.chunks(share))
+                .map(|(chunk, chunk_slots)| {
+                    let hnsw = &*hnsw;
+                    scope.spawn(move || {
+                        chunk
+                            .iter()
+                            .zip(chunk_slots)
+                            .filter_map(|(vector, slot)| hnsw.add(*slot, vector.as_slice()).err())
+                            .map(|error| error.to_string())
+                            .collect::<Vec<_>>()
+                    })
+                })
+                .collect();
+            workers.into_iter().flat_map(|worker| worker.join().unwrap_or_default()).collect()
+        });
+        match failures.first() {
+            Some(failure) => Err(IndexError::Vectors(failure.clone())),
+            None => Ok(slots),
+        }
     }
 
     pub fn nearest(&self, query: &Vector, count: usize, accept: impl Fn(Slot) -> bool) -> Vec<(Slot, f32)> {
