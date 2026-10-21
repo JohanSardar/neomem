@@ -1,9 +1,0 @@
-2026-10-21T00:40:56.717172Z  INFO neomemd::http: HTTP listening on 127.0.0.1:40893
-2026-10-21T00:40:56.719085Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
-2026-10-21T00:40:56.720397Z  INFO neomemd: neomemd serving /tmp/neomemctl-00Sdz0
-2026-10-21T00:40:57.229903Z  WARN load_from_file: llama-cpp-2: control-looking token:    212 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden module="llama.cpp::load"
-2026-10-21T00:40:57.677070Z  INFO neomem_models::llama: llama.cpp model loaded model=embeddinggemma-300m-Q8_0 gpu=true
-2026-10-21T00:40:58.086628Z  WARN load_from_file: llama-cpp-2: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden module="llama.cpp::load"
-2026-10-21T00:40:58.517421Z  INFO neomem_models::llama: llama.cpp model loaded model=qwen3-reranker-0.6b-Q8_0 gpu=true
-2026-10-21T00:41:00.130242Z  WARN load_from_file: llama-cpp-2: control-looking token:    212 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden module="llama.cpp::load"
-2026-10-21T00:41:00.483017Z  INFO neomem_models::llama: llama.cpp model loaded model=embeddinggemma-300m-Q8_0 gpu=true
