@@ -192,6 +192,10 @@ impl IsolatedNeomem {
     }
 
     pub fn start_daemon(&mut self) -> anyhow::Result<()> {
+        self.start_daemon_within(START_WAIT)
+    }
+
+    pub fn start_daemon_within(&mut self, patience: Duration) -> anyhow::Result<()> {
         let log = File::options().create(true).append(true).open(self.home.daemon_log_path())?;
         let child = Command::new(&self.binaries.neomemd)
             .env("NEOMEM_HOME", self.home.root())
@@ -204,11 +208,15 @@ impl IsolatedNeomem {
             .spawn()
             .with_context(|| format!("starting {}", self.binaries.neomemd.display()))?;
         self.daemon = Some(child);
-        self.wait_until_serving()
+        self.wait_until_serving_within(patience)
     }
 
     pub fn wait_until_serving(&self) -> anyhow::Result<()> {
-        let deadline = Instant::now() + START_WAIT;
+        self.wait_until_serving_within(START_WAIT)
+    }
+
+    fn wait_until_serving_within(&self, patience: Duration) -> anyhow::Result<()> {
+        let deadline = Instant::now() + patience;
         while Instant::now() < deadline {
             if let Ok(mut client) = Client::connect(&self.home, CALL_TIMEOUT)
                 && matches!(client.call(Request::Status), Ok(Response::Status(_)))
@@ -217,7 +225,7 @@ impl IsolatedNeomem {
             }
             thread::sleep(Duration::from_millis(10));
         }
-        bail!("neomemd did not start serving within {START_WAIT:?}; log:\n{}", self.logs())
+        bail!("neomemd did not start serving within {patience:?}; log:\n{}", self.logs())
     }
 
     pub fn client(&self) -> anyhow::Result<Client> {

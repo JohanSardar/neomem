@@ -1,45 +1,93 @@
 {
-  "code_version": "5eacf07b7e87-dirty",
+  "code_version": "944d4e0ff190-dirty",
   "results": [
     {
       "name": "socket_round_trip",
-      "p50_ms": 0.019,
-      "p95_ms": 0.021,
-      "max_ms": 0.929,
+      "p50_ms": 0.02,
+      "p95_ms": 0.056,
+      "max_ms": 0.286,
       "samples": 2000,
       "budget_ms": 0.5
     },
     {
       "name": "client_status_end_to_end",
-      "p50_ms": 2.083,
-      "p95_ms": 5.086,
-      "max_ms": 7.175,
+      "p50_ms": 1.202,
+      "p95_ms": 2.347,
+      "max_ms": 3.227,
       "samples": 200,
       "budget_ms": 5.0
     },
     {
       "name": "client_add_end_to_end",
-      "p50_ms": 3.831,
-      "p95_ms": 6.149,
-      "max_ms": 6.954,
+      "p50_ms": 1.799,
+      "p95_ms": 3.933,
+      "max_ms": 4.28,
       "samples": 200,
       "budget_ms": 50.0
     },
     {
+      "name": "capture_hook_end_to_end",
+      "p50_ms": 0.995,
+      "p95_ms": 1.874,
+      "max_ms": 2.385,
+      "samples": 200,
+      "budget_ms": 50.0
+    },
+    {
+      "name": "mcp_search_stdio_real_embedder",
+      "p50_ms": 25.031,
+      "p95_ms": 31.95,
+      "max_ms": 33.36,
+      "samples": 60,
+      "budget_ms": 30.0
+    },
+    {
       "name": "search_socket_real_embedder",
-      "p50_ms": 68.02,
-      "p95_ms": 85.045,
-      "max_ms": 121.989,
+      "p50_ms": 20.858,
+      "p95_ms": 32.025,
+      "max_ms": 32.869,
       "samples": 60,
       "budget_ms": 30.0
     },
     {
       "name": "search_end_to_end_real_embedder",
-      "p50_ms": 67.977,
-      "p95_ms": 91.638,
-      "max_ms": 125.949,
+      "p50_ms": 24.471,
+      "p95_ms": 34.598,
+      "max_ms": 45.833,
       "samples": 60,
       "budget_ms": 30.0
+    },
+    {
+      "name": "search_socket_100k_real_embedder",
+      "p50_ms": 28.267,
+      "p95_ms": 40.665,
+      "max_ms": 42.421,
+      "samples": 60,
+      "budget_ms": 30.0
+    },
+    {
+      "name": "search_end_to_end_100k_real_embedder",
+      "p50_ms": 27.451,
+      "p95_ms": 37.644,
+      "max_ms": 45.719,
+      "samples": 60,
+      "budget_ms": 30.0
+    },
+    {
+      "name": "recall_gated_out_fake",
+      "p50_ms": 0.73,
+      "p95_ms": 1.307,
+      "max_ms": 2.342,
+      "samples": 20,
+      "budget_ms": 600.0
+    },
+    {
+      "name": "recall_full_fake",
+      "p50_ms": 3.842,
+      "p95_ms": 5.228,
+      "max_ms": 7.623,
+      "samples": 20,
+      "budget_ms": 3500.0
     }
   ]
 }

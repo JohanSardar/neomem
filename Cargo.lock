@@ -1547,6 +1547,7 @@ dependencies = [
  "anyhow",
  "clap",
  "humantime",
+ "jiff",
  "neomem-core",
  "neomem-proto",
  "neomem-testkit",

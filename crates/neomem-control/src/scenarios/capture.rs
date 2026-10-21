@@ -333,7 +333,7 @@ fn reactivate_pi_branch(
     Ok(())
 }
 
-fn hook(
+pub(crate) fn hook(
     isolated: &IsolatedNeomem,
     agent: &str,
     event: &str,

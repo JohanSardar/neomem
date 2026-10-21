@@ -88,12 +88,30 @@ fn latency_benches(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> {
         neomem.neomem(&["add", "bench note about the Edge release", "--source", "bench"])?;
         Ok(())
     })?;
+    let transcripts = tempfile::tempdir()?;
+    let transcript = transcripts.path().join("bench-session.jsonl");
+    fs::write(&transcript, "")?;
+    let payload = serde_json::json!({
+        "session_id": "bench-session",
+        "transcript_path": transcript,
+        "hook_event_name": "PostToolUse",
+        "cwd": transcripts.path(),
+    });
+    let capture_hook = timing::measure(200, || {
+        anyhow::ensure!(
+            crate::scenarios::capture::hook(&neomem, "cc", "tool", &payload)?,
+            "the capture hook failed"
+        );
+        Ok(())
+    })?;
     let mut results = vec![
         BenchResult::from("socket_round_trip", 2000, Some(0.5), socket),
         BenchResult::from("client_status_end_to_end", 200, Some(5.0), status),
         BenchResult::from("client_add_end_to_end", 200, Some(50.0), add),
+        BenchResult::from("capture_hook_end_to_end", 200, Some(50.0), capture_hook),
     ];
     results.extend(search_benches(binaries)?);
+    results.extend(search_at_scale(binaries)?);
     results.extend(recall_benches(binaries)?);
     Ok(results)
 }
@@ -107,6 +125,7 @@ fn search_benches(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> {
     let queries = distinct_queries();
     let mut asked = queries.iter().cycle();
     let mut client = neomem.client()?;
+    warm_up(&mut client)?;
     let socket = timing::measure(60, || {
         let text = asked.next().map_or("Edge", String::as_str);
         client.call(Request::Search(SearchQuery {
@@ -144,7 +163,11 @@ fn search_benches(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> {
 }
 
 fn wait_for_facts(neomem: &IsolatedNeomem, facts: usize) -> anyhow::Result<()> {
-    let deadline = std::time::Instant::now() + Duration::from_secs(120);
+    wait_for_vectors(neomem, facts, Duration::from_secs(120))
+}
+
+fn wait_for_vectors(neomem: &IsolatedNeomem, facts: usize, patience: Duration) -> anyhow::Result<()> {
+    let deadline = std::time::Instant::now() + patience;
     while std::time::Instant::now() < deadline {
         if let Response::Status(status) = neomem.client()?.call(Request::Status)?
             && status.index.is_some_and(|index| index.facts >= facts && index.vectors >= facts)
@@ -318,4 +341,86 @@ fn recall_benches(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> {
         BenchResult::from("recall_gated_out_fake", 20, Some(600.0), skipped),
         BenchResult::from("recall_full_fake", 20, Some(3500.0), full),
     ])
+}
+
+const SCALE_FACTS: usize = 100_000;
+const SCALE_INDEXING: Duration = Duration::from_hours(3);
+const SCALE_START: Duration = Duration::from_mins(5);
+const SCALE_PARTS: &[&str] = &["facts", "entities", ".git", "index.db"];
+
+fn scale_cache() -> anyhow::Result<std::path::PathBuf> {
+    let user_home = std::env::var_os("HOME").context("HOME is not set")?;
+    Ok(Path::new(&user_home).join(".cache/neomem/bench").join(format!("search-{SCALE_FACTS}")))
+}
+
+fn copy_parts(from: &Path, to: &Path) -> anyhow::Result<()> {
+    fs::create_dir_all(to)?;
+    for part in SCALE_PARTS {
+        let source = from.join(part);
+        if source.exists() {
+            let copied = std::process::Command::new("cp").arg("-a").arg(&source).arg(to).status()?;
+            anyhow::ensure!(copied.success(), "copying {}", source.display());
+        }
+    }
+    Ok(())
+}
+
+fn scale_home(binaries: &Binaries) -> anyhow::Result<IsolatedNeomem> {
+    let cache = scale_cache()?;
+    let mut neomem = IsolatedNeomem::prepared_with(binaries, Models::Real)?;
+    if cache.join("index.db").exists() {
+        copy_parts(&cache, neomem.home().root())?;
+        neomem.start_daemon_within(SCALE_START)?;
+        wait_for_vectors(&neomem, SCALE_FACTS, SCALE_INDEXING)?;
+        return Ok(neomem);
+    }
+    println!("building the {SCALE_FACTS}-fact search corpus once into {}", cache.display());
+    crate::bench_corpus::write(neomem.home().root(), SCALE_FACTS)?;
+    neomem.start_daemon_within(SCALE_START)?;
+    wait_for_vectors(&neomem, SCALE_FACTS, SCALE_INDEXING)?;
+    neomem.stop_daemon()?;
+    copy_parts(neomem.home().root(), &cache)?;
+    neomem.start_daemon_within(SCALE_START)?;
+    wait_for_vectors(&neomem, SCALE_FACTS, SCALE_INDEXING)?;
+    Ok(neomem)
+}
+
+fn search_at_scale(binaries: &Binaries) -> anyhow::Result<Vec<BenchResult>> {
+    let root = repo::root()?;
+    model_files::ensure(&repo::shared_models_dir(&root), model_files::ALL)?;
+    let neomem = scale_home(binaries)?;
+    let queries = distinct_queries();
+    let mut asked = queries.iter().cycle();
+    let mut client = neomem.client()?;
+    warm_up(&mut client)?;
+    let socket = timing::measure(60, || {
+        let text = asked.next().map_or("Edge", String::as_str);
+        client.call(Request::Search(SearchQuery {
+            text: format!("{text} at scale"),
+            ..SearchQuery::default()
+        }))?;
+        Ok(())
+    })?;
+    let mut asked = queries.iter().cycle();
+    let end_to_end = timing::measure(60, || {
+        let text = asked.next().map_or("Edge", String::as_str);
+        neomem.neomem(&["search", &format!("{text} at scale end to end")])?;
+        Ok(())
+    })?;
+    Ok(vec![
+        BenchResult::from("search_socket_100k_real_embedder", 60, Some(30.0), socket),
+        BenchResult::from("search_end_to_end_100k_real_embedder", 60, Some(30.0), end_to_end),
+    ])
+}
+
+const WARM_UP_SEARCHES: usize = 5;
+
+fn warm_up(client: &mut neomem_proto::Client) -> anyhow::Result<()> {
+    for number in 0..WARM_UP_SEARCHES {
+        client.call(Request::Search(SearchQuery {
+            text: format!("warm up search {number}"),
+            ..SearchQuery::default()
+        }))?;
+    }
+    Ok(())
 }
