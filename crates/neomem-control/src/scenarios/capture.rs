@@ -95,6 +95,13 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries, agent: &str) -> anyhow::
     );
     let expected = if agent == "codex" { 5 } else { 3 };
     proof.claim("every recorded turn is captured", count == expected, format!("{count}/{expected}"));
+    if agent == "codex" {
+        proof.claim(
+            "the environment context Codex injects as a user message is not logged as a turn",
+            !contents(&isolated)?.contains("<environment_context>"),
+            "",
+        );
+    }
     storm_and_restart(proof, &mut isolated, agent, &payload, &transcript, count)?;
     partial_and_sweep(proof, &mut isolated, agent, &payload, &fixture, &transcript, count)
 }

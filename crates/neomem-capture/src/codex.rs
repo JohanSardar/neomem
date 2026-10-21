@@ -25,6 +25,7 @@ pub(super) fn content(entry: &Value) -> Option<String> {
         return None;
     }
     match payload["type"].as_str()? {
+        "message" if is_injected_context(payload) => None,
         "message" => super::message(payload),
         "function_call" => {
             let arguments = match &payload["arguments"] {
@@ -99,6 +100,17 @@ fn result(payload: &Value) -> String {
     )
 }
 
+const INJECTED_CONTEXT: &[&str] = &["<environment_context>", "<user_instructions>"];
+
+fn is_injected_context(payload: &Value) -> bool {
+    payload["role"] == "user"
+        && payload["content"]
+            .as_array()
+            .and_then(|blocks| blocks.first())
+            .and_then(|block| block["text"].as_str())
+            .is_some_and(|text| INJECTED_CONTEXT.iter().any(|marker| text.trim_start().starts_with(marker)))
+}
+
 fn compact(text: &str) -> String {
     text.lines().next().unwrap_or_default().chars().take(512).collect()
 }
@@ -124,6 +136,14 @@ mod tests {
         assert!(captured.contains("failed"));
         assert!(captured.contains("exit 1"));
         assert!(!captured.contains("RAW_OUTPUT_SENTINEL"));
+    }
+
+    #[test]
+    fn context_codex_injects_as_a_user_message_is_not_a_turn() {
+        let injected = json!({"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"<environment_context>\n  <cwd>/work</cwd>\n</environment_context>"}]}});
+        let typed = json!({"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"What is the Edge ship date?"}]}});
+        assert_eq!(content(&injected), None);
+        assert_eq!(content(&typed).as_deref(), Some("user: What is the Edge ship date?"));
     }
 
     #[test]
