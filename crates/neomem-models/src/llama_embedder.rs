@@ -11,7 +11,7 @@ use neomem_core::{Embedder, ModelError, ModelId, Purpose, Vector};
 use crate::f16_copy::fastest_weights;
 use crate::llama::{LocalModel, context_threads, failure};
 
-const BATCH_TOKENS: u32 = 2048;
+const BATCH_TOKENS: u32 = 512;
 const MOST_TOKENS_PER_TEXT: usize = 512;
 const MOST_TEXTS_PER_BATCH: usize = 32;
 const FILLER_WORD: &str = "warm ";
@@ -123,7 +123,7 @@ fn embed_prompts(
     let mut vectors = Vec::with_capacity(prompts.len());
     for group in batched(&token_lists) {
         context.clear_kv_cache();
-        let mut batch = LlamaBatch::new(usize::try_from(BATCH_TOKENS).unwrap_or(2048), 1);
+        let mut batch = LlamaBatch::new(usize::try_from(BATCH_TOKENS).unwrap_or(MOST_TOKENS_PER_TEXT), 1);
         for (sequence, tokens) in (0..).zip(group) {
             batch.add_sequence(tokens, sequence, true).map_err(|error| failure("batch", error))?;
         }
@@ -148,7 +148,7 @@ fn clipped(mut tokens: Vec<LlamaToken>) -> Vec<LlamaToken> {
 }
 
 fn batched(token_lists: &[Vec<LlamaToken>]) -> Vec<&[Vec<LlamaToken>]> {
-    let budget = usize::try_from(BATCH_TOKENS).unwrap_or(2048);
+    let budget = usize::try_from(BATCH_TOKENS).unwrap_or(MOST_TOKENS_PER_TEXT);
     let mut groups = Vec::new();
     let (mut start, mut tokens) = (0, 0);
     for (index, list) in token_lists.iter().enumerate() {
@@ -186,7 +186,10 @@ mod tests {
         assert_eq!(kept.last(), Some(&LlamaToken(599)));
         let lists: Vec<Vec<LlamaToken>> = (0..40).map(|_| vec![LlamaToken(1); 100]).collect();
         let groups = batched(&lists);
-        assert!(groups.iter().all(|group| group.len() <= MOST_TEXTS_PER_BATCH && group.len() * 100 <= 2048));
+        let budget = usize::try_from(BATCH_TOKENS).unwrap();
+        assert!(
+            groups.iter().all(|group| group.len() <= MOST_TEXTS_PER_BATCH && group.len() * 100 <= budget)
+        );
         assert_eq!(groups.iter().map(|group| group.len()).sum::<usize>(), 40);
     }
 }
