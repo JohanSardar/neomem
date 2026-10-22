@@ -77,7 +77,7 @@
   depends_on: [daemon]
   proof: models-judge
   status: proven
-  last_proof: proofs/models.judge/2026-10-22T013546Z
+  last_proof: proofs/models.judge/2026-10-22T044631Z
 - id: models.llm
   does: structured completions from every provider kind (openai, anthropic, chatgpt, codex, command) with effort levels and one retry on invalid output
   reached_via: [neomem models test, neomem login]
@@ -230,7 +230,7 @@
   depends_on: [capture.cc, capture.codex, capture.pi, mcp, skill]
   proof: install
   status: proven
-  last_proof: proofs/install/2026-10-22T013718Z
+  last_proof: proofs/install/2026-10-22T044527Z
 - id: recall.gate
   does: decides with the judge whether a turn needs memory; P >= 0.5 opens it
   reached_via: [neomem recall]

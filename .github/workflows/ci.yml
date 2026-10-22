@@ -9,6 +9,10 @@ on:
         description: Re-prove every feature, not only the ones the last change touched
         type: boolean
         default: false
+      feature:
+        description: Re-prove only this feature
+        type: string
+        default: ""
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -62,6 +66,16 @@ jobs:
         with:
           path: models
           key: models-${{ hashFiles('crates/neomem-control/src/model_files.rs') }}
+      - name: a systemd user manager for the service proofs
+        if: runner.os == 'Linux'
+        run: |
+          sudo loginctl enable-linger "$USER"
+          runtime="/run/user/$(id -u)"
+          for second in $(seq 1 30); do [ -S "$runtime/bus" ] && break; sleep 1; done
+          echo "XDG_RUNTIME_DIR=$runtime" >> "$GITHUB_ENV"
+          echo "DBUS_SESSION_BUS_ADDRESS=unix:path=$runtime/bus" >> "$GITHUB_ENV"
       - name: prove features
         if: runner.os == 'Linux'
-        run: target/debug/neomemctl prove ${{ inputs.every_feature && '--all' || '--changed' }}
+        run: >-
+          systemd-run --user --scope --quiet --property=Delegate=yes
+          target/debug/neomemctl prove ${{ inputs.feature || (inputs.every_feature && '--all' || '--changed') }}
