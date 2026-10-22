@@ -22,7 +22,7 @@ neomem-testkit = { path = "crates/neomem-testkit" }
 rmcp = { version = "=3.6.0", default-features = false, features = ["server", "transport-streamable-http-server"] }
 axum = "=0.8.9"
 thiserror = "=2.0.21"
-tokio = { version = "=1.54.0", features = ["rt-multi-thread", "net", "signal", "sync", "macros", "time"] }
+tokio = { version = "=1.54.1", features = ["rt-multi-thread", "net", "signal", "sync", "macros", "time"] }
 toml = "=1.1.8"
 tracing = "=0.1.44"
 tracing-subscriber = { version = "=0.3.23", features = ["env-filter"] }
