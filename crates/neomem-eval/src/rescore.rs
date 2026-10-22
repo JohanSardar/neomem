@@ -26,7 +26,8 @@ pub struct Options {
 pub fn run(options: &Options) -> anyhow::Result<()> {
     ensure!(!options.out.exists(), "output directory already exists");
     let settings: Settings = serde_json::from_slice(&std::fs::read(&options.models)?)?;
-    let (questions, checksum) = data::load(&options.dataset)?;
+    let (questions, checksum, prepared) = data::load_with_split(&options.dataset)?;
+    let checksum = prepared.map_or(checksum, |split| split.dataset_sha256);
     let mut manifest: Value = serde_json::from_slice(&std::fs::read(options.run.join("manifest.json"))?)?;
     ensure!(manifest["dataset_sha256"] == checksum.as_str(), "the run used a different dataset");
     let earlier: Vec<Item> = serde_json::from_slice(&std::fs::read(options.run.join("items.json"))?)?;

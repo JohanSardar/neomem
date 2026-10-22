@@ -13,8 +13,16 @@ BENCHMARKS = {
     'longmemeval-s': 'longmemeval_s_cleaned.json',
     'locomo': 'locomo/locomo-eval.json',
     'convomem': 'convomem/convomem-eval.json',
-    'memoryagentbench': 'memoryagentbench/mab-eval.json',
+    'memoryagentbench': 'memoryagentbench/mab-eval.v2.json',
     'beam-100k': 'beam/beam-100k-eval.json',
+    'longmemeval-m': 'longmemeval-m/longmemeval-m-eval.v2.json',
+    'locomo-v2': 'locomo/locomo-eval.v2.json',
+    'convomem-v2': 'convomem/convomem-eval.v2.json',
+    'memoryagentbench-v2': 'memoryagentbench/mab-eval.v2.json',
+    'beam-100k-v2': 'beam/beam-100k-eval.v2.json',
+    'beam-500k': 'beam/beam-500k-eval.v2.json',
+    'beam-1m': 'beam/beam-1m-eval.v2.json',
+    'beam-10m': 'beam/beam-10m-eval.v2.json',
     'coding': 'coding-set/questions.json',
 }
 CODING_QUESTIONS = 50
@@ -82,12 +90,17 @@ if 'coding' in chosen:
 
 def shard_command(name, arm, shard, attempt):
     sample = CODING_QUESTIONS if name == 'coding' else args.sample
-    command = [str(binaries / 'neomem-eval'), 'run', str(args.data / BENCHMARKS[name]),
-               '--sample', str(sample), '--seed', '20261021', '--arm', arm, '--models', str(models),
-               '--out', str(args.out / f'{name}-{arm}' / f'shard-{shard}'),
-               '--shard', str(shard), '--shards', str(args.parallel)]
-    if args.held_out:
-        command.append('--held-out')
+    dataset = (args.out / 'prepared' / name / f'shard-{shard}.json'
+               if args.parallel > 1 else args.data / BENCHMARKS[name])
+    command = [str(binaries / 'neomem-eval'), 'run', str(dataset),
+               '--arm', arm, '--models', str(models),
+               '--out', str(args.out / f'{name}-{arm}' / f'shard-{shard}')]
+    if args.parallel > 1:
+        command.append('--prepared')
+    else:
+        command.extend(['--sample', str(sample), '--seed', '20261021'])
+        if args.held_out:
+            command.append('--held-out')
     if attempt > 0:
         command.append('--resume')
     return command
@@ -127,6 +140,14 @@ def merge(name, arm):
 started = time.monotonic()
 try:
     for name in chosen:
+        if args.parallel > 1:
+            prepared = args.out / 'prepared' / name
+            command = [str(binaries / 'neomem-eval'), 'prepare', str(args.data / BENCHMARKS[name]),
+                       '--sample', str(CODING_QUESTIONS if name == 'coding' else args.sample),
+                       '--seed', '20261021', '--shards', str(args.parallel), '--out', str(prepared)]
+            if args.held_out:
+                command.append('--held-out')
+            subprocess.run(command, check=True)
         for arm in args.arms.split(','):
             run_shards(name, arm)
             merge(name, arm)

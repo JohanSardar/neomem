@@ -2,9 +2,9 @@
   "feature": "eval",
   "scenario": "eval",
   "passed": true,
-  "started_at": "2026-10-22T184024Z",
-  "duration_ms": 5538,
-  "code_version": "38e3b178e42d-dirty",
+  "started_at": "2026-10-22T190443Z",
+  "duration_ms": 5897,
+  "code_version": "a77c819c62c3",
   "models": "fake",
   "failure": null,
   "checks": [
@@ -21,7 +21,7 @@
     {
       "claim": "knowledge updates retrieve the newer fact first",
       "passed": true,
-      "detail": "{\"about\":[\"ent_01M5JEMAF75XYH5Z0M7YN3H5B9\"],\"content\":\"user: The Osprey bicycle is now blue.\",\"durability\":\"ordinary\",\"evidence\":[],\"id\":\"fct_01M5JEMAFH40KCN6F0S4STSYAE\",\"importance\":5,\"invalid_at\":null,\"links\":[{\"to\":\"fct_01M5JEMAF75XYH5Z0M7YN3H5BA\",\"type\":\"updates\"}],\"recorded_at\":1792694430193,\"sources\":[\"int_01M5JEM9C2BE771XY5GSTDN6YR\"],\"tags\":[],\"updated_at\":1792694430193,\"valid_at\":1780401600000}"
+      "detail": "{\"about\":[\"ent_01M5JG0VBV0Q9G9S5V3TMDBYBJ\"],\"content\":\"user: The Osprey bicycle is now blue.\",\"durability\":\"ordinary\",\"evidence\":[],\"id\":\"fct_01M5JG0VC8DA6JJ80DAQX6PS7M\",\"importance\":5,\"invalid_at\":null,\"links\":[{\"to\":\"fct_01M5JG0VBV0Q9G9S5V3TMDBYBK\",\"type\":\"updates\"}],\"recorded_at\":1792695889288,\"sources\":[\"int_01M5JG0T8C6PX1VJ1BFTSH07T7\"],\"tags\":[],\"updated_at\":1792695889288,\"valid_at\":1780401600000}"
     },
     {
       "claim": "all histories use Add, Search and Dream with temporary homes",
@@ -37,6 +37,11 @@
       "claim": "report can be regenerated from saved results",
       "passed": true,
       "detail": "exit status: 0"
+    },
+    {
+      "claim": "prepared shard runs answer the same questions with the original dataset identity",
+      "passed": true,
+      "detail": "two shards; manifests and answered ids match"
     },
     {
       "claim": "rescoring a run answers every question again from its saved search hits",

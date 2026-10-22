@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from eval_format import SharedDataset
 import json
 import re
 from datetime import datetime, timedelta
@@ -75,31 +76,18 @@ def main():
         parser.error("--max-questions-per-row must be nonnegative")
     count = 0
     row_count = 0
-    with arguments.out.open("w") as output:
-        output.write("[")
-        for split in SPLITS:
-            parquet = pq.ParquetFile(arguments.memoryagentbench / f"{split}.parquet")
-            rows = 0
-            questions = 0
-            converted = 0
-            columns = None if split in INCLUDED else ["questions"]
-            for batch in parquet.iter_batches(batch_size=1, columns=columns):
-                for sample in batch.to_pylist():
-                    if split in INCLUDED:
-                        for item in items_of(sample, split, rows, arguments.max_questions_per_row):
-                            if count:
-                                output.write(",")
-                            json.dump(item, output)
-                            count += 1
-                            converted += 1
-                        row_count += 1
-                    rows += 1
-                    questions += len(sample["questions"])
-            if split in INCLUDED:
-                print(f"{split}: {rows} rows, {questions} questions, {converted} converted")
-            else:
-                print(f"{split}: {rows} rows, {questions} questions skipped")
-        output.write("]")
+    dataset = SharedDataset()
+    for split in INCLUDED:
+        parquet = pq.ParquetFile(arguments.memoryagentbench / f"{split}.parquet")
+        rows = 0
+        for batch in parquet.iter_batches(batch_size=1):
+            for sample in batch.to_pylist():
+                for item in items_of(sample, split, rows, arguments.max_questions_per_row):
+                    dataset.add(item)
+                    count += 1
+                row_count += 1
+                rows += 1
+    dataset.write(arguments.out)
     print(f"{count} questions from {row_count} rows -> {arguments.out}")
 
 

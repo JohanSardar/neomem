@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from eval_format import SharedDataset
 import json
 import re
 from datetime import datetime
@@ -55,7 +56,10 @@ def main():
     arguments = parser.parse_args()
     samples = json.loads(arguments.locomo.read_text())
     items = [item for sample in samples for item in items_of(sample)]
-    arguments.out.write_text(json.dumps(items))
+    dataset = SharedDataset()
+    for item in items:
+        dataset.add(item)
+    dataset.write(arguments.out)
     print(f"{len(items)} questions from {len(samples)} conversations -> {arguments.out}")
 
 

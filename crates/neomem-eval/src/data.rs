@@ -1,6 +1,8 @@
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
+use std::io::{BufReader, Read};
 use std::path::Path;
+use std::sync::Arc;
 
 use anyhow::{Context, ensure};
 use serde::{Deserialize, Serialize};
@@ -31,9 +33,14 @@ pub struct BenchmarkItem {
     #[serde(deserialize_with = "answer_text")]
     pub answer: String,
     pub question_date: String,
-    pub haystack_sessions: Vec<Vec<Turn>>,
-    pub haystack_session_ids: Vec<String>,
-    pub haystack_dates: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub haystack_sessions: Arc<Vec<Arc<Vec<Turn>>>>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub haystack_session_ids: Arc<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub haystack_dates: Arc<Vec<String>>,
+    #[serde(skip)]
+    pub history_id: Option<Arc<String>>,
     pub answer_session_ids: Vec<String>,
 }
 
@@ -48,6 +55,9 @@ fn answer_text<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Stri
 
 impl BenchmarkItem {
     pub fn shares_history_with(&self, other: &Self) -> bool {
+        if let (Some(first), Some(second)) = (&self.history_id, &other.history_id) {
+            return first == second;
+        }
         self.haystack_session_ids == other.haystack_session_ids
             && self.haystack_dates == other.haystack_dates
             && self.haystack_sessions == other.haystack_sessions
@@ -63,8 +73,41 @@ impl BenchmarkItem {
 }
 
 pub fn load(path: &Path) -> anyhow::Result<(Vec<BenchmarkItem>, String)> {
-    let bytes = std::fs::read(path)?;
-    let questions: Vec<BenchmarkItem> = serde_json::from_slice(&bytes)?;
+    let (questions, checksum, _) = load_with_split(path)?;
+    Ok((questions, checksum))
+}
+
+pub fn load_with_split(
+    path: &Path,
+) -> anyhow::Result<(Vec<BenchmarkItem>, String, Option<crate::prepare::Split>)> {
+    let file = std::fs::File::open(path)?;
+    let mut reader = BufReader::new(file);
+    let mut digest = Sha256::new();
+    let mut buffer = vec![0; 65536];
+    loop {
+        let count = reader.read(&mut buffer)?;
+        if count == 0 {
+            break;
+        }
+        digest.update(&buffer[..count]);
+    }
+    let mut probe = BufReader::new(std::fs::File::open(path)?);
+    let first = probe
+        .by_ref()
+        .bytes()
+        .find_map(|byte| match byte {
+            Ok(byte) if byte.is_ascii_whitespace() => None,
+            result => Some(result),
+        })
+        .context("empty dataset")??;
+    let reader = BufReader::new(std::fs::File::open(path)?);
+    let (questions, prepared): (Vec<BenchmarkItem>, _) = if first == b'[' {
+        (serde_json::from_reader(reader)?, None)
+    } else {
+        let dataset: SharedDataset = serde_json::from_reader(reader)?;
+        let prepared = dataset.prepared.clone();
+        (dataset.expand()?, prepared)
+    };
     for question in &questions {
         ensure!(
             question.haystack_sessions.len() == question.haystack_session_ids.len()
@@ -74,10 +117,72 @@ pub fn load(path: &Path) -> anyhow::Result<(Vec<BenchmarkItem>, String)> {
         );
     }
     let mut checksum = String::new();
-    for byte in Sha256::digest(&bytes) {
+    for byte in digest.finalize() {
         write!(&mut checksum, "{byte:02x}")?;
     }
-    Ok((questions, checksum))
+    Ok((questions, checksum, prepared))
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct History {
+    pub session_ids: Arc<Vec<String>>,
+    pub dates: Arc<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub session_keys: Option<Arc<Vec<String>>>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SharedQuestion {
+    #[serde(flatten)]
+    pub item: BenchmarkItem,
+    pub history: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SharedDataset {
+    pub format: String,
+    pub sessions: BTreeMap<String, Arc<Vec<Turn>>>,
+    pub histories: BTreeMap<String, History>,
+    pub questions: Vec<SharedQuestion>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prepared: Option<crate::prepare::Split>,
+}
+
+impl SharedDataset {
+    fn expand(self) -> anyhow::Result<Vec<BenchmarkItem>> {
+        ensure!(self.format == "neomem-eval/2", "unsupported dataset format");
+        let histories = self
+            .histories
+            .into_iter()
+            .map(|(id, history)| {
+                ensure!(history.session_ids.len() == history.dates.len(), "unaligned history: {id}");
+                let keys = history.session_keys.as_ref().unwrap_or(&history.session_ids);
+                ensure!(keys.len() == history.session_ids.len(), "unaligned session keys: {id}");
+                let sessions = keys
+                    .iter()
+                    .map(|session| {
+                        self.sessions
+                            .get(session)
+                            .cloned()
+                            .with_context(|| format!("missing session: {session}"))
+                    })
+                    .collect::<anyhow::Result<Vec<_>>>()?;
+                Ok((id.clone(), (Arc::new(id), history, Arc::new(sessions))))
+            })
+            .collect::<anyhow::Result<BTreeMap<_, _>>>()?;
+        self.questions
+            .into_iter()
+            .map(|question| {
+                let (id, history, sessions) = histories.get(&question.history).context("missing history")?;
+                let mut item = question.item;
+                item.history_id = Some(id.clone());
+                item.haystack_sessions = sessions.clone();
+                item.haystack_session_ids = history.session_ids.clone();
+                item.haystack_dates = history.dates.clone();
+                Ok(item)
+            })
+            .collect()
+    }
 }
 
 pub fn split(
@@ -136,6 +241,46 @@ pub fn date(text: &str) -> anyhow::Result<i64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn shared_schema_loads_without_legacy_fields_and_validates_references() {
+        let question = serde_json::json!({
+            "question_id":"q1", "question_type":"single-hop", "question":"what?",
+            "answer":3, "question_date":"2024/01/01", "answer_session_ids":["s1"], "history":"h1"
+        });
+        let mut second = question.clone();
+        second["question_id"] = serde_json::json!("q2");
+        second["history"] = serde_json::json!("h2");
+        let mut dataset = serde_json::json!({
+            "format":"neomem-eval/2", "sessions":{"s1":[{"role":"user", "content":"three"}]},
+            "histories":{"h1":{"session_ids":["s1"], "dates":["2024/01/01"]},
+                         "h2":{"session_ids":["s1"], "dates":["2024/01/01"]}},
+            "questions":[question, second]
+        });
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("shared.json");
+        std::fs::write(&path, serde_json::to_vec(&dataset).unwrap()).unwrap();
+        let (items, _) = load(&path).unwrap();
+        assert_eq!(items[0].answer, "3");
+        let (again, _) = load(&path).unwrap();
+        assert!(items[0].shares_history_with(&again[0]));
+        assert!(!items[0].shares_history_with(&items[1]));
+        assert!(Arc::ptr_eq(&items[0].haystack_sessions[0], &items[1].haystack_sessions[0]));
+        dataset["histories"]["h1"]["session_ids"] = serde_json::json!(["missing"]);
+        std::fs::write(&path, serde_json::to_vec(&dataset).unwrap()).unwrap();
+        assert!(load(&path).is_err());
+        dataset["format"] = serde_json::json!("neomem-eval/3");
+        std::fs::write(&path, serde_json::to_vec(&dataset).unwrap()).unwrap();
+        assert!(load(&path).is_err());
+    }
+
+    #[test]
+    fn legacy_checksum_is_the_original_byte_checksum() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../.agents/skills/neomem-control/fixtures/eval/questions.json");
+        let (_, checksum) = load(&path).unwrap();
+        assert_eq!(checksum, "6afeff8915425b228268a9eeb33af41c8f24f392fa9423162c41872147af549a");
+    }
 
     #[test]
     fn stratification_is_deterministic_disjoint_and_covers_types() {
