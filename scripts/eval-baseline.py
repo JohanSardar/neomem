@@ -31,6 +31,8 @@ parser.add_argument('--benchmarks', default='longmemeval-s,coding')
 parser.add_argument('--arms', default='memory-off,search')
 parser.add_argument('--held-out', action='store_true')
 parser.add_argument('--parallel', type=int, default=1, help='shards run side by side, each in its own daemon home')
+parser.add_argument('--binaries', type=Path, default=Path('target/debug'),
+                    help='build folder holding neomem-eval and neomemd, relative to the repository')
 parser.add_argument('--bridge', type=Path, help='secrets.env with a neomem ChatGPT sign-in; serves the reader and judge')
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
@@ -46,7 +48,7 @@ args.out.mkdir(parents=True, exist_ok=False)
 binaries = args.out / 'bin'
 binaries.mkdir()
 for name in ['neomem-eval', 'neomemd']:
-    shutil.copy2(root / 'target/debug' / name, binaries / name)
+    shutil.copy2(root / args.binaries / name, binaries / name)
 (args.out / 'binaries.json').write_text(json.dumps({
     name: hashlib.file_digest((binaries / name).open('rb'), 'sha256').hexdigest()
     for name in ['neomem-eval', 'neomemd']
@@ -66,7 +68,8 @@ try:
 except OSError:
     pass
 source_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
-(args.out / 'source.json').write_text(json.dumps({'source_revision_at_freeze': source_revision}, indent=2))
+(args.out / 'source.json').write_text(json.dumps({'source_revision_at_freeze': source_revision,
+                                                   'binaries': str(args.binaries)}, indent=2))
 chosen = args.benchmarks.split(',')
 inputs = [args.data / BENCHMARKS[name] for name in chosen]
 if 'coding' in chosen:
