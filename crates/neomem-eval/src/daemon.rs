@@ -7,6 +7,9 @@ use std::time::{Duration, Instant};
 use anyhow::{Context, bail, ensure};
 use neomem_proto::{Client, Home, Request, Response};
 
+const STATUS_POLL: Duration = Duration::from_secs(1);
+const STALLED_AFTER: Duration = Duration::from_mins(30);
+
 #[derive(Debug)]
 pub struct Daemon {
     pub home: Home,
@@ -83,10 +86,14 @@ impl Daemon {
         Ok(())
     }
 
+    fn ask(&self, request: Request) -> anyhow::Result<Response> {
+        Ok(Client::connect(&self.home, Duration::from_mins(30))?.call(request)?)
+    }
+
     pub fn call(&self, request: Request) -> anyhow::Result<Response> {
         let started = Instant::now();
         let envelope = serde_json::to_value(&request)?;
-        let response = Client::connect(&self.home, Duration::from_mins(30))?.call(request)?;
+        let response = self.ask(request)?;
         self.exchanges
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
@@ -97,22 +104,30 @@ impl Daemon {
         Ok(response)
     }
 
-    pub fn finish(&self) -> anyhow::Result<()> {
-        let deadline = Instant::now() + Duration::from_hours(2);
-        loop {
-            if let Response::Status(status) = self.call(Request::Status)? {
-                let (pending, failed) =
-                    status.extraction.context("daemon does not report extraction state")?;
-                ensure!(failed == 0, "{failed} extraction jobs failed");
-                if pending == 0 {
-                    break;
-                }
+    pub fn finish(&self) -> anyhow::Result<usize> {
+        let mut fewest_pending = usize::MAX;
+        let mut last_progress = Instant::now();
+        let failed = loop {
+            let Response::Status(status) = self.ask(Request::Status)? else {
+                bail!("the daemon did not answer the status request with its status");
+            };
+            let (pending, failed) = status.extraction.context("daemon does not report extraction state")?;
+            if pending == 0 {
+                break failed;
             }
-            ensure!(Instant::now() < deadline, "extraction timeout");
-            thread::sleep(Duration::from_millis(200));
-        }
+            if pending < fewest_pending {
+                fewest_pending = pending;
+                last_progress = Instant::now();
+            }
+            ensure!(
+                last_progress.elapsed() < STALLED_AFTER,
+                "extraction made no progress for {STALLED_AFTER:?}"
+            );
+            thread::sleep(STATUS_POLL);
+        };
+        self.call(Request::Status)?;
         ensure!(matches!(self.call(Request::Dream)?, Response::Dreamed(_)), "consolidation did not finish");
-        Ok(())
+        Ok(failed)
     }
 }
 

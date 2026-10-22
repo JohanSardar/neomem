@@ -12,6 +12,8 @@ pub struct Item {
     pub recall10: Option<f64>,
     pub precision5: Option<f64>,
     pub correct: bool,
+    #[serde(default)]
+    pub failed_extractions: usize,
     pub latency_ms: f64,
     pub ingestion_ms: f64,
     pub context_tokens: u64,
@@ -25,6 +27,7 @@ pub struct Item {
 struct Metrics {
     questions: u32,
     retrieval_questions: u32,
+    questions_with_failed_extractions: u32,
     recall5: f64,
     recall10: f64,
     precision5: f64,
@@ -41,6 +44,7 @@ pub fn write(directory: &Path) -> anyhow::Result<()> {
     for item in &items {
         let metrics = by_type.entry(item.category.clone()).or_default();
         metrics.questions += 1;
+        metrics.questions_with_failed_extractions += u32::from(item.failed_extractions > 0);
         if let Some(recall) = item.recall5 {
             metrics.retrieval_questions += 1;
             metrics.recall5 += recall;

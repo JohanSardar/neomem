@@ -28,8 +28,28 @@ pub struct Settings {
     pub provenance: Value,
 }
 
+const RETRY_PAUSES: [std::time::Duration; 3] = [
+    std::time::Duration::from_secs(5),
+    std::time::Duration::from_secs(30),
+    std::time::Duration::from_mins(2),
+];
+
 impl Endpoint {
     pub fn complete(&self, system: &str, user: &str) -> anyhow::Result<(String, u64)> {
+        let mut pauses = RETRY_PAUSES.iter();
+        loop {
+            match self.complete_once(system, user) {
+                Ok(answer) => return Ok(answer),
+                Err(error) => {
+                    let Some(pause) = pauses.next() else { return Err(error) };
+                    eprintln!("{} failed, asking again in {pause:?}: {error:#}", self.model);
+                    std::thread::sleep(*pause);
+                }
+            }
+        }
+    }
+
+    fn complete_once(&self, system: &str, user: &str) -> anyhow::Result<(String, u64)> {
         let agent: ureq::Agent = ureq::Agent::config_builder()
             .timeout_global(Some(std::time::Duration::from_mins(30)))
             .build()
