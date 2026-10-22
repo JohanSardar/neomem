@@ -54,11 +54,14 @@ pub struct Inspection {
     pub inspect: bool,
 }
 
+const JUDGE_ATTEMPTS: usize = 3;
+
 struct Ingested {
     history_of: BenchmarkItem,
     daemon: Daemon,
     evidence: BTreeMap<String, String>,
     ingestion_ms: f64,
+    failed_extractions: usize,
 }
 
 pub fn run(options: &Options) -> anyhow::Result<()> {
@@ -153,12 +156,13 @@ fn ingest(question: &BenchmarkItem, settings: &Settings) -> anyhow::Result<Inges
     let sign_in = settings.sign_in.as_deref();
     let daemon = Daemon::start(&settings.daemon_config, settings.models_dir.as_deref(), sign_in)?;
     let evidence = crate::ingest::replay(&daemon, question)?;
-    daemon.finish()?;
+    let failed_extractions = daemon.finish()?;
     daemon.return_sign_in(sign_in)?;
     Ok(Ingested {
         history_of: question.clone(),
         daemon,
         evidence,
+        failed_extractions,
         ingestion_ms: ingestion.elapsed().as_secs_f64() * 1000.0,
     })
 }
@@ -197,6 +201,7 @@ fn evaluate(
         recall10,
         precision5,
         correct: answered.correct,
+        failed_extractions: ingested.map_or(0, |history| history.failed_extractions),
         latency_ms: answered.latency_ms,
         ingestion_ms,
         context_tokens: answered.context_tokens,
@@ -240,9 +245,17 @@ pub fn answer(
         .replace("{question}", &question.question)
         .replace("{answer}", &question.answer)
         .replace("{response}", &answer);
-    let (judge_answer, _) =
-        settings.answer_judge.complete("You are an impartial answer evaluator.", &prompt)?;
-    let verdict = judge_answer.trim().trim_end_matches('.').to_lowercase();
-    ensure!(verdict == "yes" || verdict == "no", "invalid judge verdict: {judge_answer}");
-    Ok(Answered { answer, judge_answer, correct: verdict == "yes", context_tokens, latency_ms })
+    let mut judged = None;
+    for _ in 0..JUDGE_ATTEMPTS {
+        let (judge_answer, _) =
+            settings.answer_judge.complete("You are an impartial answer evaluator.", &prompt)?;
+        let verdict = judge_answer.trim().trim_end_matches('.').to_lowercase();
+        if verdict == "yes" || verdict == "no" {
+            judged = Some((judge_answer, verdict == "yes"));
+            break;
+        }
+        eprintln!("the judge answered neither yes nor no, asking again: {judge_answer}");
+    }
+    let (judge_answer, correct) = judged.context("the judge never answered yes or no")?;
+    Ok(Answered { answer, judge_answer, correct, context_tokens, latency_ms })
 }
