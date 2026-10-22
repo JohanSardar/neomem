@@ -78,9 +78,17 @@ impl Engine {
     }
 
     pub(crate) fn advance_model_swap(&self) {
-        if let Err(error) = self.reembed_batch() {
-            tracing::error!("re-embedding a model swap failed: {error}");
+        let failure = self.reembed_batch().err().map(|error| error.to_string());
+        let mut last = self.model_swap_failure.lock().unwrap_or_else(PoisonError::into_inner);
+        if failure == *last {
+            return;
         }
+        if let Some(error) = &failure {
+            tracing::error!("re-embedding a model swap failed: {error}");
+        } else {
+            tracing::info!("re-embedding a model swap works again");
+        }
+        *last = failure;
     }
 
     fn reembed_batch(&self) -> Result<(), IndexingError> {
