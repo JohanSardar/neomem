@@ -22,6 +22,7 @@ const MOST_RELATED: usize = 15;
 const SAME_ENTITY_SIMILARITY: f32 = 0.92;
 const GIVE_UP_AFTER: u32 = 3;
 const RETRY_AFTER_MS: i64 = 60_000;
+const MOST_CHARACTERS_PER_CALL: usize = 24_000;
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum ExtractError {
@@ -56,7 +57,8 @@ impl Engine {
         if let Err(error) = self.state.reclaim_expired_leases(now) {
             tracing::error!("reclaiming extraction leases failed: {error}");
         }
-        let claimed = match self.state.claim_ready_batch(now, now.plus_millis(millis(self.worker.lease))) {
+        let lease_until = now.plus_millis(millis(self.worker.lease));
+        let claimed = match self.state.claim_ready_batch(now, lease_until, MOST_CHARACTERS_PER_CALL) {
             Ok(Some(claimed)) => claimed,
             Ok(None) => return false,
             Err(error) => {

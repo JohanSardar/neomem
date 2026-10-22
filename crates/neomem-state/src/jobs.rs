@@ -61,6 +61,20 @@ const READY_BATCH: &str = "SELECT batch_key FROM jobs
     ORDER BY min(created_at)
     LIMIT 1";
 
+const CLAIM_OLDEST_RECORDS: &str =
+    "UPDATE jobs SET state = 'claimed', lease_until = ?2, attempts = attempts + 1
+    WHERE id IN (
+        SELECT id FROM (
+            SELECT jobs.id AS id,
+                sum(length(coalesce(intake.content, ''))) OVER (ORDER BY jobs.id)
+                    - length(coalesce(intake.content, '')) AS earlier_characters
+            FROM jobs LEFT JOIN intake ON intake.id = jobs.intake_id
+            WHERE jobs.kind = 'extract' AND jobs.state = 'pending' AND jobs.batch_key = ?1
+        )
+        WHERE earlier_characters < ?3
+    )
+    RETURNING id, intake_id";
+
 impl StateDb {
     pub fn extraction_counts(&self) -> Result<(usize, usize), StateError> {
         self.read(|connection| {
@@ -104,6 +118,7 @@ impl StateDb {
         &self,
         now: EpochMs,
         lease_until: EpochMs,
+        most_characters: usize,
     ) -> Result<Option<ClaimedBatch>, StateError> {
         let mut writer = self.writer()?;
         let transaction = writer.transaction()?;
@@ -111,14 +126,12 @@ impl StateDb {
             transaction.query_row(READY_BATCH, [now.as_millis()], |row| row.get(0)).optional()?;
         let Some(key) = key else { return Ok(None) };
         let jobs = {
-            let mut statement = transaction.prepare(
-                "UPDATE jobs SET state = 'claimed', lease_until = ?2, attempts = attempts + 1
-                 WHERE kind = 'extract' AND state = 'pending' AND batch_key = ?1
-                 RETURNING id, intake_id",
-            )?;
-            let rows = statement.query_map(params![key, lease_until.as_millis()], |row| {
-                Ok((row.get::<_, i64>(0)?, row.get::<_, String>(1)?))
-            })?;
+            let mut statement = transaction.prepare(CLAIM_OLDEST_RECORDS)?;
+            let most_characters = i64::try_from(most_characters).unwrap_or(i64::MAX);
+            let rows = statement
+                .query_map(params![key, lease_until.as_millis(), most_characters], |row| {
+                    Ok((row.get::<_, i64>(0)?, row.get::<_, String>(1)?))
+                })?;
             let mut jobs = Vec::new();
             for row in rows {
                 let (id, intake) = row?;
@@ -231,11 +244,11 @@ mod tests {
         let state = StateDb::open(&directory.path().join("state.db")).unwrap();
         log(&state, 1, Some("s1"), 1_000, 301_000);
         log(&state, 2, Some("s1"), 200_000, 500_000);
-        assert_eq!(state.claim_ready_batch(at(400_000), at(1_000_000)).unwrap(), None);
-        let claimed = state.claim_ready_batch(at(500_000), at(1_000_000)).unwrap().unwrap();
+        assert_eq!(state.claim_ready_batch(at(400_000), at(1_000_000), usize::MAX).unwrap(), None);
+        let claimed = state.claim_ready_batch(at(500_000), at(1_000_000), usize::MAX).unwrap().unwrap();
         assert_eq!(claimed.batch.as_str(), "claude-code/s1");
         assert_eq!(claimed.jobs.len(), 2);
-        assert_eq!(state.claim_ready_batch(at(600_000), at(1_000_000)).unwrap(), None);
+        assert_eq!(state.claim_ready_batch(at(600_000), at(1_000_000), usize::MAX).unwrap(), None);
     }
 
     #[test]
@@ -243,10 +256,10 @@ mod tests {
         let directory = tempfile::tempdir().unwrap();
         let state = StateDb::open(&directory.path().join("state.db")).unwrap();
         log(&state, 1, Some("s2"), 1_000, 2_000);
-        let claimed = state.claim_ready_batch(at(3_000), at(10_000)).unwrap().unwrap();
+        let claimed = state.claim_ready_batch(at(3_000), at(10_000), usize::MAX).unwrap().unwrap();
         assert_eq!(state.reclaim_expired_leases(at(9_000)).unwrap(), 0);
         assert_eq!(state.reclaim_expired_leases(at(11_000)).unwrap(), 1);
-        let again = state.claim_ready_batch(at(12_000), at(20_000)).unwrap().unwrap();
+        let again = state.claim_ready_batch(at(12_000), at(20_000), usize::MAX).unwrap().unwrap();
         assert_eq!(again.jobs, claimed.jobs);
         state
             .finish_jobs(
@@ -255,7 +268,7 @@ mod tests {
                 at(13_000),
             )
             .unwrap();
-        assert_eq!(state.claim_ready_batch(at(99_000), at(100_000)).unwrap(), None);
+        assert_eq!(state.claim_ready_batch(at(99_000), at(100_000), usize::MAX).unwrap(), None);
     }
 
     #[test]
@@ -266,6 +279,20 @@ mod tests {
         let batch = BatchKey("claude-code".to_owned());
         assert_eq!(state.pending_in_batch(&batch).unwrap(), 1);
         state.hasten_batch(&batch, at(5_000)).unwrap();
-        assert!(state.claim_ready_batch(at(5_000), at(9_000)).unwrap().is_some());
+        assert!(state.claim_ready_batch(at(5_000), at(9_000), usize::MAX).unwrap().is_some());
+    }
+
+    #[test]
+    fn a_long_session_is_claimed_oldest_records_first_up_to_the_character_budget() {
+        let directory = tempfile::tempdir().unwrap();
+        let state = StateDb::open(&directory.path().join("state.db")).unwrap();
+        let first = log(&state, 1, Some("s3"), 1_000, 2_000);
+        let second = log(&state, 2, Some("s3"), 1_100, 2_000);
+        let third = log(&state, 3, Some("s3"), 1_200, 2_000);
+        let claimed = state.claim_ready_batch(at(3_000), at(10_000), 10).unwrap().unwrap();
+        assert_eq!(claimed.jobs.iter().map(|job| job.1).collect::<Vec<_>>(), vec![first, second]);
+        let rest = state.claim_ready_batch(at(3_000), at(10_000), 10).unwrap().unwrap();
+        assert_eq!(rest.jobs.iter().map(|job| job.1).collect::<Vec<_>>(), vec![third]);
+        assert_eq!(state.claim_ready_batch(at(3_000), at(10_000), 1).unwrap(), None);
     }
 }
