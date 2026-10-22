@@ -11,6 +11,9 @@ import urllib.request
 BENCHMARKS = {
     'longmemeval-s': 'longmemeval_s_cleaned.json',
     'locomo': 'locomo/locomo-eval.json',
+    'convomem': 'convomem/convomem-eval.json',
+    'memoryagentbench': 'memoryagentbench/mab-eval.json',
+    'beam-100k': 'beam/beam-100k-eval.json',
     'coding': 'coding-set/questions.json',
 }
 CODING_QUESTIONS = 50
