@@ -9,6 +9,8 @@ use crate::json_schema;
 use crate::llm::{self, LlmSettings, Wire};
 use crate::sse::{self, Flow};
 
+pub const PRIORITY_TIER: &str = "priority";
+
 #[derive(Debug)]
 pub struct OpenAiResponses {
     agent: ureq::Agent,
@@ -16,6 +18,7 @@ pub struct OpenAiResponses {
     key: Option<String>,
     model: String,
     effort: Option<Effort>,
+    fast: bool,
     timeout: Duration,
 }
 
@@ -27,6 +30,7 @@ impl OpenAiResponses {
             key,
             model: settings.required_model("openai")?,
             effort: settings.effort,
+            fast: settings.fast,
             timeout: settings.timeout,
         })
     }
@@ -38,7 +42,7 @@ impl Wire for OpenAiResponses {
     }
 
     fn send(&self, request: &LlmRequest, on_text: &mut dyn FnMut(&str)) -> Result<LlmReply, ModelError> {
-        let mut body = body(&self.model, self.effort, request)?;
+        let mut body = body(&self.model, self.effort, self.fast, request)?;
         if request.max_output_tokens > 0 {
             body["max_output_tokens"] = json!(request.max_output_tokens);
         }
@@ -52,7 +56,12 @@ impl Wire for OpenAiResponses {
     }
 }
 
-pub fn body(model: &str, effort: Option<Effort>, request: &LlmRequest) -> Result<Value, ModelError> {
+pub fn body(
+    model: &str,
+    effort: Option<Effort>,
+    fast: bool,
+    request: &LlmRequest,
+) -> Result<Value, ModelError> {
     let mut body = json!({
         "model": model,
         "instructions": request.system,
@@ -78,6 +87,9 @@ pub fn body(model: &str, effort: Option<Effort>, request: &LlmRequest) -> Result
     }
     if let Some(effort) = effort {
         body["reasoning"] = json!({ "effort": effort.name() });
+    }
+    if fast {
+        body["service_tier"] = json!(PRIORITY_TIER);
     }
     Ok(body)
 }

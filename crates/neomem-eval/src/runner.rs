@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 use std::time::Instant;
 
@@ -35,6 +35,12 @@ pub struct Options {
     pub out: PathBuf,
     #[arg(long)]
     pub held_out: bool,
+    #[arg(long, default_value_t = 0)]
+    pub shard: usize,
+    #[arg(long, default_value_t = 1)]
+    pub shards: usize,
+    #[arg(long)]
+    pub resume: bool,
 }
 
 struct Ingested {
@@ -45,7 +51,8 @@ struct Ingested {
 }
 
 pub fn run(options: &Options) -> anyhow::Result<()> {
-    ensure!(!options.out.exists(), "output directory already exists");
+    ensure!(options.resume || !options.out.exists(), "output directory already exists");
+    ensure!(options.shard < options.shards, "the shard must be below the shard count");
     let settings: Settings = serde_json::from_slice(&std::fs::read(&options.models)?)?;
     let (questions, checksum) = data::load(&options.dataset)?;
     let (development, held_out) = data::split(questions, options.sample, options.seed);
@@ -53,17 +60,25 @@ pub fn run(options: &Options) -> anyhow::Result<()> {
         if options.held_out { (held_out, development) } else { (development, held_out) };
     ensure!(!sample.is_empty(), "empty sample");
     sample.sort_by(|first, second| first.haystack_session_ids.cmp(&second.haystack_session_ids));
+    let sample = shard_of(sample, options.shard, options.shards);
     std::fs::create_dir_all(&options.out)?;
     let split = if options.held_out { "held-out" } else { "development" };
     let manifest = json!({"dataset_sha256":checksum,"seed":options.seed,"arm":options.arm,"split":split,
+        "shard":options.shard,"shards":options.shards,
         "selected":sample.iter().map(|q| &q.question_id).collect::<Vec<_>>(),
         "held_out":other.iter().map(|q| &q.question_id).collect::<Vec<_>>(),
         "models":settings,"k":10,"timezone":"UTC","reader_prompt":include_str!("../prompts/reader.md"),
         "judge_prompts":include_str!("../prompts/judge.json"),"git_revision":std::process::Command::new("git").args(["rev-parse","HEAD"]).output().ok().map(|o|String::from_utf8_lossy(&o.stdout).trim().to_owned())});
     std::fs::write(options.out.join("manifest.json"), serde_json::to_vec_pretty(&manifest)?)?;
-    let mut items = Vec::new();
+    let earlier = options.out.join("items.json");
+    let mut items: Vec<Item> = if options.resume && earlier.exists() {
+        serde_json::from_slice(&std::fs::read(&earlier)?)?
+    } else {
+        Vec::new()
+    };
+    let answered: BTreeSet<String> = items.iter().map(|item| item.id.clone()).collect();
     let mut ingested: Option<Ingested> = None;
-    for question in &sample {
+    for question in sample.iter().filter(|question| !answered.contains(&question.question_id)) {
         eprintln!("{} {}", question.question_id, question.category());
         let shares_history =
             ingested.as_ref().is_some_and(|history| history.history_of.shares_history_with(question));
@@ -80,6 +95,24 @@ pub fn run(options: &Options) -> anyhow::Result<()> {
         std::fs::write(options.out.join("items.json"), serde_json::to_vec_pretty(&items)?)?;
     }
     report::write(&options.out)
+}
+
+fn shard_of(sample: Vec<BenchmarkItem>, shard: usize, shards: usize) -> Vec<BenchmarkItem> {
+    let mut history = 0;
+    let owners: Vec<usize> = (0..sample.len())
+        .map(|index| {
+            if index > 0 && !sample[index - 1].shares_history_with(&sample[index]) {
+                history += 1;
+            }
+            history % shards
+        })
+        .collect();
+    sample
+        .into_iter()
+        .zip(owners)
+        .filter(|(_, owner)| *owner == shard)
+        .map(|(question, _)| question)
+        .collect()
 }
 
 fn ingest(question: &BenchmarkItem, settings: &Settings) -> anyhow::Result<Ingested> {

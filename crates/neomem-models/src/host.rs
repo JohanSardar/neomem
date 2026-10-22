@@ -364,13 +364,14 @@ fn describe_role_config(role: &RoleConfig) -> String {
         (None, Some(provider)) => format!("{provider} {}", role.model.as_deref().unwrap_or("")),
         (None, None) => "incomplete".to_owned(),
     };
-    let effort = role.effort.map(|effort| format!(" effort {effort:?}").to_lowercase()).unwrap_or_default();
+    let effort = role.effort.map(|effort| format!(" effort {}", effort.name())).unwrap_or_default();
+    let fast = if role.fast == Some(true) { " fast" } else { "" };
     let fallback = role
         .fallback
         .as_deref()
         .map(|fallback| format!(" (fallback {})", describe_role_config(fallback)))
         .unwrap_or_default();
-    format!("{}{effort}{fallback}", base.trim_end())
+    format!("{}{effort}{fast}{fallback}", base.trim_end())
 }
 
 #[cfg(test)]

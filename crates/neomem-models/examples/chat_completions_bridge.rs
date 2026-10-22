@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, PoisonError};
+use std::thread;
 
 use neomem_core::{Effort, Llm, LlmMessage, LlmRequest, LlmRole, ModelRoles};
 use neomem_models::{ModelHost, ModelsConfig, ProviderConfig, ProviderKind, RoleConfig, Secrets};
@@ -10,8 +11,11 @@ const PROVIDER: &str = "chatgpt";
 const TIMEOUT: &str = "10m";
 const BYTES_PER_TOKEN: usize = 4;
 const DEFAULT_MAX_TOKENS: u32 = 4096;
+const HANDLERS: usize = 32;
 
-type Models = HashMap<(String, Option<String>), Arc<dyn Llm>>;
+const PRIORITY_TIER: &str = "priority";
+
+type Models = HashMap<(String, Option<String>, bool), Arc<dyn Llm>>;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut arguments = std::env::args().skip(1);
@@ -25,37 +29,56 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         tiny_http::Server::http(("127.0.0.1", port.parse::<u16>()?)).map_err(|error| error.to_string())?;
     let json_type = tiny_http::Header::from_bytes("Content-Type", "application/json")
         .map_err(|()| "invalid content type header")?;
-    let mut models = Models::new();
-    for mut request in server.incoming_requests() {
-        let mut body = String::new();
-        request.as_reader().read_to_string(&mut body)?;
-        let (status, reply) = match completed(&sign_in, &mut models, &body) {
-            Ok(reply) => (200, reply),
-            Err(error) => (502, json!({"error": {"message": error}})),
-        };
-        request.respond(
-            tiny_http::Response::from_string(reply.to_string())
-                .with_status_code(status)
-                .with_header(json_type.clone()),
-        )?;
-    }
+    let models = Mutex::new(Models::new());
+    thread::scope(|scope| {
+        for _ in 0..HANDLERS {
+            scope.spawn(|| {
+                while let Ok(request) = server.recv() {
+                    if let Err(error) = answer(request, &sign_in, &models, &json_type) {
+                        eprintln!("answering a request failed: {error}");
+                    }
+                }
+            });
+        }
+    });
     Ok(())
 }
 
-fn completed(sign_in: &Path, models: &mut Models, body: &str) -> Result<Value, String> {
+fn answer(
+    mut request: tiny_http::Request,
+    sign_in: &Path,
+    models: &Mutex<Models>,
+    json_type: &tiny_http::Header,
+) -> std::io::Result<()> {
+    let mut body = String::new();
+    request.as_reader().read_to_string(&mut body)?;
+    let (status, reply) = match completed(sign_in, models, &body) {
+        Ok(reply) => (200, reply),
+        Err(error) => (502, json!({"error": {"message": error}})),
+    };
+    request.respond(
+        tiny_http::Response::from_string(reply.to_string())
+            .with_status_code(status)
+            .with_header(json_type.clone()),
+    )
+}
+
+fn completed(sign_in: &Path, models: &Mutex<Models>, body: &str) -> Result<Value, String> {
     let completion: Value = serde_json::from_str(body).map_err(|error| error.to_string())?;
     let model = completion["model"].as_str().ok_or("the request names no model")?.to_owned();
     let effort_name = completion["reasoning_effort"].as_str().map(str::to_owned);
-    let key = (model.clone(), effort_name.clone());
-    let llm = if let Some(llm) = models.get(&key) {
-        Arc::clone(llm)
+    let fast = completion["service_tier"].as_str() == Some(PRIORITY_TIER);
+    let key = (model.clone(), effort_name.clone(), fast);
+    let cached = models.lock().unwrap_or_else(PoisonError::into_inner).get(&key).map(Arc::clone);
+    let llm = if let Some(llm) = cached {
+        llm
     } else {
         let effort = effort_name
             .map(|name| serde_json::from_value::<Effort>(Value::String(name)))
             .transpose()
             .map_err(|error| error.to_string())?;
-        let llm = chatgpt_model(sign_in, &model, effort)?;
-        models.insert(key, Arc::clone(&llm));
+        let llm = chatgpt_model(sign_in, &model, effort, fast)?;
+        models.lock().unwrap_or_else(PoisonError::into_inner).insert(key, Arc::clone(&llm));
         llm
     };
     let reply = llm.complete(&request_from(&completion), &mut |_| {}).map_err(|error| error.to_string())?;
@@ -96,7 +119,12 @@ fn request_from(completion: &Value) -> LlmRequest {
     }
 }
 
-fn chatgpt_model(sign_in: &Path, model: &str, effort: Option<Effort>) -> Result<Arc<dyn Llm>, String> {
+fn chatgpt_model(
+    sign_in: &Path,
+    model: &str,
+    effort: Option<Effort>,
+    fast: bool,
+) -> Result<Arc<dyn Llm>, String> {
     let provider = ProviderConfig {
         kind: ProviderKind::Chatgpt,
         base_url: None,
@@ -113,6 +141,7 @@ fn chatgpt_model(sign_in: &Path, model: &str, effort: Option<Effort>) -> Result<
         provider: Some(PROVIDER.to_owned()),
         model: Some(model.to_owned()),
         effort,
+        fast: Some(fast),
         timeout: Some(TIMEOUT.to_owned()),
         ..RoleConfig::default()
     });

@@ -41,6 +41,7 @@ impl ModelHost {
         let settings = LlmSettings {
             model: role.model.clone().or_else(|| provider.model.clone()),
             effort: role.effort,
+            fast: role.fast.unwrap_or(false),
             timeout: role.timeout.as_deref().and_then(duration::parse).unwrap_or(llm::DEFAULT_TIMEOUT),
         };
         let base_url = provider.base_url.as_deref();

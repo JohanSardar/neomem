@@ -6,3 +6,4 @@ diagram/video/
 .DS_Store
 .claude/
 eval-data/
+__pycache__/

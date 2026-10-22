@@ -15,6 +15,7 @@ const JSON_RETRY: &str = include_str!("../prompts/json_retry.md");
 pub struct LlmSettings {
     pub model: Option<String>,
     pub effort: Option<Effort>,
+    pub fast: bool,
     pub timeout: Duration,
 }
 

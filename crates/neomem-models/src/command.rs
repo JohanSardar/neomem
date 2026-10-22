@@ -198,7 +198,8 @@ mod tests {
 
     #[test]
     fn a_command_that_runs_too_long_is_stopped_at_the_timeout() {
-        let settings = LlmSettings { model: None, effort: None, timeout: Duration::from_millis(100) };
+        let settings =
+            LlmSettings { model: None, effort: None, fast: false, timeout: Duration::from_millis(100) };
         let slow = CommandLlm::new(&["sleep".to_owned(), "5".to_owned()], &settings).unwrap();
         let request = LlmRequest {
             system: String::new(),

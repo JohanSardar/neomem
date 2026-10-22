@@ -11,6 +11,8 @@ pub struct Endpoint {
     pub key_env: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reasoning_effort: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub service_tier: Option<String>,
     pub max_tokens: u32,
 }
 
@@ -46,6 +48,9 @@ impl Endpoint {
         });
         if let Some(effort) = &self.reasoning_effort {
             body["reasoning_effort"] = json!(effort);
+        }
+        if let Some(tier) = &self.service_tier {
+            body["service_tier"] = json!(tier);
         }
         let response: Value = request.send_json(body)?.body_mut().read_json()?;
         let answer =
