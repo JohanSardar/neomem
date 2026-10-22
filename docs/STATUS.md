@@ -22,7 +22,7 @@ Every feature in `.agents/skills/neomem-control/feature-graph.yaml` is proven: `
 
 ## Speed against the §13.5 budget
 
-`neomemctl bench latency` on a release Vulkan build, idle machine (Intel Core Ultra 9 288V, Arc 140V iGPU); the numbers are in `benches/baseline.json`.
+`neomemctl bench latency` on a release Vulkan build (Intel Core Ultra 9 288V, Arc 140V iGPU). The search rows come from two runs after the F16 embedder change, on battery power with other work running; the other rows are the idle, plugged-in numbers in `benches/baseline.json`.
 
 | What | p50 | p95 | Budget | Met |
 |---|---:|---:|---|---|
@@ -30,15 +30,15 @@ Every feature in `.agents/skills/neomem-control/feature-graph.yaml` is proven: `
 | Unix socket round trip | 0.02 ms | 0.06 ms | < 0.5 ms | yes |
 | Capture hook end to end | 1.0 ms | 1.9 ms | < 50 ms | yes |
 | `neomem add` end to end | 1.8 ms | 3.9 ms | < 50 ms | yes |
-| Search over the socket, 13 facts | 20.9 ms | 32.0 ms | 10–30 ms | p50 yes, p95 no |
-| `neomem search` end to end, 13 facts | 24.5 ms | 34.6 ms | 10–30 ms | p50 yes, p95 no |
-| Search over the socket, 100K facts | 28.3 ms | 40.7 ms | 10–30 ms | p50 yes, p95 no |
-| `neomem search` end to end, 100K facts | 27.5 ms | 37.6 ms | 10–30 ms | p50 yes, p95 no |
-| MCP search over stdio | 25.0 ms | 32.0 ms | 10–30 ms | p50 yes, p95 no |
+| Search over the socket, 13 facts | 21.9–24.6 ms | 24.6–28.9 ms | 10–30 ms | yes |
+| `neomem search` end to end, 13 facts | 23.5–25.8 ms | 27.8–30.6 ms | 10–30 ms | p50 yes, p95 at the limit |
+| Search over the socket, 100K facts | 24.6–25.2 ms | 28.1–28.4 ms | 10–30 ms | yes |
+| `neomem search` end to end, 100K facts | 26.4–28.5 ms | 31.6–32.3 ms | 10–30 ms | p50 yes, p95 no |
+| MCP search over stdio | 20.4–24.4 ms | 25.5–28.2 ms | 10–30 ms | yes |
 | Recall, fake models | 3.8 ms | 5.2 ms | < 3.5 s | yes |
 | Recall gate, fake models | 0.7 ms | 1.3 ms | ~0.15–0.3 s | yes |
 
-Search misses the budget at p95 for one reason: embedding the query takes ~29 ms on this laptop's Arc iGPU (llama.cpp's own `llama-bench` needs 33 ms for a 24-token pass of the same model), where the spec budgets 5–20 ms on Metal. Everything else in a search at 100K facts takes ~0.8 ms (HNSW seeds 0.6–0.95 ms, latest swap 0.1 ms, ranking and one hop < 0.03 ms). The CPU backend is slower here (35 ms). Repeated queries hit the query cache (< 0.01 ms). Live Jev answers the gate in ~100 ms (p50).
+Query embedding is almost the whole search: ~20 ms on this laptop's Arc iGPU since the embedder runs from F16 weights (it was ~29 ms with Q8_0; the spec budgets 5–20 ms on Metal). Everything else in a search at 100K facts takes ~0.8 ms (HNSW seeds 0.6–0.95 ms, latest swap 0.1 ms, ranking and one hop < 0.03 ms). `neomem search` end to end at 100K facts still misses at p95 by 1.6–2.3 ms in these battery-powered runs, where starting the client costs 2–4 ms instead of 1.2 ms. Repeated queries hit the query cache (< 0.01 ms). Live Jev answers the gate in ~100 ms (p50).
 
 Perf rounds after the features were proven:
 
@@ -50,6 +50,7 @@ Perf rounds after the features were proven:
 | 4 | Capture hook with 0–200 appended turns | none: 0.8–1.8 ms, process start dominates | < 3% |
 | 5 | Recall | none: fake-model time is the model calls; real time is the planner and Jev | < 3% |
 | 6 | Query embedding | EmbeddingGemma's QAT Q4_0 instead of Q8_0, tried and not adopted | search −17% end to end at 100K facts, same answers on 60 labeled queries, but Google's MTEB scores drop (code 68.70 → 67.99, English 69.49 → 69.31) and SPEC §13.4 names Q8_0 |
+| 7 | Query embedding: llama.cpp's Vulkan Q8_0 matrix multiply (24 of 31 ms at 16 tokens), plus GPU buffers growing on the first query longer than any before (20–75 ms) | F16 copy of the same Q8_0 weights and a 512-token warm-up at load (#67) | search p95 −20 to −40% (MCP 36–39 → 25–28 ms, socket at 100K 38–48 → 28 ms) |
 
 Earlier perf work during the build: the fake model server's Nagle stall (47 → 2.7 ms per call), llama.cpp optimized in debug builds (566 → 38 ms per embedding), and background writes reloading the embedder for every batch (#54).
 
@@ -69,7 +70,7 @@ The first baseline found almost no facts; following it up found and fixed five e
 - **GitHub CI.** The `gh` token has no `workflow` scope, so GitHub refuses the workflow file. Run `scripts/enable-ci.sh`: it asks gh for the scope in your browser, moves `ci/workflows/ci.yml` into `.github/workflows/` and pushes. Until then `cargo xtask ci` (format, build, nextest, clippy pedantic, cargo-deny, xtask check, `prove --changed`) is the gate. Every PR passed it; for one (#47) it ran before the last merge of main into the branch, and the same gate on the merged main passed right after.
 - **Live LLM providers** (`models.llm` is proven against fakes for every kind): `neomem login chatgpt` needs your browser sign-in; OpenAI and Anthropic need API keys in `~/.neomem/secrets.env`; neomem never uses Codex's own login. The spec's default extractor and consolidator are hosted models, so the eval used a local Qwen3-4B instead; a run with a hosted extractor needs one of these.
 - **macOS.** The launchd agent, Metal and the macOS CI job are written but untested: this machine is Linux.
-- **Search p95 on this laptop.** To trade a little embedding quality for the 30 ms budget, put [`embeddinggemma-300m-Q4_0.gguf`](https://huggingface.co/unsloth/embeddinggemma-300m-GGUF/resolve/main/embeddinggemma-300m-Q4_0.gguf) in `~/.neomem/models/` and run `neomem models use embedder embeddinggemma-300m-Q4_0.gguf`; the vault re-embeds in the background (about 40 minutes at 100K facts) and searches keep using Q8_0 until it is done.
+- **An idle, plugged-in bench.** The search rows above were measured on battery. `neomemctl bench latency --save-baseline` on AC power with nothing else running records the new baseline for every row.
 
 ## Incidents
 

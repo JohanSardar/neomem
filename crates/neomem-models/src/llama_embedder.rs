@@ -8,11 +8,13 @@ use llama_cpp_2::model::LlamaModel;
 use llama_cpp_2::token::LlamaToken;
 use neomem_core::{Embedder, ModelError, ModelId, Purpose, Vector};
 
+use crate::f16_copy::fastest_weights;
 use crate::llama::{LocalModel, context_threads, failure};
 
 const BATCH_TOKENS: u32 = 2048;
 const MOST_TOKENS_PER_TEXT: usize = 512;
 const MOST_TEXTS_PER_BATCH: usize = 32;
+const FILLER_WORD: &str = "warm ";
 const QWEN3_QUERY_INSTRUCTION: &str =
     "Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery:";
 
@@ -59,7 +61,7 @@ pub struct LlamaEmbedder {
 
 impl LlamaEmbedder {
     pub fn open(path: &Path) -> Result<Self, ModelError> {
-        let (model, (family, dims)) = LocalModel::load(path, |model| {
+        let (model, (family, dims)) = LocalModel::load(&fastest_weights(path), |model| {
             let architecture = model.meta_val_str("general.architecture").unwrap_or_default();
             let family = EmbeddingFamily::of(&architecture);
             let dims = usize::try_from(model.n_embd_out())
@@ -77,7 +79,15 @@ impl LlamaEmbedder {
                 .with_n_threads_batch(threads);
             Ok((params, (family, dims)))
         })?;
-        Ok(Self { model, family, dims })
+        let embedder = Self { model, family, dims };
+        if cfg!(feature = "vulkan") {
+            embedder.grow_gpu_buffers_to_the_longest_query()?;
+        }
+        Ok(embedder)
+    }
+
+    fn grow_gpu_buffers_to_the_longest_query(&self) -> Result<(), ModelError> {
+        self.embed(&[&FILLER_WORD.repeat(MOST_TOKENS_PER_TEXT)], Purpose::Query).map(drop)
     }
 }
 

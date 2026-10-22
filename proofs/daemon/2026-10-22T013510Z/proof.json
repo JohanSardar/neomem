@@ -1,0 +1,57 @@
+{
+  "feature": "daemon",
+  "scenario": "daemon",
+  "passed": true,
+  "started_at": "2026-10-22T013510Z",
+  "duration_ms": 289,
+  "code_version": "8ab5c8857436",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "status over the socket names the current protocol and the isolated home",
+      "passed": true,
+      "detail": "Status(StatusReport { extraction: Some((0, 0)), daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-XC2oot\", pid: 2340938, uptime_ms: 32, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+    },
+    {
+      "claim": "a socket request and reply takes under 0.5 ms at the median",
+      "passed": true,
+      "detail": "p50 0.140 ms, p95 0.249 ms, max 0.523 ms"
+    },
+    {
+      "claim": "neomem status --json prints the daemon's status",
+      "passed": true,
+      "detail": "{\"reply\":\"status\",\"body\":{\"extraction\":[0,0],\"daemon_version\":\"0.1.0\",\"protocol\":1,\"home\":\"/tmp/neomemctl-XC2oot\",\"pid\":2340938,\"uptime_ms\":67,\"index\":{\"facts\":0,\"entities\":0,\"links\":0,\"names\":0,\"vectors\":0,\"model\":\"openai:hash-256\"}}}\n"
+    },
+    {
+      "claim": "neomem status answers end to end within 25 ms at the median (the 2-5 ms budget is checked by neomemctl bench on release builds)",
+      "passed": true,
+      "detail": "p50 4.003 ms, p95 4.953 ms, max 5.491 ms"
+    },
+    {
+      "claim": "HTTP POST /v1/request answers status with the same handler",
+      "passed": true,
+      "detail": "Status(StatusReport { extraction: Some((0, 0)), daemon_version: \"0.1.0\", protocol: 1, home: \"/tmp/neomemctl-XC2oot\", pid: 2340938, uptime_ms: 152, index: Some(IndexReport { facts: 0, entities: 0, links: 0, names: 0, vectors: 0, model: Some(\"openai:hash-256\") }) })"
+    },
+    {
+      "claim": "a client on another protocol version gets version_mismatch",
+      "passed": true,
+      "detail": "VersionMismatch { daemon: 1, client: 2 }"
+    },
+    {
+      "claim": "a second neomemd on the same home exits cleanly and the first keeps serving",
+      "passed": true,
+      "detail": "second exit exit status: 0"
+    },
+    {
+      "claim": "neomem status starts a stopped daemon and answers within 2 seconds",
+      "passed": true,
+      "detail": "35.844374ms"
+    },
+    {
+      "claim": "a home too long for a Unix socket path still gets a working socket elsewhere",
+      "passed": true,
+      "detail": "/run/user/1000/neomem-cec4d443c1f9a9de.sock"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ mod codex;
 mod command;
 mod config;
 mod duration;
+mod f16_copy;
 mod fallback_judge;
 mod gguf;
 mod host;
