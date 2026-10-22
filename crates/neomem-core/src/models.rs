@@ -132,6 +132,8 @@ pub enum Effort {
     Low,
     Medium,
     High,
+    Xhigh,
+    Max,
 }
 
 impl Effort {
@@ -140,6 +142,8 @@ impl Effort {
             Self::Low => "low",
             Self::Medium => "medium",
             Self::High => "high",
+            Self::Xhigh => "xhigh",
+            Self::Max => "max",
         }
     }
 }

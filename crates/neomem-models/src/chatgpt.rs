@@ -341,6 +341,7 @@ pub struct ChatgptLlm {
     account: Arc<ChatgptAccount>,
     model: String,
     effort: Option<Effort>,
+    fast: bool,
     timeout: Duration,
 }
 
@@ -356,6 +357,7 @@ impl ChatgptLlm {
             account,
             model: settings.required_model("chatgpt")?,
             effort: settings.effort,
+            fast: settings.fast,
             timeout: settings.timeout,
         })
     }
@@ -368,7 +370,7 @@ impl Wire for ChatgptLlm {
 
     fn send(&self, request: &LlmRequest, on_text: &mut dyn FnMut(&str)) -> Result<LlmReply, ModelError> {
         let (access, account_id) = self.account.credentials()?;
-        let body = openai_responses::body(&self.model, self.effort, request)?;
+        let body = openai_responses::body(&self.model, self.effort, self.fast, request)?;
         let headers = [
             ("authorization", format!("Bearer {access}")),
             ("chatgpt-account-id", account_id),

@@ -52,6 +52,7 @@ pub struct RoleConfig {
     pub provider: Option<String>,
     pub model: Option<String>,
     pub effort: Option<Effort>,
+    pub fast: Option<bool>,
     pub timeout: Option<String>,
     pub runtime: Option<String>,
     pub file: Option<String>,
@@ -73,6 +74,7 @@ mycli       = { kind = "command", cmd = ["my-llm-cli", "--json"] }
 embedder     = { runtime = "llama.cpp", file = "embeddinggemma-300m-Q8_0.gguf" }
 judge        = { provider = "jev", fallback = { runtime = "llama.cpp", file = "qwen3-reranker-0.6b-Q8_0.gguf" } }
 planner      = { provider = "chatgpt", model = "gpt-6.1-sol", effort = "low", timeout = "2.5s" }
+extractor    = { provider = "chatgpt", model = "gpt-6-luna", effort = "max", fast = true }
 checker      = { provider = "jev" }
 idle_unload  = "15m"
 
@@ -87,6 +89,8 @@ idle_unload  = "15m"
         let judge = config.models.judge.unwrap();
         assert_eq!(judge.fallback.unwrap().runtime.as_deref(), Some("llama.cpp"));
         assert_eq!(config.models.planner.unwrap().effort, Some(Effort::Low));
+        let extractor = config.models.extractor.unwrap();
+        assert_eq!((extractor.effort, extractor.fast), (Some(Effort::Max), Some(true)));
         assert!(config.models.extractor_by_source.contains_key("bank-digest"));
     }
 }

@@ -11,7 +11,9 @@ const TIMEOUT: &str = "10m";
 const BYTES_PER_TOKEN: usize = 4;
 const DEFAULT_MAX_TOKENS: u32 = 4096;
 
-type Models = HashMap<(String, Option<String>), Arc<dyn Llm>>;
+const PRIORITY_TIER: &str = "priority";
+
+type Models = HashMap<(String, Option<String>, bool), Arc<dyn Llm>>;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut arguments = std::env::args().skip(1);
@@ -46,7 +48,8 @@ fn completed(sign_in: &Path, models: &mut Models, body: &str) -> Result<Value, S
     let completion: Value = serde_json::from_str(body).map_err(|error| error.to_string())?;
     let model = completion["model"].as_str().ok_or("the request names no model")?.to_owned();
     let effort_name = completion["reasoning_effort"].as_str().map(str::to_owned);
-    let key = (model.clone(), effort_name.clone());
+    let fast = completion["service_tier"].as_str() == Some(PRIORITY_TIER);
+    let key = (model.clone(), effort_name.clone(), fast);
     let llm = if let Some(llm) = models.get(&key) {
         Arc::clone(llm)
     } else {
@@ -54,7 +57,7 @@ fn completed(sign_in: &Path, models: &mut Models, body: &str) -> Result<Value, S
             .map(|name| serde_json::from_value::<Effort>(Value::String(name)))
             .transpose()
             .map_err(|error| error.to_string())?;
-        let llm = chatgpt_model(sign_in, &model, effort)?;
+        let llm = chatgpt_model(sign_in, &model, effort, fast)?;
         models.insert(key, Arc::clone(&llm));
         llm
     };
@@ -96,7 +99,12 @@ fn request_from(completion: &Value) -> LlmRequest {
     }
 }
 
-fn chatgpt_model(sign_in: &Path, model: &str, effort: Option<Effort>) -> Result<Arc<dyn Llm>, String> {
+fn chatgpt_model(
+    sign_in: &Path,
+    model: &str,
+    effort: Option<Effort>,
+    fast: bool,
+) -> Result<Arc<dyn Llm>, String> {
     let provider = ProviderConfig {
         kind: ProviderKind::Chatgpt,
         base_url: None,
@@ -113,6 +121,7 @@ fn chatgpt_model(sign_in: &Path, model: &str, effort: Option<Effort>) -> Result<
         provider: Some(PROVIDER.to_owned()),
         model: Some(model.to_owned()),
         effort,
+        fast: Some(fast),
         timeout: Some(TIMEOUT.to_owned()),
         ..RoleConfig::default()
     });

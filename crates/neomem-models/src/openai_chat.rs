@@ -8,6 +8,7 @@ use serde_json::{Value, json};
 use crate::http::{self, BodyLines};
 use crate::json_schema;
 use crate::llm::{self, LlmSettings, Wire};
+use crate::openai_responses;
 use crate::sse::{self, Flow};
 
 #[derive(Debug)]
@@ -17,6 +18,7 @@ pub struct OpenAiChat {
     key: Option<String>,
     model: String,
     effort: Option<Effort>,
+    fast: bool,
     timeout: Duration,
     effort_as_reasoning_object: bool,
 }
@@ -29,6 +31,7 @@ impl OpenAiChat {
             key,
             model: settings.required_model("openai")?,
             effort: settings.effort,
+            fast: settings.fast,
             timeout: settings.timeout,
             effort_as_reasoning_object: base_url.contains("openrouter.ai"),
         })
@@ -68,6 +71,9 @@ impl OpenAiChat {
             } else {
                 body["reasoning_effort"] = json!(effort.name());
             }
+        }
+        if self.fast {
+            body["service_tier"] = json!(openai_responses::PRIORITY_TIER);
         }
         Ok(body)
     }
@@ -192,6 +198,7 @@ mod tests {
         let settings = LlmSettings {
             model: Some("m".to_owned()),
             effort: Some(Effort::Low),
+            fast: false,
             timeout: llm::DEFAULT_TIMEOUT,
         };
         OpenAiChat::new(base_url, None, &settings).unwrap()
@@ -215,5 +222,25 @@ mod tests {
         let direct = chat("http://127.0.0.1:11434/v1").body(&ping()).unwrap();
         assert_eq!(direct["reasoning_effort"], "low");
         assert!(direct["max_tokens"].is_null(), "no limit is sent when the request sets none");
+        assert!(direct["service_tier"].is_null());
+    }
+
+    #[test]
+    fn a_fast_role_asks_for_the_priority_tier_at_max_effort() {
+        let settings = LlmSettings {
+            model: Some("m".to_owned()),
+            effort: Some(Effort::Max),
+            fast: true,
+            timeout: llm::DEFAULT_TIMEOUT,
+        };
+        let body =
+            OpenAiChat::new("http://127.0.0.1:11434/v1", None, &settings).unwrap().body(&ping()).unwrap();
+        assert_eq!(
+            (body["reasoning_effort"].as_str(), body["service_tier"].as_str()),
+            (Some("max"), Some("priority"))
+        );
+        let responses = openai_responses::body("m", Some(Effort::Xhigh), true, &ping()).unwrap();
+        assert_eq!(responses["reasoning"]["effort"], "xhigh");
+        assert_eq!(responses["service_tier"], "priority");
     }
 }
