@@ -63,6 +63,15 @@ impl Daemon {
         }
     }
 
+    pub fn exchange_count(&self) -> usize {
+        self.exchanges.lock().unwrap_or_else(std::sync::PoisonError::into_inner).len()
+    }
+
+    pub fn exchanges_since(&self, first: usize) -> Vec<serde_json::Value> {
+        let exchanges = self.exchanges.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        exchanges.get(first..).map(<[serde_json::Value]>::to_vec).unwrap_or_default()
+    }
+
     pub fn return_sign_in(&self, sign_in: Option<&Path>) -> anyhow::Result<()> {
         let Some(sign_in) = sign_in else { return Ok(()) };
         let used = fs::read(self.home.secrets_path())?;
