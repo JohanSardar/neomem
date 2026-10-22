@@ -1,0 +1,4 @@
+2026-10-22T01:37:28.102822Z  INFO neomemd::http: HTTP listening on 127.0.0.1:36037
+2026-10-22T01:37:28.103552Z  INFO neomemd: neomemd serving /tmp/neomemctl-2PzSET
+2026-10-22T01:37:28.103997Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-22T01:37:29.372868Z  INFO neomem_engine::maintenance: committed 20 vault changes

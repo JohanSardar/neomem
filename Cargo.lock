@@ -1627,6 +1627,7 @@ dependencies = [
  "base64",
  "form_urlencoded",
  "getrandom 0.4.3",
+ "half",
  "llama-cpp-2",
  "neomem-core",
  "neomem-testkit",

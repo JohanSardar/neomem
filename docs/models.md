@@ -30,6 +30,8 @@ checker  = { provider = "jev", fallback = { runtime = "llama.cpp", file = "qwen3
 
 `neomemctl` (prove, up, bench) picks the backend itself; `NEOMEM_GPU=cpu|vulkan|cuda` overrides it. A Vulkan build also needs the SPIR-V headers (`apt install spirv-headers`); when they are missing, `neomemctl` installs them once into `~/.cache/neomem/`. A plain `cargo build` is CPU-only (Metal on macOS), so it builds on any machine. When the build has a GPU backend, every layer of every local model goes to the GPU.
 
+On a Vulkan build the embedder runs from an F16 copy of its GGUF that neomem writes once into `models/f16/` (about 2 s and 622 MB for EmbeddingGemma). The copy holds the same Q8_0 weights, widened, so vectors keep the Q8_0 model's ID. llama.cpp's Vulkan Q8_0 matrix multiply needs ~30 ms for any query longer than 8 tokens on the Arc iGPU; F16 needs ~21 ms. The embedder also embeds one 512-token query as it loads: llama.cpp's Vulkan backend grows its GPU buffers the first time a query is longer than any before, which cost 20–75 ms on those queries.
+
 ## Benchmark
 
 `neomemctl bench models` on a release build: a single 16–32 token query (30 distinct queries, through `neomem models test embedder`, timed inside the daemon), a query plus 16 documents, and the reranker deciding between two options and scoring 15 candidates. §13.5 budgets 5–20 ms for the query embedding (measured on Metal) and ~0.1–0.3 s for the local judge.

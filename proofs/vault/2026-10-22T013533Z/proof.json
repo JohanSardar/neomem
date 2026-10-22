@@ -1,0 +1,47 @@
+{
+  "feature": "vault",
+  "scenario": "vault",
+  "passed": true,
+  "started_at": "2026-10-22T013533Z",
+  "duration_ms": 7196,
+  "code_version": "8ab5c8857436",
+  "models": "fake",
+  "failure": null,
+  "checks": [
+    {
+      "claim": "the home is a local git repository with no remote",
+      "passed": true,
+      "detail": "remotes: []"
+    },
+    {
+      "claim": ".gitignore keeps databases, models, sockets, spool and secrets out of git",
+      "passed": true,
+      "detail": "missing: []"
+    },
+    {
+      "claim": "facts/ and entities/ exist",
+      "passed": true,
+      "detail": "/tmp/neomemctl-IJOQHs"
+    },
+    {
+      "claim": "a seeded fact chain is committed by the daemon within the batch interval, in one commit",
+      "passed": true,
+      "detail": "4 files, commits 0 -> 1"
+    },
+    {
+      "claim": "only facts, entities, config.toml and .gitignore are ever committed",
+      "passed": true,
+      "detail": "strays: []"
+    },
+    {
+      "claim": "a hand-edited fact file is noticed and committed",
+      "passed": true,
+      "detail": "commits 1 -> 2, last commit touched [facts/2026/10/fct_01M59NY2N09AC5V7E9Z0C1HT0H_edge-s-ship-date-is-november-1-2026.md]"
+    },
+    {
+      "claim": "a malformed file neither stops the daemon nor gets trusted, and its error log names only the file",
+      "passed": true,
+      "detail": "errors: [\"fct_01M5AAAAAAAAAAAAAAAAAAAAAA\"]"
+    }
+  ]
+}

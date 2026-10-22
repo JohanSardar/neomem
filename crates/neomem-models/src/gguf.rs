@@ -39,13 +39,13 @@ fn read_dims(path: &Path) -> io::Result<usize> {
     dims.filter(|dims| *dims > 0).ok_or_else(|| io::Error::other("GGUF has no embedding dimension"))
 }
 
-fn number(file: &mut File, bytes: usize) -> io::Result<u64> {
+pub(crate) fn number(reader: &mut impl Read, bytes: usize) -> io::Result<u64> {
     let mut data = [0; 8];
-    file.read_exact(&mut data[..bytes])?;
+    reader.read_exact(&mut data[..bytes])?;
     Ok(u64::from_le_bytes(data))
 }
 
-fn skip(file: &mut File, kind: u64, depth: usize) -> io::Result<()> {
+pub(crate) fn skip(file: &mut (impl Read + Seek), kind: u64, depth: usize) -> io::Result<()> {
     let bytes = match kind {
         0 | 1 | 7 => 1,
         2 | 3 => 2,
