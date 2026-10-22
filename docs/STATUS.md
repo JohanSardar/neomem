@@ -49,6 +49,7 @@ Perf rounds after the features were proven:
 | 3 | Non-embedding search pipeline at 100K | none possible: 0.8 ms of ~27 ms | < 3% |
 | 4 | Capture hook with 0–200 appended turns | none: 0.8–1.8 ms, process start dominates | < 3% |
 | 5 | Recall | none: fake-model time is the model calls; real time is the planner and Jev | < 3% |
+| 6 | Query embedding | EmbeddingGemma's QAT Q4_0 instead of Q8_0, tried and not adopted | search −17% end to end at 100K facts, same answers on 60 labeled queries, but Google's MTEB scores drop (code 68.70 → 67.99, English 69.49 → 69.31) and SPEC §13.4 names Q8_0 |
 
 Earlier perf work during the build: the fake model server's Nagle stall (47 → 2.7 ms per call), llama.cpp optimized in debug builds (566 → 38 ms per embedding), and background writes reloading the embedder for every batch (#54).
 
@@ -68,6 +69,7 @@ The first baseline found almost no facts; following it up found and fixed five e
 - **GitHub CI.** The `gh` token has no `workflow` scope, so GitHub refuses the workflow file. Run `scripts/enable-ci.sh`: it asks gh for the scope in your browser, moves `ci/workflows/ci.yml` into `.github/workflows/` and pushes. Until then `cargo xtask ci` (format, build, nextest, clippy pedantic, cargo-deny, xtask check, `prove --changed`) is the gate. Every PR passed it; for one (#47) it ran before the last merge of main into the branch, and the same gate on the merged main passed right after.
 - **Live LLM providers** (`models.llm` is proven against fakes for every kind): `neomem login chatgpt` needs your browser sign-in; OpenAI and Anthropic need API keys in `~/.neomem/secrets.env`; neomem never uses Codex's own login. The spec's default extractor and consolidator are hosted models, so the eval used a local Qwen3-4B instead; a run with a hosted extractor needs one of these.
 - **macOS.** The launchd agent, Metal and the macOS CI job are written but untested: this machine is Linux.
+- **Search p95 on this laptop.** To trade a little embedding quality for the 30 ms budget, put [`embeddinggemma-300m-Q4_0.gguf`](https://huggingface.co/unsloth/embeddinggemma-300m-GGUF/resolve/main/embeddinggemma-300m-Q4_0.gguf) in `~/.neomem/models/` and run `neomem models use embedder embeddinggemma-300m-Q4_0.gguf`; the vault re-embeds in the background (about 40 minutes at 100K facts) and searches keep using Q8_0 until it is done.
 
 ## Incidents
 
