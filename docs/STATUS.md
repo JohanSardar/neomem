@@ -4,7 +4,7 @@ What was built from SPEC.md, how fast it is against the §13.5 budget, how it sc
 
 ## Built
 
-Every feature in `.agents/skills/neomem-control/feature-graph.yaml` is proven: `neomemctl prove --all` passes on main (35 of 35 at `68849fb`). Each proof runs a real `neomemd` in an isolated home and checks its claims through the same surfaces a user or agent uses.
+Every feature in `.agents/skills/neomem-control/feature-graph.yaml` is proven: `neomemctl prove --all` passes on main (35 of 35 at `68849fb`). Each proof runs a real `neomemd` in an isolated home and checks its claims through the same surfaces a user or agent uses. GitHub Actions re-proves them on every push to main (Ubuntu; macOS builds, tests and lints): the full run on 2026-10-22 (run 39724786383) proved 35 of 35.
 
 | Area | Features |
 |---|---|
