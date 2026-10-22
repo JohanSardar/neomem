@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::process::Command;
 
 use anyhow::Context;
@@ -103,5 +104,46 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
         .output()?
         .status;
     proof.claim("report can be regenerated from saved results", status.success(), status);
+    claim_rescore(proof, binaries, &directory, &settings, &items)
+}
+
+fn claim_rescore(
+    proof: &mut ProofRun,
+    binaries: &Binaries,
+    directory: &Path,
+    settings: &Path,
+    items: &[Value],
+) -> anyhow::Result<()> {
+    let rescored = directory.with_file_name("rescored");
+    let output = Command::new(binaries.neomemd.with_file_name("neomem-eval"))
+        .arg("rescore")
+        .arg(directory)
+        .arg("--dataset")
+        .arg(seed::fixture_dir("eval")?.join("questions.json"))
+        .arg("--models")
+        .arg(settings)
+        .arg("--out")
+        .arg(&rescored)
+        .env("NEOMEM_FAKE_OPENAI_KEY", "fake-key")
+        .output()?;
+    let again: Vec<Value> = std::fs::read(rescored.join("items.json"))
+        .ok()
+        .and_then(|bytes| serde_json::from_slice(&bytes).ok())
+        .unwrap_or_default();
+    let same_hits = again.len() == items.len()
+        && again
+            .iter()
+            .zip(items)
+            .all(|(new, old)| new["id"] == old["id"] && new["recall5"] == old["recall5"]);
+    proof.claim(
+        "rescoring a run answers every question again from its saved search hits",
+        output.status.success() && same_hits,
+        format!(
+            "{} of {} questions; {}",
+            again.len(),
+            items.len(),
+            String::from_utf8_lossy(&output.stderr).trim()
+        ),
+    );
     Ok(())
 }
