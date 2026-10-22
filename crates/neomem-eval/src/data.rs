@@ -6,7 +6,7 @@ use anyhow::{Context, ensure};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Turn {
     pub role: String,
     pub content: String,
@@ -47,6 +47,12 @@ fn answer_text<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Stri
 }
 
 impl BenchmarkItem {
+    pub fn shares_history_with(&self, other: &Self) -> bool {
+        self.haystack_session_ids == other.haystack_session_ids
+            && self.haystack_dates == other.haystack_dates
+            && self.haystack_sessions == other.haystack_sessions
+    }
+
     pub fn evidence_sessions(&self) -> &[String] {
         if self.category() == "abstention" { &[] } else { &self.answer_session_ids }
     }
@@ -74,7 +80,11 @@ pub fn load(path: &Path) -> anyhow::Result<(Vec<BenchmarkItem>, String)> {
     Ok((questions, checksum))
 }
 
-pub fn split(questions: Vec<BenchmarkItem>, sample: usize, seed: u64) -> (Vec<BenchmarkItem>, Vec<String>) {
+pub fn split(
+    questions: Vec<BenchmarkItem>,
+    sample: usize,
+    seed: u64,
+) -> (Vec<BenchmarkItem>, Vec<BenchmarkItem>) {
     let reserve = sample < questions.len();
     let mut groups = BTreeMap::<String, Vec<BenchmarkItem>>::new();
     for question in questions {
@@ -90,7 +100,7 @@ pub fn split(questions: Vec<BenchmarkItem>, sample: usize, seed: u64) -> (Vec<Be
             if group.len() > 1
                 && let Some(question) = group.pop()
             {
-                held_out.push(question.question_id);
+                held_out.push(question);
             }
         }
     }
@@ -103,7 +113,7 @@ pub fn split(questions: Vec<BenchmarkItem>, sample: usize, seed: u64) -> (Vec<Be
                 if selected.len() < sample {
                     selected.push(question.clone());
                 } else {
-                    held_out.push(question.question_id.clone());
+                    held_out.push(question.clone());
                 }
             }
         }
@@ -137,7 +147,7 @@ mod tests {
         assert_eq!(ids(&selected), ids(&again));
         assert_eq!(selected.len(), 3);
         assert_eq!(held_out.len(), 1);
-        assert!(selected.iter().all(|q| !held_out.contains(&q.question_id)));
+        assert!(ids(&selected).iter().all(|id| !ids(&held_out).contains(id)));
         assert_eq!(
             selected.iter().map(BenchmarkItem::category).collect::<std::collections::BTreeSet<_>>().len(),
             3
