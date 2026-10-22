@@ -42,6 +42,16 @@ pub struct Options {
     pub shards: usize,
     #[arg(long)]
     pub resume: bool,
+    #[arg(long, conflicts_with_all = ["sample", "seed", "held_out", "shard", "shards"])]
+    pub prepared: bool,
+    #[command(flatten)]
+    pub inspection: Inspection,
+}
+
+#[derive(Debug, Args)]
+pub struct Inspection {
+    #[arg(long)]
+    pub inspect: bool,
 }
 
 struct Ingested {
@@ -52,22 +62,43 @@ struct Ingested {
 }
 
 pub fn run(options: &Options) -> anyhow::Result<()> {
-    ensure!(options.resume || !options.out.exists(), "output directory already exists");
+    ensure!(
+        options.inspection.inspect || options.resume || !options.out.exists(),
+        "output directory already exists"
+    );
     ensure!(options.shard < options.shards, "the shard must be below the shard count");
+    let (questions, mut checksum, prepared) = data::load_with_split(&options.dataset)?;
+    let (sample, other, seed, held_out, shard, shards) = if options.prepared {
+        let split = prepared.context("dataset is not a prepared shard")?;
+        checksum = split.dataset_sha256;
+        (questions, split.other, split.seed, split.held_out, split.shard, split.shards)
+    } else {
+        let (sample, other) =
+            crate::prepare::select(questions, options.sample, options.seed, options.held_out);
+        ensure!(!sample.is_empty(), "empty sample");
+        (
+            shard_of(sample, options.shard, options.shards),
+            other,
+            options.seed,
+            options.held_out,
+            options.shard,
+            options.shards,
+        )
+    };
+    if options.inspection.inspect {
+        println!(
+            "{}",
+            serde_json::to_string(&sample.iter().map(|item| &item.question_id).collect::<Vec<_>>())?
+        );
+        return Ok(());
+    }
     let settings: Settings = serde_json::from_slice(&std::fs::read(&options.models)?)?;
-    let (questions, checksum) = data::load(&options.dataset)?;
-    let (development, held_out) = data::split(questions, options.sample, options.seed);
-    let (mut sample, other) =
-        if options.held_out { (held_out, development) } else { (development, held_out) };
-    ensure!(!sample.is_empty(), "empty sample");
-    sample.sort_by(|first, second| first.haystack_session_ids.cmp(&second.haystack_session_ids));
-    let sample = shard_of(sample, options.shard, options.shards);
     std::fs::create_dir_all(&options.out)?;
-    let split = if options.held_out { "held-out" } else { "development" };
-    let manifest = json!({"dataset_sha256":checksum,"seed":options.seed,"arm":options.arm,"split":split,
-        "shard":options.shard,"shards":options.shards,
+    let split = if held_out { "held-out" } else { "development" };
+    let manifest = json!({"dataset_sha256":checksum,"seed":seed,"arm":options.arm,"split":split,
+        "shard":shard,"shards":shards,
         "selected":sample.iter().map(|q| &q.question_id).collect::<Vec<_>>(),
-        "held_out":other.iter().map(|q| &q.question_id).collect::<Vec<_>>(),
+        "held_out":other,
         "models":settings,"k":10,"timezone":"UTC","reader_prompt":include_str!("../prompts/reader.md"),
         "judge_prompts":include_str!("../prompts/judge.json"),"git_revision":std::process::Command::new("git").args(["rev-parse","HEAD"]).output().ok().map(|o|String::from_utf8_lossy(&o.stdout).trim().to_owned())});
     std::fs::write(options.out.join("manifest.json"), serde_json::to_vec_pretty(&manifest)?)?;
@@ -77,6 +108,7 @@ pub fn run(options: &Options) -> anyhow::Result<()> {
     } else {
         Vec::new()
     };
+    std::fs::write(&earlier, serde_json::to_vec_pretty(&items)?)?;
     let answered: BTreeSet<String> = items.iter().map(|item| item.id.clone()).collect();
     let mut ingested: Option<Ingested> = None;
     for question in sample.iter().filter(|question| !answered.contains(&question.question_id)) {
@@ -98,7 +130,7 @@ pub fn run(options: &Options) -> anyhow::Result<()> {
     report::write(&options.out)
 }
 
-fn shard_of(sample: Vec<BenchmarkItem>, shard: usize, shards: usize) -> Vec<BenchmarkItem> {
+pub fn shard_of(sample: Vec<BenchmarkItem>, shard: usize, shards: usize) -> Vec<BenchmarkItem> {
     let mut history = 0;
     let owners: Vec<usize> = (0..sample.len())
         .map(|index| {

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from eval_format import SharedDataset
 import ast
 import json
 import re
@@ -47,9 +48,20 @@ def evidence_ids(value):
         yield str(value)
 
 
+def sessions_of(chat):
+    if not chat or isinstance(chat[0], list):
+        return [session for session in chat if session]
+    sessions = []
+    for plan in chat:
+        for batches in plan.values():
+            for batch in batches or []:
+                sessions.extend(session for session in batch["turns"] if session)
+    return sessions
+
+
 def items_of(sample, size, limit):
     conversation_id = f"beam-{size}-{sample['conversation_id']}"
-    sessions = [session for session in sample["chat"] if session]
+    sessions = sessions_of(sample["chat"])
     history = [[{"role": turn["role"], "content": turn["content"]} for turn in session] for session in sessions]
     session_ids = [f"{conversation_id}-S{index + 1}" for index in range(len(sessions))]
     moments = [session_date(session, index) for index, session in enumerate(sessions)]
@@ -88,7 +100,7 @@ def items_of(sample, size, limit):
 
 def main():
     parser = argparse.ArgumentParser(description="Convert BEAM (Mohammadta/BEAM, CC BY-SA 4.0) into neomem-eval items")
-    parser.add_argument("--size", choices=("100K", "500K", "1M"), default="100K")
+    parser.add_argument("--size", choices=("100K", "500K", "1M", "10M"), default="100K")
     parser.add_argument("--max-questions-per-conversation", type=int)
     parser.add_argument("beam", type=Path)
     parser.add_argument("out", type=Path)
@@ -98,17 +110,26 @@ def main():
     if not arguments.beam.resolve().is_relative_to(DOWNLOAD_ROOT.resolve()):
         parser.error(f"download directory must be within {DOWNLOAD_ROOT}")
     arguments.beam.mkdir(parents=True, exist_ok=True)
-    filename = f"{arguments.size}-00000-of-00001.parquet"
-    source = arguments.beam / filename
-    if not source.exists():
-        urllib.request.urlretrieve(f"{DATASET}/{filename}", source)
-    samples = parquet.read_table(source).to_pylist()
+    filenames = ([f"10M-{index:05}-of-00002.parquet" for index in range(2)]
+                 if arguments.size == "10M" else [f"{arguments.size}-00000-of-00001.parquet"])
+    samples = []
+    for filename in filenames:
+        source = arguments.beam / filename
+        if not source.exists():
+            base = ("https://huggingface.co/datasets/Mohammadta/BEAM-10M/resolve/main/data"
+                    if arguments.size == "10M" else DATASET)
+            urllib.request.urlretrieve(f"{base}/{filename}", source)
+        for batch in parquet.ParquetFile(source).iter_batches(batch_size=1, columns=["conversation_id", "chat", "probing_questions"]):
+            samples.extend(batch.to_pylist())
     items = [item for sample in samples for item in items_of(sample, arguments.size, arguments.max_questions_per_conversation)]
     if len({item["question_id"] for item in items}) != len(items):
         raise ValueError("Duplicate question IDs")
-    arguments.out.write_text(json.dumps(items))
-    turns = sum(len(session) for sample in samples for session in sample["chat"])
-    characters = sum(len(turn["content"]) for sample in samples for session in sample["chat"] for turn in session)
+    dataset = SharedDataset()
+    for item in items:
+        dataset.add(item)
+    dataset.write(arguments.out)
+    turns = sum(len(session) for sample in samples for session in sessions_of(sample["chat"]))
+    characters = sum(len(turn["content"]) for sample in samples for session in sessions_of(sample["chat"]) for turn in session)
     print(f"{len(items)} questions from {len(samples)} conversations -> {arguments.out}")
     print(f"Total turns: {turns}")
     print(f"Approximate characters: {characters}")

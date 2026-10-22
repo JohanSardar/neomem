@@ -104,6 +104,7 @@ pub fn prove(proof: &mut ProofRun, binaries: &Binaries) -> anyhow::Result<()> {
         .output()?
         .status;
     proof.claim("report can be regenerated from saved results", status.success(), status);
+    claim_prepared(proof, binaries, &directory, &settings)?;
     claim_rescore(proof, binaries, &directory, &settings, &items)
 }
 
@@ -144,6 +145,80 @@ fn claim_rescore(
             items.len(),
             String::from_utf8_lossy(&output.stderr).trim()
         ),
+    );
+    Ok(())
+}
+
+fn claim_prepared(
+    proof: &mut ProofRun,
+    binaries: &Binaries,
+    directory: &Path,
+    settings: &Path,
+) -> anyhow::Result<()> {
+    let binary = binaries.neomemd.with_file_name("neomem-eval");
+    let prepared = directory.with_file_name("prepared");
+    let fixture = seed::fixture_dir("eval")?.join("questions.json");
+    let status = Command::new(&binary)
+        .arg("prepare")
+        .arg(&fixture)
+        .args(["--sample", "3", "--shards", "2", "--out"])
+        .arg(&prepared)
+        .output()?;
+    anyhow::ensure!(status.status.success(), "prepare failed: {}", String::from_utf8_lossy(&status.stderr));
+    let mut matches = true;
+    for shard in 0..2 {
+        let direct = directory.with_file_name(format!("direct-{shard}"));
+        let compact = directory.with_file_name(format!("compact-{shard}"));
+        for (dataset, out, flags) in [
+            (
+                fixture.clone(),
+                &direct,
+                vec![
+                    "--sample".to_owned(),
+                    "3".to_owned(),
+                    "--shard".to_owned(),
+                    shard.to_string(),
+                    "--shards".to_owned(),
+                    "2".to_owned(),
+                ],
+            ),
+            (prepared.join(format!("shard-{shard}.json")), &compact, vec!["--prepared".to_owned()]),
+        ] {
+            let output = Command::new(&binary)
+                .arg("run")
+                .arg(dataset)
+                .args(flags)
+                .arg("--models")
+                .arg(settings)
+                .arg("--out")
+                .arg(out)
+                .args(["--arm", "memory-off"])
+                .env("NEOMEM_FAKE_OPENAI_KEY", "fake-key")
+                .output()?;
+            anyhow::ensure!(
+                output.status.success(),
+                "shard failed: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+        let read = |path: &Path| -> anyhow::Result<Value> {
+            Ok(serde_json::from_slice(&std::fs::read(path.join("manifest.json"))?)?)
+        };
+        let first = read(&direct)?;
+        let second = read(&compact)?;
+        matches &= ["selected", "held_out", "dataset_sha256", "seed", "split", "shard", "shards"]
+            .iter()
+            .all(|key| first[key] == second[key]);
+        let answered = |path: &Path| -> anyhow::Result<Vec<Value>> {
+            let items: Vec<Value> = serde_json::from_slice(&std::fs::read(path.join("items.json"))?)?;
+            Ok(items.into_iter().map(|item| item["id"].clone()).collect())
+        };
+        matches &= answered(&direct)? == answered(&compact)?;
+    }
+    proof.claim(
+        "prepared shard runs answer the same questions with the original dataset identity",
+        matches,
+        "two shards; manifests and answered ids match",
     );
     Ok(())
 }

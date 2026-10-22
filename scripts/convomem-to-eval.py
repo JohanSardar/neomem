@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from eval_format import SharedDataset
 import hashlib
 import json
 from datetime import datetime, timedelta
@@ -85,9 +86,16 @@ def items_of(sample, name, category):
 def main():
     parser = argparse.ArgumentParser(description="Convert Salesforce/ConvoMem (CC BY-NC 4.0) into neomem-eval items")
     parser.add_argument("--limit-per-category", type=int)
+    parser.add_argument("--from-eval", type=Path, help="convert an existing array without downloading source files")
     parser.add_argument("convomem", type=Path)
     parser.add_argument("out", type=Path)
     arguments = parser.parse_args()
+    if arguments.from_eval:
+        dataset = SharedDataset()
+        for item in json.loads(arguments.from_eval.read_text()):
+            dataset.add(item)
+        dataset.write(arguments.out)
+        return
     if arguments.limit_per_category is not None and arguments.limit_per_category < 1:
         parser.error("--limit-per-category must be positive")
     arguments.convomem.mkdir(parents=True, exist_ok=True)
@@ -106,7 +114,10 @@ def main():
                 break
         print(f"{category}: {count} questions")
     arguments.out.parent.mkdir(parents=True, exist_ok=True)
-    arguments.out.write_text(json.dumps(items))
+    dataset = SharedDataset()
+    for item in items:
+        dataset.add(item)
+    dataset.write(arguments.out)
     histories = {tuple(item["haystack_session_ids"]) for item in items}
     print(f"{len(items)} questions from {len(histories)} distinct histories -> {arguments.out}")
 

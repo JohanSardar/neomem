@@ -17,6 +17,26 @@ Recall@k measures the fraction of gold evidence sessions covered by the sources 
 
 Datasets, transcripts, questions, model manifests, and per-question outputs remain gitignored. Only aggregate baseline results belong here.
 
+## Shared datasets and prepared shards
+
+The loader accepts the existing JSON array and `neomem-eval/2`. Both retain the SHA-256 of the exact input bytes. Format 2 has a `sessions` object mapping session ids to turn arrays, a `histories` object mapping history ids to `{ "session_ids": [...], "dates": [...] }`, and `questions` containing the ordinary question fields plus `history` instead of the three `haystack_*` arrays. Sessions and history vectors are shared in memory. Questions referencing the same history id reuse ingestion.
+
+Prepare once before launching parallel processes:
+
+```
+neomem-eval prepare dataset.v2.json --sample 60 --seed 20261021 --shards 8 --out prepared
+neomem-eval run prepared/shard-0.json --prepared --models models.json --out run/shard-0
+neomem-eval run prepared/shard-0.json --prepared --inspect --models unused --out unused
+```
+
+`prepare` also accepts legacy arrays and `--held-out`. It uses the same stratified selection, stable history ordering, and history-based shard ownership as a direct run. `split.json` lists the global selected ids, the other split's ids, original checksum, seed, split, and shard count. Every `shard-N.json` contains only its questions and referenced sessions/histories, with that metadata embedded. `--prepared` uses the frozen selection and original dataset identity; it cannot be combined with selection flags. `--inspect` loads and prints selected ids without reading model settings or starting models. Empty shards produce empty reports. Rescoring accepts either the original dataset or the prepared shard.
+
+Legacy datasets may reuse a session id for different content. Prepared histories optionally carry `session_keys`, aligned with `session_ids`, to distinguish storage keys while preserving the original ids used for ingestion and evidence scoring. The converters instead give conflicting sessions distinct ids and update evidence references. They report the number of conflicting occurrences.
+
+`scripts/eval-baseline.py --parallel N` prepares each benchmark once and reuses the prepared files across arms and retries. Existing benchmark keys remain available (`memoryagentbench` now selects its shared file); `locomo-v2`, `convomem-v2`, `memoryagentbench-v2`, `beam-100k-v2`, `beam-500k`, `beam-1m`, `beam-10m`, and `longmemeval-m` select the shared files.
+
+Converters write shared files directly. LongMemEval conversion and the equivalence checker require `ijson` (`uv run --no-project --with ijson python scripts/longmemeval-to-eval.py SOURCE OUT`). Parquet converters require `pyarrow`. ConvoMem's `--from-eval ARRAY` converts an existing local array without source downloads. `scripts/check-eval-format.py ARRAY SHARED` checks every question and history against an existing array.
+
 ## Local baseline configuration
 
 The baseline uses Qwen3-4B-Instruct-2507 Q4_K_M from `unsloth/Qwen3-4B-Instruct-2507-GGUF`, served by llama.cpp b11780 (0.7.0-dev, commit `1242be66f`) with Vulkan on Intel Arc 140V. One server runs at nice 10 with `--ctx-size 32768 --parallel 1 --threads 4 --n-gpu-layers 99`. The public [model profile](../crates/neomem-eval/examples/local-models.json) records file hashes and sampling settings. Extraction, consolidation, planner, reader and answer judge share this local endpoint. Embedding uses embeddinggemma-300m Q8_0 through llama-cpp-2 0.1.160; write checks and recall judgments use live Jev `jev-1.13.0`. Planner and recall judge are configured but not exercised by these two arms.

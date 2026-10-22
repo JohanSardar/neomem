@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 pub fn replay(daemon: &Daemon, question: &BenchmarkItem) -> anyhow::Result<BTreeMap<String, String>> {
     let mut evidence = BTreeMap::new();
     for (index, turns) in question.haystack_sessions.iter().enumerate() {
-        for turn in turns {
+        for turn in turns.iter() {
             let record = json!({"source":"eval","occurred":{"start":data::date(&question.haystack_dates[index])?,"end":data::date(&question.haystack_dates[index])?},
                     "tags":[],"content":format!("{}: {}",turn.role,turn.content),"entity_hints":[],
                     "source_ref":null,"session":question.haystack_session_ids[index]});
