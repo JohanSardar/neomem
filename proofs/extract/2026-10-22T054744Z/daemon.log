@@ -1,0 +1,7 @@
+2026-10-22T05:47:44.357659Z  INFO neomemd::http: HTTP listening on 127.0.0.1:37695
+2026-10-22T05:47:44.358009Z  INFO neomemd: neomemd serving /tmp/neomemctl-8pZnXs
+2026-10-22T05:47:44.363852Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
+2026-10-22T05:47:46.705967Z  INFO neomem_engine::maintenance: committed 21 vault changes
+2026-10-22T05:47:52.741999Z  INFO neomem_engine::maintenance: nightly drift check: 0 differences repaired
+2026-10-22T05:47:57.805844Z  INFO neomem_engine::maintenance: committed 2 vault changes
+2026-10-22T05:48:00.820754Z  INFO neomem_engine::maintenance: committed 3 vault changes

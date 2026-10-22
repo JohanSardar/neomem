@@ -1,3 +1,0 @@
-2026-10-22T01:36:39.753963Z  INFO neomemd::http: HTTP listening on 127.0.0.1:36959
-2026-10-22T01:36:39.755088Z  INFO neomemd: neomemd serving /tmp/neomemctl-MawETe
-2026-10-22T01:36:39.764345Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities

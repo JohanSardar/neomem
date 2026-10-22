@@ -1,0 +1,29 @@
+2026-10-22T05:48:56.119297Z  INFO neomemd::http: HTTP listening on 127.0.0.1:41933
+2026-10-22T05:48:56.119881Z  INFO neomemd: neomemd serving /tmp/neomemctl-mxBW0D
+2026-10-22T05:48:56.136695Z  INFO neomem_engine::indexing: index rebuilt from the files: 13 facts, 7 entities
+2026-10-22T05:48:57.999197Z  INFO neomem_engine::engine: engine flushed
+2026-10-22T05:48:57.999257Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-22T05:48:58.402156Z  INFO neomemd::http: HTTP listening on 127.0.0.1:32965
+2026-10-22T05:48:58.402815Z  INFO neomemd: neomemd serving /tmp/neomemctl-mxBW0D
+2026-10-22T05:48:58.402832Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-mxBW0D/run/neomemd.sock
+2026-10-22T05:48:59.366614Z  INFO neomem_engine::engine: engine flushed
+2026-10-22T05:48:59.366665Z  INFO neomemd::http: neomemd stopped by signal
+2026-10-22T05:48:59.417061Z  INFO neomemd::http: HTTP listening on 127.0.0.1:41923
+2026-10-22T05:48:59.417837Z  INFO neomemd: neomemd serving /tmp/neomemctl-mxBW0D
+2026-10-22T05:48:59.417873Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-mxBW0D/run/neomemd.sock
+2026-10-22T05:48:59.760398Z  INFO serve_inner: rmcp::service: Service initialized as server peer_info=Some(InitializeRequestParams { meta: None, protocol_version: ProtocolVersion("2025-11-25"), capabilities: ClientCapabilities { experimental: None, extensions: None, roots: None, sampling: None, elicitation: None }, client_info: Implementation { name: "rmcp", title: None, version: "3.6.0", description: None, icons: None, website_url: None } })
+2026-10-22T05:48:59.760700Z  INFO serve_inner: rmcp::service: input stream terminated
+2026-10-22T05:48:59.760726Z  INFO serve_inner: rmcp::service: serve finished quit_reason=Closed
+2026-10-22T05:48:59.763235Z  INFO serve_inner: rmcp::service: Service initialized as server peer_info=Some(InitializeRequestParams { meta: None, protocol_version: ProtocolVersion("2025-11-25"), capabilities: ClientCapabilities { experimental: None, extensions: None, roots: None, sampling: None, elicitation: None }, client_info: Implementation { name: "rmcp", title: None, version: "3.6.0", description: None, icons: None, website_url: None } })
+2026-10-22T05:48:59.763499Z  INFO serve_inner: rmcp::service: input stream terminated
+2026-10-22T05:48:59.763527Z  INFO serve_inner: rmcp::service: serve finished quit_reason=Closed
+2026-10-22T05:48:59.868220Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-22T05:48:59.933460Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-22T05:49:00.231789Z  INFO serve_inner: rmcp::service: Service initialized as server peer_info=Some(InitializeRequestParams { meta: None, protocol_version: ProtocolVersion("2025-06-18"), capabilities: ClientCapabilities { experimental: None, extensions: None, roots: None, sampling: None, elicitation: None }, client_info: Implementation { name: "rmcp", title: None, version: "3.6.0", description: None, icons: None, website_url: None } })
+2026-10-22T05:49:00.231979Z  INFO serve_inner: rmcp::service: input stream terminated
+2026-10-22T05:49:00.231999Z  INFO serve_inner: rmcp::service: serve finished quit_reason=Closed
+2026-10-22T05:49:00.238182Z  INFO serve_inner: rmcp::service: Service initialized as server peer_info=Some(InitializeRequestParams { meta: None, protocol_version: ProtocolVersion("2025-06-18"), capabilities: ClientCapabilities { experimental: None, extensions: None, roots: None, sampling: None, elicitation: None }, client_info: Implementation { name: "rmcp", title: None, version: "3.6.0", description: None, icons: None, website_url: None } })
+2026-10-22T05:49:00.238531Z  INFO serve_inner: rmcp::service: input stream terminated
+2026-10-22T05:49:00.238626Z  INFO serve_inner: rmcp::service: serve finished quit_reason=Closed
+2026-10-22T05:49:00.547316Z  WARN neomemd::socket: replying on the socket failed: the connection failed: Broken pipe (os error 32)
+2026-10-22T05:49:01.195106Z  INFO neomem_engine::maintenance: committed 3 vault changes

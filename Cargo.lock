@@ -1636,6 +1636,7 @@ dependencies = [
  "sha2",
  "tempfile",
  "thiserror",
+ "tiny_http",
  "toml",
  "tracing",
  "ureq",

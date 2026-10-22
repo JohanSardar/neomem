@@ -59,9 +59,11 @@ pub fn run(options: &Options) -> anyhow::Result<()> {
 fn evaluate(question: &BenchmarkItem, arm: Arm, settings: &Settings) -> anyhow::Result<Item> {
     let ingestion = Instant::now();
     let (daemon, evidence) = if matches!(arm, Arm::Search) {
-        let daemon = Daemon::start(&settings.daemon_config, settings.models_dir.as_deref())?;
+        let sign_in = settings.sign_in.as_deref();
+        let daemon = Daemon::start(&settings.daemon_config, settings.models_dir.as_deref(), sign_in)?;
         let evidence = crate::ingest::replay(&daemon, question)?;
         daemon.finish()?;
+        daemon.return_sign_in(sign_in)?;
         (Some(daemon), evidence)
     } else {
         (None, BTreeMap::new())

@@ -1,1 +1,0 @@
-{"request":{"protocol":1,"request":{"arguments":{"agent":"codex","event":"stop","session":"capture-session","transcript_path":"/tmp/neomemctl-sejjwA/capture/codex/sessions/./rollout-capture-session.jsonl"},"command":"capture"}},"response":{"reply":"captured"},"elapsed_ms":1.221233}

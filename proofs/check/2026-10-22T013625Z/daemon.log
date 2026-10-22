@@ -1,8 +1,0 @@
-2026-10-22T01:36:25.249212Z  INFO neomemd::http: HTTP listening on 127.0.0.1:33345
-2026-10-22T01:36:25.249910Z  INFO neomemd: neomemd serving /tmp/neomemctl-Xkmhd6
-2026-10-22T01:36:25.255473Z  INFO neomem_engine::indexing: index rebuilt from the files: 2 facts, 2 entities
-2026-10-22T01:36:26.522123Z  INFO neomem_engine::maintenance: committed 2 vault changes
-2026-10-22T01:36:29.039645Z  INFO neomem_engine::maintenance: committed 1 vault changes
-2026-10-22T01:36:31.566456Z  INFO neomem_engine::maintenance: committed 1 vault changes
-2026-10-22T01:36:34.090970Z  INFO neomem_engine::maintenance: committed 1 vault changes
-2026-10-22T01:36:36.612294Z  INFO neomem_engine::maintenance: committed 1 vault changes

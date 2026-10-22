@@ -20,7 +20,7 @@ pub fn sibling(name: &str) -> anyhow::Result<std::path::PathBuf> {
 }
 
 impl Daemon {
-    pub fn start(config: &str, models: Option<&Path>) -> anyhow::Result<Self> {
+    pub fn start(config: &str, models: Option<&Path>, sign_in: Option<&Path>) -> anyhow::Result<Self> {
         let temporary = tempfile::Builder::new().prefix("neomem-eval-").tempdir()?;
         let home = Home::at(temporary.path());
         fs::create_dir_all(home.run_dir())?;
@@ -37,6 +37,9 @@ impl Daemon {
         fs::write(home.config_path(), toml::to_string(&parsed)?)?;
         if let Some(models) = models {
             std::os::unix::fs::symlink(models, home.models_dir())?;
+        }
+        if let Some(sign_in) = sign_in {
+            fs::copy(sign_in, home.secrets_path()).context("copying the shared sign-in")?;
         }
         let child = Command::new(sibling("neomemd")?)
             .env("NEOMEM_HOME", home.root())
@@ -58,6 +61,17 @@ impl Daemon {
             );
             thread::sleep(Duration::from_millis(100));
         }
+    }
+
+    pub fn return_sign_in(&self, sign_in: Option<&Path>) -> anyhow::Result<()> {
+        let Some(sign_in) = sign_in else { return Ok(()) };
+        let used = fs::read(self.home.secrets_path())?;
+        if used != fs::read(sign_in)? {
+            let staging = sign_in.with_extension("env.returning");
+            fs::copy(self.home.secrets_path(), &staging)?;
+            fs::rename(&staging, sign_in)?;
+        }
+        Ok(())
     }
 
     pub fn call(&self, request: Request) -> anyhow::Result<Response> {
