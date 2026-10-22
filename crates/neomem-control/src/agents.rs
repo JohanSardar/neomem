@@ -144,6 +144,7 @@ impl AgentSandbox {
         let units = self.home().join(".config/systemd/user");
         fs::create_dir_all(&units)?;
         fs::write(units.join(EMPTY_TARGET), "[Unit]\nDescription=neomem proof sandbox\n")?;
+        let manager_log = self.home().join("systemd-manager.log");
         let manager = Command::new(SYSTEMD)
             .arg("--user")
             .arg(format!("--unit={EMPTY_TARGET}"))
@@ -153,14 +154,15 @@ impl AgentSandbox {
             .env("XDG_RUNTIME_DIR", self.runtime())
             .stdin(Stdio::null())
             .stdout(Stdio::null())
-            .stderr(Stdio::null())
+            .stderr(fs::File::create(&manager_log)?)
             .spawn()
             .context("starting a private systemd user manager")?;
         let socket = self.runtime().join("systemd/private");
         let deadline = Instant::now() + MANAGER_WAIT;
         while !socket.exists() {
             if Instant::now() > deadline {
-                bail!("the private systemd user manager did not start");
+                let said = fs::read_to_string(&manager_log).unwrap_or_default();
+                bail!("the private systemd user manager did not start: {}", said.trim());
             }
             thread::sleep(Duration::from_millis(20));
         }

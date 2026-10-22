@@ -1,0 +1,21 @@
+2026-10-22T04:46:31.327620Z  INFO neomemd::http: HTTP listening on 127.0.0.1:45865
+2026-10-22T04:46:31.328126Z  INFO neomemd: neomemd serving /tmp/neomemctl-fZvDIe
+2026-10-22T04:46:31.328660Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-22T04:46:31.969594Z  WARN neomem_models::fallback_judge: judge: the model did not answer within 600 ms; the local fallback answers this call primary=jev:jev-fake fallback=llama.cpp:qwen3-reranker-0.6b-Q8_0
+2026-10-22T04:46:32.188083Z  WARN load_from_file: llama-cpp-2: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden module="llama.cpp::load"
+2026-10-22T04:46:34.630123Z  INFO neomem_models::llama: llama.cpp model loaded model=qwen3-reranker-0.6b-Q8_0 gpu=true
+2026-10-22T04:46:35.425572Z  WARN neomem_models::fallback_judge: judge: the model did not answer within 600 ms; the local fallback answers this call primary=jev:jev-fake fallback=llama.cpp:qwen3-reranker-0.6b-Q8_0
+2026-10-22T04:46:36.131651Z  WARN neomem_models::fallback_judge: judge: the model did not answer within 600 ms; the local fallback answers this call primary=jev:jev-fake fallback=llama.cpp:qwen3-reranker-0.6b-Q8_0
+2026-10-22T04:46:36.898588Z  WARN neomem_models::fallback_judge: judge: the model did not answer within 600 ms; the local fallback answers this call primary=jev:jev-fake fallback=llama.cpp:qwen3-reranker-0.6b-Q8_0
+2026-10-22T04:46:37.603822Z  WARN neomem_models::fallback_judge: judge: the model did not answer within 600 ms; the local fallback answers this call primary=jev:jev-fake fallback=llama.cpp:qwen3-reranker-0.6b-Q8_0
+2026-10-22T04:46:38.306469Z  WARN neomem_models::fallback_judge: judge: the model did not answer within 600 ms; the local fallback answers this call primary=jev:jev-fake fallback=llama.cpp:qwen3-reranker-0.6b-Q8_0
+2026-10-22T04:46:38.435585Z  INFO neomem_engine::engine: engine flushed
+2026-10-22T04:46:38.435664Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-22T04:46:38.651215Z  INFO neomemd::http: HTTP listening on 127.0.0.1:41523
+2026-10-22T04:46:38.653172Z  INFO neomemd: neomemd serving /tmp/neomemctl-fZvDIe
+2026-10-22T04:46:38.653253Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-fZvDIe/run/neomemd.sock
+2026-10-22T04:46:38.955846Z  WARN load_from_file: llama-cpp-2: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden module="llama.cpp::load"
+2026-10-22T04:46:39.797952Z  INFO neomem_models::llama: llama.cpp model loaded model=qwen3-reranker-0.6b-Q8_0 gpu=true
+2026-10-22T04:46:41.372251Z  INFO neomemd::http: HTTP listening on 127.0.0.1:45179
+2026-10-22T04:46:41.374081Z  INFO neomemd: neomemd serving /tmp/neomemctl-8lssL3
+2026-10-22T04:46:41.374612Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
