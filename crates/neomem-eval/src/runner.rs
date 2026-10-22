@@ -4,10 +4,11 @@ use std::time::Instant;
 
 use anyhow::{Context, ensure};
 use clap::{Args, ValueEnum};
-use neomem_proto::{Request, Response, SearchQuery};
+use neomem_proto::{Request, Response, SearchQuery, SearchResults};
 use serde::Serialize;
 use serde_json::{Value, json};
 
+use crate::context;
 use crate::daemon::Daemon;
 use crate::data::{self, BenchmarkItem};
 use crate::model::Settings;
@@ -154,16 +155,42 @@ fn evaluate(
     } else {
         None
     };
-    let mut context = String::new();
-    if let Some(results) = &results {
-        for hit in &results.hits {
-            let fact = format!("{}\n", hit.fact.content());
-            if context.chars().count() + fact.chars().count() > settings.context_budget {
-                break;
-            }
-            context.push_str(&fact);
-        }
-    }
+    let answered = answer(question, results.as_deref(), started, settings)?;
+    let (recall5, recall10, precision5) =
+        crate::score::retrieval(results.as_deref(), evidence, question.evidence_sessions());
+    Ok(Item {
+        id: question.question_id.clone(),
+        category: question.category().to_owned(),
+        recall5,
+        recall10,
+        precision5,
+        correct: answered.correct,
+        latency_ms: answered.latency_ms,
+        ingestion_ms,
+        context_tokens: answered.context_tokens,
+        answer: answered.answer,
+        judge_answer: answered.judge_answer,
+        results: serde_json::to_value(results)?,
+        exchanges: daemon.map_or_else(Vec::new, |daemon| daemon.exchanges_since(exchanges_from)),
+    })
+}
+
+pub struct Answered {
+    pub answer: String,
+    pub judge_answer: String,
+    pub correct: bool,
+    pub context_tokens: u64,
+    pub latency_ms: f64,
+}
+
+pub fn answer(
+    question: &BenchmarkItem,
+    results: Option<&SearchResults>,
+    started: Instant,
+    settings: &Settings,
+) -> anyhow::Result<Answered> {
+    let context =
+        results.map(|results| context::render(results, settings.context_budget)).unwrap_or_default();
     let (answer, context_tokens) = settings.reader.complete(
         include_str!("../prompts/reader.md"),
         &format!(
@@ -185,21 +212,5 @@ fn evaluate(
         settings.answer_judge.complete("You are an impartial answer evaluator.", &prompt)?;
     let verdict = judge_answer.trim().trim_end_matches('.').to_lowercase();
     ensure!(verdict == "yes" || verdict == "no", "invalid judge verdict: {judge_answer}");
-    let (recall5, recall10, precision5) =
-        crate::score::retrieval(results.as_deref(), evidence, question.evidence_sessions());
-    Ok(Item {
-        id: question.question_id.clone(),
-        category: question.category().to_owned(),
-        recall5,
-        recall10,
-        precision5,
-        correct: verdict == "yes",
-        latency_ms,
-        ingestion_ms,
-        context_tokens,
-        answer,
-        judge_answer,
-        results: serde_json::to_value(results)?,
-        exchanges: daemon.map_or_else(Vec::new, |daemon| daemon.exchanges_since(exchanges_from)),
-    })
+    Ok(Answered { answer, judge_answer, correct: verdict == "yes", context_tokens, latency_ms })
 }
