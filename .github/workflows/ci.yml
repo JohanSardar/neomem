@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      every_feature:
+        description: Re-prove every feature, not only the ones the last change touched
+        type: boolean
+        default: false
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -57,6 +62,6 @@ jobs:
         with:
           path: models
           key: models-${{ hashFiles('crates/neomem-control/src/model_files.rs') }}
-      - name: prove changed features
+      - name: prove features
         if: runner.os == 'Linux'
-        run: target/debug/neomemctl prove --changed
+        run: target/debug/neomemctl prove ${{ inputs.every_feature && '--all' || '--changed' }}
