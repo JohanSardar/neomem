@@ -67,7 +67,6 @@ The first baseline found almost no facts; following it up found and fixed five e
 
 ## Needs you
 
-- **GitHub CI.** The `gh` token has no `workflow` scope, so GitHub refuses the workflow file; four device-login codes expired unapproved on 2026-10-21. Run `scripts/enable-ci.sh`: it asks gh for the scope in your browser, moves `ci/workflows/ci.yml` into `.github/workflows/` and pushes. The workflow installs the agent CLIs the proofs drive; all 35 proofs passed in a runner-like environment (temporary HOME, no secrets, CPU llama.cpp). Until then `cargo xtask ci` (format, build, nextest, clippy pedantic, cargo-deny, xtask check, `prove --changed`) is the gate, and every PR passed it.
 - **Live LLM providers** (`models.llm` is proven against fakes for every kind): `neomem login chatgpt` needs your browser sign-in; OpenAI and Anthropic need API keys in `~/.neomem/secrets.env`; neomem never uses Codex's own login. The spec's default extractor and consolidator are hosted models, so the eval used a local Qwen3-4B instead; a run with a hosted extractor needs one of these.
 - **macOS.** The launchd agent, Metal and the macOS CI job are written but untested: this machine is Linux.
 - **An idle, plugged-in bench.** The search rows above were measured on battery. `neomemctl bench latency --save-baseline` on AC power with nothing else running records the new baseline for every row.
