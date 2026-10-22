@@ -49,6 +49,33 @@ struct Tokens {
     expires_at: u64,
 }
 
+impl Tokens {
+    fn stored_in(secrets: &Secrets) -> Option<Self> {
+        let ((access, refresh), account_id) =
+            secrets.get(ACCESS_TOKEN).zip(secrets.get(REFRESH_TOKEN)).zip(secrets.get(ACCOUNT_ID))?;
+        let expires_at = secrets.get(EXPIRES_AT).and_then(|at| at.parse().ok()).unwrap_or(0);
+        Some(Self { access, refresh, account_id, expires_at })
+    }
+
+    fn is_fresh(&self) -> bool {
+        self.expires_at > now_secs() + REFRESH_MARGIN_SECS
+    }
+
+    fn credentials(&self) -> (String, String) {
+        (self.access.clone(), self.account_id.clone())
+    }
+
+    fn store_in(&self, secrets: &Secrets) -> std::io::Result<()> {
+        let expires_at = self.expires_at.to_string();
+        secrets.store(&[
+            (ACCESS_TOKEN, self.access.as_str()),
+            (REFRESH_TOKEN, self.refresh.as_str()),
+            (ACCOUNT_ID, self.account_id.as_str()),
+            (EXPIRES_AT, expires_at.as_str()),
+        ])
+    }
+}
+
 impl fmt::Debug for Tokens {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter
@@ -96,15 +123,7 @@ impl PendingLogin {
 
 impl ChatgptAccount {
     pub fn new(issuer: &str, secrets: Secrets) -> Self {
-        let stored =
-            secrets.get(ACCESS_TOKEN).zip(secrets.get(REFRESH_TOKEN)).zip(secrets.get(ACCOUNT_ID)).map(
-                |((access, refresh), account_id)| Tokens {
-                    access,
-                    refresh,
-                    account_id,
-                    expires_at: secrets.get(EXPIRES_AT).and_then(|at| at.parse().ok()).unwrap_or(0),
-                },
-            );
+        let stored = Tokens::stored_in(&secrets);
         Self {
             issuer: issuer.trim_end_matches('/').to_owned(),
             secrets,
@@ -115,11 +134,17 @@ impl ChatgptAccount {
 
     pub fn credentials(&self) -> Result<(String, String), ModelError> {
         let mut tokens = self.tokens.lock().unwrap_or_else(PoisonError::into_inner);
-        let current = tokens.as_ref().ok_or_else(|| {
+        if let Some(current) = tokens.as_ref().filter(|current| current.is_fresh()) {
+            return Ok(current.credentials());
+        }
+        let newest = Tokens::stored_in(&self.secrets.reloaded()).or_else(|| tokens.clone());
+        let current = newest.ok_or_else(|| {
             ModelError::NotConfigured("chatgpt: not signed in; run neomem login chatgpt".to_owned())
         })?;
-        if current.expires_at > now_secs() + REFRESH_MARGIN_SECS {
-            return Ok((current.access.clone(), current.account_id.clone()));
+        if current.is_fresh() {
+            let credentials = current.credentials();
+            *tokens = Some(current);
+            return Ok(credentials);
         }
         let form = [
             ("grant_type", "refresh_token"),
@@ -128,7 +153,7 @@ impl ChatgptAccount {
             ("scope", "openid profile email"),
         ];
         let response: TokenResponse = http::post_form(&self.agent, &self.token_url(), &form, TOKEN_TIMEOUT)?;
-        let refreshed = tokens_from(response, Some(current));
+        let refreshed = tokens_from(response, Some(&current));
         self.keep(&refreshed)?;
         let credentials = (refreshed.access.clone(), refreshed.account_id.clone());
         *tokens = Some(refreshed);
@@ -196,14 +221,7 @@ impl ChatgptAccount {
     }
 
     fn keep(&self, tokens: &Tokens) -> Result<(), ModelError> {
-        let expires_at = tokens.expires_at.to_string();
-        let values = [
-            (ACCESS_TOKEN, tokens.access.as_str()),
-            (REFRESH_TOKEN, tokens.refresh.as_str()),
-            (ACCOUNT_ID, tokens.account_id.as_str()),
-            (EXPIRES_AT, expires_at.as_str()),
-        ];
-        self.secrets.store(&values).map_err(|error| {
+        tokens.store_in(&self.secrets).map_err(|error| {
             ModelError::Unavailable(format!("cannot save the ChatGPT sign-in in secrets.env: {error}"))
         })
     }
@@ -370,6 +388,29 @@ impl Wire for ChatgptLlm {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn signed_in(path: &std::path::Path, access: &str, refresh: &str, expires_at: u64) {
+        Secrets::load(path)
+            .store(&[
+                (ACCESS_TOKEN, access),
+                (REFRESH_TOKEN, refresh),
+                (ACCOUNT_ID, "acct"),
+                (EXPIRES_AT, &expires_at.to_string()),
+            ])
+            .unwrap();
+    }
+
+    #[test]
+    fn a_sign_in_refreshed_by_another_process_is_used_instead_of_refreshing_again() {
+        let folder = tempfile::tempdir().unwrap();
+        let path = folder.path().join("secrets.env");
+        signed_in(&path, "expired-access", "rotated-away", now_secs() - 10);
+        let account = ChatgptAccount::new("http://127.0.0.1:9", Secrets::load(&path));
+        signed_in(&path, "fresh-access", "current-refresh", now_secs() + 3600);
+
+        assert_eq!(account.credentials().unwrap(), ("fresh-access".to_owned(), "acct".to_owned()));
+        assert_eq!(account.credentials().unwrap().0, "fresh-access");
+    }
 
     #[test]
     fn the_account_comes_from_the_id_token_claims() {

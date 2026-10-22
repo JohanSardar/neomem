@@ -28,6 +28,10 @@ impl Secrets {
         Self { path: Some(path.to_path_buf()), from_file: env_file_entries(&text) }
     }
 
+    pub fn reloaded(&self) -> Self {
+        self.path.as_deref().map_or_else(|| self.clone(), Self::load)
+    }
+
     pub fn get(&self, name: &str) -> Option<String> {
         std::env::var(name)
             .ok()

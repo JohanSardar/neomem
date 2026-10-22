@@ -9,6 +9,8 @@ pub struct Endpoint {
     pub version: String,
     #[serde(default)]
     pub key_env: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reasoning_effort: Option<String>,
     pub max_tokens: u32,
 }
 
@@ -16,6 +18,8 @@ pub struct Endpoint {
 pub struct Settings {
     pub daemon_config: String,
     pub models_dir: Option<std::path::PathBuf>,
+    #[serde(default)]
+    pub sign_in: Option<std::path::PathBuf>,
     pub reader: Endpoint,
     pub answer_judge: Endpoint,
     pub context_budget: usize,
@@ -35,14 +39,15 @@ impl Endpoint {
                 &format!("Bearer {}", std::env::var(name).context("missing model key")?),
             );
         }
-        let response: Value = request
-            .send_json(json!({
-                "model": self.model, "temperature": 0, "seed": 20_261_021,
-                "max_tokens": self.max_tokens,
-                "messages": [{"role":"system","content":system},{"role":"user","content":user}]
-            }))?
-            .body_mut()
-            .read_json()?;
+        let mut body = json!({
+            "model": self.model, "temperature": 0, "seed": 20_261_021,
+            "max_tokens": self.max_tokens,
+            "messages": [{"role":"system","content":system},{"role":"user","content":user}]
+        });
+        if let Some(effort) = &self.reasoning_effort {
+            body["reasoning_effort"] = json!(effort);
+        }
+        let response: Value = request.send_json(body)?.body_mut().read_json()?;
         let answer =
             response["choices"][0]["message"]["content"].as_str().context("missing model answer")?.to_owned();
         let tokens =

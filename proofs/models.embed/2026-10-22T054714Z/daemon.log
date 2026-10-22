@@ -1,0 +1,15 @@
+2026-10-22T05:47:15.502949Z  INFO neomemd::http: HTTP listening on 127.0.0.1:39939
+2026-10-22T05:47:15.503475Z  INFO neomemd: neomemd serving /tmp/neomemctl-cJic0b
+2026-10-22T05:47:15.503961Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
+2026-10-22T05:47:16.665728Z  WARN load_from_file: llama-cpp-2: control-looking token:    212 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden module="llama.cpp::load"
+2026-10-22T05:47:19.470938Z  INFO neomem_models::llama: llama.cpp model loaded model=embeddinggemma-300m-Q8_0 gpu=true
+2026-10-22T05:47:19.930955Z  INFO neomem_engine::engine: engine flushed
+2026-10-22T05:47:19.931013Z  INFO neomemd::dispatch: neomemd shutting down on request
+2026-10-22T05:47:20.372261Z  INFO neomemd::http: HTTP listening on 127.0.0.1:44475
+2026-10-22T05:47:20.372664Z  INFO neomemd: neomemd serving /tmp/neomemctl-cJic0b
+2026-10-22T05:47:20.372680Z  INFO neomemd::socket: replaced a stale socket at /tmp/neomemctl-cJic0b/run/neomemd.sock
+2026-10-22T05:47:20.667890Z  WARN load_from_file: llama-cpp-2: control-looking token:    212 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden module="llama.cpp::load"
+2026-10-22T05:47:22.606499Z  INFO neomem_models::llama: llama.cpp model loaded model=embeddinggemma-300m-Q8_0 gpu=true
+2026-10-22T05:47:23.884453Z  INFO neomemd::http: HTTP listening on 127.0.0.1:39547
+2026-10-22T05:47:23.885697Z  INFO neomemd: neomemd serving /tmp/neomemctl-weWiab
+2026-10-22T05:47:23.886653Z  INFO neomem_engine::indexing: index rebuilt from the files: 0 facts, 0 entities
