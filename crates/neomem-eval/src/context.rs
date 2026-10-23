@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use neomem_proto::{SearchHit, SearchResults};
+use neomem_proto::{SearchHit, SearchResults, shown_memory};
 
 pub fn render(results: &SearchResults, budget: usize) -> String {
     let mut context = String::new();
@@ -15,28 +15,12 @@ pub fn render(results: &SearchResults, budget: usize) -> String {
 }
 
 fn entry(rank: usize, hit: &SearchHit) -> String {
-    let fact = &hit.fact;
-    let conflict = if hit.conflict { "  [conflict]" } else { "" };
-    let ended = fact
-        .invalid_at()
-        .map(|ended| format!(", invalid since {}", moment(ended.as_millis())))
-        .unwrap_or_default();
-    let mut entry = String::new();
-    let _ = writeln!(entry, "{rank}. {}{conflict}", fact.content());
-    let _ = writeln!(entry, "   valid since {}{ended}", moment(fact.valid_at().as_millis()));
-    let names: Vec<&str> = hit.entities.iter().map(|entity| entity.name.as_str()).collect();
-    if !names.is_empty() {
-        let _ = writeln!(entry, "   about {}", names.join(", "));
-    }
+    let conflict = if hit.conflict { "[conflict] " } else { "" };
+    let mut entry = format!("{rank}. {conflict}{}", shown_memory(&hit.fact, &hit.entities));
     for linked in &hit.linked {
-        let _ = writeln!(entry, "   {} {}", linked.kind, linked.fact.content());
+        let _ = writeln!(entry, "  linked: {} {}", linked.kind, linked.fact.content());
     }
     entry
-}
-
-fn moment(millis: i64) -> String {
-    jiff::Timestamp::from_millisecond(millis)
-        .map_or_else(|_| millis.to_string(), |moment| moment.strftime("%Y-%m-%dT%H:%M:%SZ").to_string())
 }
 
 #[cfg(test)]
@@ -57,10 +41,13 @@ mod tests {
             "model": "m"
         }))
         .unwrap();
-        assert_eq!(
-            render(&results, 10_000),
-            "1. user: The Osprey bicycle is now blue.\n   valid since 2026-06-02T12:00:00Z\n   about Osprey bicycle\n"
+        let rendered = render(&results, 10_000);
+        assert!(
+            rendered
+                .starts_with("1. fct_01M5J6PVN65J47RFMV3735RVV5: user: The Osprey bicycle is now blue.\n")
         );
+        assert!(rendered.contains("  valid_at: 2026-06-02T12:00:00Z   invalid_at: null (still true)\n"));
+        assert!(rendered.contains("  about: ent_01M5J6PVMD04ASNCXMR8R93842 (Osprey bicycle)\n"));
         assert_eq!(render(&results, 20), "");
     }
 }

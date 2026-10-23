@@ -5,6 +5,7 @@ mod frame;
 mod home;
 mod request;
 mod response;
+mod shown;
 pub mod spool;
 
 pub use client::{CallError, Client};
@@ -22,3 +23,4 @@ pub use response::{
 
 mod schema;
 pub use schema::contract_schema;
+pub use shown::shown_memory;

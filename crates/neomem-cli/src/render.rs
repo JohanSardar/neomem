@@ -38,7 +38,7 @@ fn print_human(response: &Response) {
     match response {
         Response::Recalled(memories) => {
             for memory in memories {
-                println!("{}  {}", memory.id, memory.content);
+                print!("{}", memory.shown);
             }
         }
         Response::Tags(tags) => {
@@ -202,29 +202,15 @@ fn print_search(results: &SearchResults) {
         println!("no memories match");
     }
     for (rank, hit) in results.hits.iter().enumerate() {
-        let fact = &hit.fact;
-        let conflict = if hit.conflict { "  [conflict]" } else { "" };
-        let ended = fact
-            .invalid_at()
-            .map(|ended| format!(", invalid since {}", time_argument::display(ended)))
-            .unwrap_or_default();
-        println!("{}. {}{conflict}", rank + 1, fact.content());
-        println!(
-            "   {}  valid since {}{ended}  score {:.3}",
-            fact.id(),
-            time_argument::display(fact.valid_at()),
-            hit.score
-        );
+        let conflict = if hit.conflict { "[conflict] " } else { "" };
+        print!("{}. {conflict}{}", rank + 1, neomem_proto::shown_memory(&hit.fact, &hit.entities));
+        println!("  score: {:.3}", hit.score);
         if !hit.replaced.is_empty() {
             let replaced: Vec<String> = hit.replaced.iter().map(ToString::to_string).collect();
-            println!("   replaces {}", replaced.join(", "));
-        }
-        if !hit.entities.is_empty() {
-            let names: Vec<&str> = hit.entities.iter().map(|entity| entity.name.as_str()).collect();
-            println!("   about {}", names.join(", "));
+            println!("  replaces: {}", replaced.join(", "));
         }
         for linked in &hit.linked {
-            println!("   {} {}  ({})", linked.kind, linked.fact.content(), linked.fact.id());
+            println!("  linked: {} {} ({})", linked.kind, linked.fact.content(), linked.fact.id());
         }
     }
 }
