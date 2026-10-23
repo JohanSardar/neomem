@@ -73,14 +73,12 @@ export default function neomem(pi) {
       if (response?.reply !== "recalled" || !Array.isArray(response.body)) return;
       if (!response.body.every(memory => typeof memory.id === "string" && typeof memory.content === "string")) return;
       let content = "";
-      let charactersLeft = 10000;
       for (const memory of response.body) {
-        const prefix = `${memory.id}: `;
-        const budget = charactersLeft - [...prefix].length - 1;
-        if (budget <= 0) break;
-        const body = [...memory.content].slice(0, budget);
-        content += `${prefix}${body.join("")}\n`;
-        charactersLeft -= [...prefix].length + body.length + 1;
+        const shown = [...(typeof memory.shown === "string" && memory.shown ? memory.shown : `${memory.id}: ${memory.content}\n`)];
+        const room = 10000 - [...content].length;
+        if (shown.length <= room) { content += shown.join(""); continue; }
+        if (room > [...`${memory.id}: `].length + 1) content += `${shown.slice(0, room - 1).join("")}\n`;
+        break;
       }
       if (content) return { message: { customType: "neomem-recall", content, display: false } };
     }

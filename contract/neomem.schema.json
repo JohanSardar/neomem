@@ -899,6 +899,10 @@
         },
         "id": {
           "$ref": "#/$defs/FactId"
+        },
+        "shown": {
+          "type": "string",
+          "default": ""
         }
       },
       "required": [
@@ -2113,6 +2117,10 @@
         "score": {
           "type": "number",
           "format": "float"
+        },
+        "shown": {
+          "type": "string",
+          "default": ""
         },
         "similarity": {
           "type": "number",

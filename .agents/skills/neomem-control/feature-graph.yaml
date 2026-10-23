@@ -262,7 +262,7 @@
   depends_on: [recall.approve, capture.cc, capture.codex, capture.pi]
   proof: recall-hooks
   status: proven
-  last_proof: proofs/recall.hooks/2026-10-22T054907Z
+  last_proof: proofs/recall.hooks/2026-10-23T000948Z
 - id: contract
   does: publishes IDs, the tag registry, link types and external references for other systems (CONTRACT.md plus JSON Schema)
   reached_via: [neomem tags, neomem link, neomem entity, mcp tags, mcp link, http POST /v1/request, CONTRACT.md, contract/neomem.schema.json]

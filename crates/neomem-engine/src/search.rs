@@ -9,6 +9,7 @@ use neomem_core::{
 use neomem_index::Snapshot;
 use neomem_proto::{
     EntityRef, FailureKind, LinkedFact, Response, SearchHit, SearchQuery, SearchResults, SearchTrace,
+    shown_memory,
 };
 
 use crate::Engine;
@@ -134,6 +135,7 @@ impl Engine {
                 let decay = decay_for(fact, versions, now);
                 let score =
                     rank_score(candidate.similarity, decay, fact.importance(), invalid_for(fact, versions));
+                let entities = entity_refs(snapshot, fact);
                 SearchHit {
                     fact: Fact::clone(fact),
                     score,
@@ -142,7 +144,8 @@ impl Engine {
                     replaced: candidate.replaced,
                     conflict: false,
                     linked: Vec::new(),
-                    entities: entity_refs(snapshot, fact),
+                    shown: shown_memory(fact, &entities),
+                    entities,
                 }
             })
             .collect();
@@ -286,7 +289,7 @@ fn version_valid_at(snapshot: &Snapshot, seed: FactId, moment: EpochMs) -> Optio
     })
 }
 
-fn entity_refs(snapshot: &Snapshot, fact: &Fact) -> Vec<EntityRef> {
+pub(crate) fn entity_refs(snapshot: &Snapshot, fact: &Fact) -> Vec<EntityRef> {
     let mut refs: Vec<EntityRef> = fact
         .about()
         .iter()

@@ -202,6 +202,8 @@ pub struct SearchHit {
     pub conflict: bool,
     pub linked: Vec<LinkedFact>,
     pub entities: Vec<EntityRef>,
+    #[serde(default)]
+    pub shown: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -279,4 +281,6 @@ pub struct SpecialistReport {
 pub struct RecallMemory {
     pub id: FactId,
     pub content: String,
+    #[serde(default)]
+    pub shown: String,
 }

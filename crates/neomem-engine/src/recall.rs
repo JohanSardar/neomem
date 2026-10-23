@@ -5,7 +5,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use neomem_core::{Fact, JudgeRole, LlmMessage, LlmRequest, LlmRole, redact_secrets};
-use neomem_proto::{RecallMemory, RecallQuery, Response, SearchQuery};
+use neomem_proto::{RecallMemory, RecallQuery, Response, SearchQuery, shown_memory};
 use neomem_state::{RecallLog, RecallScore};
 
 use crate::Engine;
@@ -194,7 +194,8 @@ impl Engine {
                 continue;
             }
             prepared.log.injected.push(fact.id());
-            prepared.memories.push(RecallMemory { id: fact.id(), content: fact.content().to_owned() });
+            let shown = shown_memory(&fact, &crate::search::entity_refs(&snapshot, &fact));
+            prepared.memories.push(RecallMemory { id: fact.id(), content: fact.content().to_owned(), shown });
         }
         prepared
     }

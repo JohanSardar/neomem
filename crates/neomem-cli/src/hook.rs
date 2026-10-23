@@ -1,4 +1,3 @@
-use std::fmt::Write;
 use std::io::Read;
 use std::os::fd::AsFd;
 use std::os::unix::net::UnixStream;
@@ -139,17 +138,27 @@ fn capture(home: &Home, envelope: &Envelope) -> anyhow::Result<Option<UnixStream
 fn additional_context(memories: Vec<RecallMemory>) -> String {
     let mut context = String::new();
     for memory in memories {
-        let prefix = format!("{}: ", memory.id);
-        let available = 10_000 - context.chars().count();
-        let Some(budget) = available.checked_sub(prefix.chars().count() + 1) else { break };
-        if budget == 0 {
-            break;
+        let prefix = format!("{}: ", memory.id).chars().count();
+        let shown = if memory.shown.is_empty() {
+            format!("{}: {}\n", memory.id, memory.content)
+        } else {
+            memory.shown
+        };
+        let room = CONTEXT_LIMIT - context.chars().count();
+        if shown.chars().count() <= room {
+            context.push_str(&shown);
+            continue;
         }
-        let excerpt: String = memory.content.chars().take(budget).collect();
-        let _ = writeln!(context, "{prefix}{excerpt}");
+        if room > prefix + 1 {
+            context.extend(shown.chars().take(room - 1));
+            context.push('\n');
+        }
+        break;
     }
     context
 }
+
+const CONTEXT_LIMIT: usize = 10_000;
 
 #[cfg(test)]
 mod tests {
@@ -161,11 +170,25 @@ mod tests {
         let second: neomem_core::FactId = "fct_01M5D6RA00000000000000000B".parse().unwrap();
         let content = "x".repeat(10_000 - first.to_string().len() - 10);
         let result = additional_context(vec![
-            RecallMemory { id: first, content },
-            RecallMemory { id: second, content: "second memory".to_owned() },
+            RecallMemory { id: first, content, shown: String::new() },
+            RecallMemory { id: second, content: "second memory".to_owned(), shown: String::new() },
         ]);
         assert!(result.ends_with('\n'));
         assert_eq!(result.lines().count(), 1);
         assert!(result.chars().count() < 10_000);
+    }
+
+    #[test]
+    fn whole_memories_come_first_and_the_last_one_is_cut_to_fill_the_limit() {
+        let first: neomem_core::FactId = "fct_01M55FJ500000000000000000D".parse().unwrap();
+        let second: neomem_core::FactId = "fct_01M5D6RA00000000000000000B".parse().unwrap();
+        let shown = format!("{first}: kept\n  valid_at: 2023-06-30T00:00:00Z\n");
+        let result = additional_context(vec![
+            RecallMemory { id: first, content: "kept".to_owned(), shown: shown.clone() },
+            RecallMemory { id: second, content: "é".repeat(20_000), shown: String::new() },
+        ]);
+        assert!(result.starts_with(&shown));
+        assert_eq!(result.chars().count(), 10_000);
+        assert!(result.ends_with('\n'));
     }
 }
